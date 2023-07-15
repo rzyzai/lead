@@ -1,21 +1,13 @@
 <!DOCTYPE html>
 <html>
 <meta charset="utf-8">
-<link href="https://unpkg.com/mdui@1.0.2/dist/css/mdui.min.css" rel="stylesheet"/>
+<link href="https://unpkg.com/mdui@1.0.2/dist/css/mdui.min.css" rel="stylesheet" />
 <script src="https://unpkg.com/mdui@1.0.2/dist/js/mdui.min.js"></script>
 <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 <script src="lead.js"></script>
 <style>
-    h1 {
-        font-weight: 700;
-        font-size: xx-large
-    }
-
-    p {
-        font-weight: 400;
-        font-size: large
-    }
-
+    h1{font-weight: 700; font-size: xx-large}
+    p{font-weight: 400; font-size: large}
     .container {
         display: flex;
         align-items: center;
@@ -26,16 +18,16 @@
     <div class="item">
         <h1>Lead - 一个背单词网站</h1>
         <p>
-            <span id="word">word</span>
+            <span id = "word">word</span>
         </p>
         <p>
-            <span id="pronunciation">pronunciation</span>
+        <span id = "pronunciation">pronunciation</span>
         </p>
         <ul class="mdui-list">
-            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('A')"><span id="A">A</span></li>
-            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('B')"><span id="B">B</span></li>
-            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('C')"><span id="C">C</span></li>
-            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('D')"><span id="D">D</span></li>
+            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('A')"><span id = "A">A</span></li>
+            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('B')"><span id = "B">B</span></li>
+            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('C')"><span id = "C">C</span></li>
+            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('D')"><span id = "D">D</span></li>
         </ul>
         <button class="mdui-btn mdui-btn-raised" onclick="pass()">已记住</button>
         <button class="mdui-btn mdui-btn-raised" onclick="get_quiz()">刷新</button>

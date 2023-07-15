@@ -22,7 +22,6 @@
 #ifndef LEAD_VOC_HPP
 #define LEAD_VOC_HPP
 #pragma once
-
 #include "bundled/nlohmann/json.hpp"
 #include "utils.hpp"
 #include <tuple>
@@ -32,7 +31,6 @@
 #include <vector>
 #include <set>
 #include <random>
-
 namespace lead
 {
   class Word
@@ -47,7 +45,7 @@ namespace lead
     
     Word(std::string word_, std::string meaning_, std::string pronunciation_)
         : reviewed_times(0), planned_times(10), word(std::move(word_)),
-          meaning(std::move(meaning_)), pronunciation(pronunciation_) {}
+        meaning(std::move(meaning_)), pronunciation(pronunciation_) {}
   };
   
   void to_json(nlohmann::json &j, const lead::Word &p)
@@ -61,7 +59,7 @@ namespace lead
   
   struct WordRef
   {
-    Word *word;
+    Word * word;
     size_t pos;
   };
   
@@ -82,9 +80,7 @@ namespace lead
       vocabulary = word;
       current.clear();
       for (size_t i = 0; i < vocabulary.size(); ++i)
-      {
         current.insert(i);
-      }
     }
     
     void load(const std::string &path)
@@ -94,7 +90,7 @@ namespace lead
       for (auto &r: data)
       {
         vocabulary.emplace_back(Word{r["word"].get<std::string>(), r["meaning"].get<std::string>(),
-                                     r["pronunciation"].get<std::string>()});
+            r["pronunciation"].get<std::string>()});
         current.insert(vocabulary.size() - 1);
       }
     }
@@ -104,8 +100,8 @@ namespace lead
       size_t pos = utils::randint(0, vocabulary.size());
       return {&vocabulary[pos], pos};
     }
-    
-    WordRef at(size_t w)
+  
+     WordRef at(size_t w)
     {
       return {&vocabulary[w], w};
     }
@@ -120,22 +116,22 @@ namespace lead
     nlohmann::json generate_a_quiz(WordRef wr) const
     {
       int a = 0;
-      do { utils::randint(0, vocabulary.size()); }
-      while (a == wr.pos && vocabulary.size() > 1);
+      do utils::randint(0, vocabulary.size());
+      while(a == wr.pos && vocabulary.size() > 1);
       int b = 0;
-      do { b = utils::randint(0, vocabulary.size()); }
-      while ((b == a || b == wr.pos) && vocabulary.size() > 2);
+      do b = utils::randint(0, vocabulary.size());
+      while((b == a || b == wr.pos) && vocabulary.size() > 2);
       int c = 0;
-      do { c = utils::randint(0, vocabulary.size()); }
-      while ((c == b || c == a || c == wr.pos) && vocabulary.size() > 3);
+      do c = utils::randint(0, vocabulary.size());
+      while((c == b || c == a || c == wr.pos) && vocabulary.size() > 3);
       std::vector<std::string> opt{"A", "B", "C", "D"};
       std::random_shuffle(opt.begin(), opt.end());
       return {{"options", {
-                              {opt[0], vocabulary[a].meaning},
-                              {opt[1], vocabulary[b].meaning},
-                              {opt[2], vocabulary[c].meaning},
-                              {opt[3], wr.word->meaning}}},
-              {"answer",  opt[3]}
+        {opt[0], vocabulary[a].meaning},
+        {opt[1], vocabulary[b].meaning},
+        {opt[2], vocabulary[c].meaning},
+        {opt[3], wr.word->meaning}}},
+              {"answer", opt[3]}
       };
     }
   };

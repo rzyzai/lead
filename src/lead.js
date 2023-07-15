@@ -2,12 +2,13 @@ var quiz;
 var word;
 var pronunciation;
 var pos;
-
-function get_quiz() {
+function get_quiz()
+{
     $.ajax({
         type: 'GET',
         url: "get_quiz",
-        success: function (result) {
+        success: function (result)
+        {
             quiz = result["quiz"]
             word = result["word"]
             pronunciation = result["pronunciation"]
@@ -19,7 +20,8 @@ function get_quiz() {
             $("#C").html(quiz["options"]["C"]);
             $("#D").html(quiz["options"]["D"]);
         },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
+        error: function (XMLHttpRequest, textStatus, errorThrown)
+        {
             console.log(XMLHttpRequest.status);
             console.log(XMLHttpRequest.readyState);
             console.log(textStatus);
@@ -27,23 +29,29 @@ function get_quiz() {
     });
 }
 
-function quiz_select(opt) {
-    if (opt == quiz["answer"]) {
+function quiz_select(opt)
+{
+    if(opt == quiz["answer"])
+    {
         $.ajax({
             type: 'GET',
             url: "quiz_passed?pos=" + pos,
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
+            error: function (XMLHttpRequest, textStatus, errorThrown)
+            {
                 console.log(XMLHttpRequest.status);
                 console.log(XMLHttpRequest.readyState);
                 console.log(textStatus);
             }
         });
         get_quiz()
-    } else {
+    }
+    else
+    {
         $.ajax({
             type: 'GET',
             url: "quiz_failed?pos=" + pos,
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
+            error: function (XMLHttpRequest, textStatus, errorThrown)
+            {
                 console.log(XMLHttpRequest.status);
                 console.log(XMLHttpRequest.readyState);
                 console.log(textStatus);
@@ -53,11 +61,13 @@ function quiz_select(opt) {
     }
 }
 
-function pass() {
+function pass()
+{
     $.ajax({
         type: 'GET',
         url: "pass?pos=" + pos,
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
+        error: function (XMLHttpRequest, textStatus, errorThrown)
+        {
             console.log(XMLHttpRequest.status);
             console.log(XMLHttpRequest.readyState);
             console.log(textStatus);

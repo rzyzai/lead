@@ -22,12 +22,10 @@
 #ifndef LEAD_UTILS_HPP
 #define LEAD_UTILS_HPP
 #pragma once
-
 #include <string>
 #include <sstream>
 #include <fstream>
 #include <random>
-
 namespace lead::utils
 {
   int randint(int a, int b)// [a, b)
@@ -36,12 +34,9 @@ namespace lead::utils
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> u(a, b - 1);
     for (int i = 0; i < 10; ++i)
-    {
       return u(gen);
-    }
     return 0;
   }
-  
   std::string get_string_from_file(const std::string &path)
   {
     std::ifstream file{path, std::ios::binary};
