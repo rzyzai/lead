@@ -124,8 +124,8 @@
         <i class="mdui-icon material-icons" mdui-dialog="{target: '#loginDialog', history: false, modal: true}">account_circle</i>
     </a>
 </div>
-<div class="container">
-    <div class="item">
+<div class="mdui-container-fluid">
+    <div class="item mdui-text-center">
         <p>
             <span id = "word">word</span>
             <span id = "pronunciation">pronunciation</span>
@@ -133,7 +133,7 @@
         <a href="#" class="mdui-btn mdui-btn-icon mdui-ripple" mdui-tooltip="{content: '播放'}">
             <i class="mdui-icon material-icons mdui-ripple" onclick="pronounce()">volume_up</i>
         </a>
-        <ul class="mdui-list">
+        <ul class="mdui-lists">
             <li class="mdui-list-item mdui-ripple" onclick="quiz_select('A')"><span id = "A">A</span></li>
             <div class="mdui-divider"></div>
             <li class="mdui-list-item mdui-ripple" onclick="quiz_select('B')"><span id = "B">B</span></li>
@@ -146,5 +146,4 @@
         <button class="mdui-btn mdui-btn-raised mdui-color-indigo" onclick="quiz_prompt()">提示</button>
     </div>
 </div>
-
 </html>
