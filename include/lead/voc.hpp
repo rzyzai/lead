@@ -95,9 +95,12 @@ namespace lead
       }
     }
     
-    const WordRef get_a_word()
+    const WordRef get_word(int pos_ = -1)
     {
-      size_t pos = utils::randint(0, vocabulary.size());
+      size_t pos;
+      if (pos_ == -1)
+        pos = utils::randint(0, vocabulary.size());
+      else pos = pos_;
       return {&vocabulary[pos], pos};
     }
   
@@ -111,7 +114,19 @@ namespace lead
       current.erase(pos);
     }
     
+    
     const auto &get_voc() const { return vocabulary; }
+  
+    nlohmann::json search(const std::string& word)
+    {
+      size_t i = 0;
+      for(;i < vocabulary.size(); ++i)
+      {
+        if(vocabulary[i].word == word)
+          return {{"status", "success"}, {"pos", i}, {"message", word}};
+      }
+      return {{"status", "failed"}, {"message", "没有找到" + word}};
+    }
     
     nlohmann::json generate_a_quiz(WordRef wr) const
     {
@@ -125,7 +140,10 @@ namespace lead
       do c = utils::randint(0, vocabulary.size());
       while((c == b || c == a || c == wr.pos) && vocabulary.size() > 3);
       std::vector<std::string> opt{"A", "B", "C", "D"};
-      std::random_shuffle(opt.begin(), opt.end());
+  
+      std::random_device rd;
+      std::mt19937 g(rd());
+      std::shuffle(opt.begin(), opt.end(), g);
       return {{"options", {
         {opt[0], vocabulary[a].meaning},
         {opt[1], vocabulary[b].meaning},

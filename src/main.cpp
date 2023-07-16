@@ -19,6 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+#include "lead/lead.hpp"
 #include "lead/voc.hpp"
 #include "lead/utils.hpp"
 #include "cpp-httplib/httplib.h"
@@ -27,11 +28,12 @@
 
 int main()
 {
+  lead::Lead lead;
   lead::VOC voc;
-  voc.load("../src/voc.json");
+  voc.load("../res/voc/voc.json");
   httplib::Server svr;
-  std::string html = lead::utils::get_string_from_file("../src/index.html");
-  std::string js = lead::utils::get_string_from_file("../src/lead.js");
+  std::string html = lead::utils::get_string_from_file("../res/html/index.html");
+  std::string js = lead::utils::get_string_from_file("../res/js/lead.js");
   svr.Get("/", [&html](const httplib::Request &req, httplib::Response &res)
   {
     res.set_content(html, "text/html");
@@ -42,7 +44,11 @@ int main()
   });
   svr.Get("/get_quiz", [&voc](const httplib::Request &req, httplib::Response &res)
   {
-    auto wr = voc.get_a_word();
+    lead::WordRef wr;
+    if(req.has_param("pos"))
+      wr = voc.get_word(std::stoi(req.get_param_value("pos")));
+    else
+      wr = voc.get_word();
     auto quiz = voc.generate_a_quiz(wr);
     res.set_content(nlohmann::json{{"word", wr.word->word},
                                    {"pronunciation", wr.word->pronunciation},
@@ -66,10 +72,26 @@ int main()
     auto wr = voc.at(std::stoi(pos));
     wr.word->planned_times += 3;
   });
+  svr.Get("/quiz_prompted", [&voc](const httplib::Request &req, httplib::Response &res)
+  {
+    auto pos = req.get_param_value("pos");
+    auto wr = voc.at(std::stoi(pos));
+    wr.word->planned_times += 1;
+  });
   svr.Get("/words", [&voc](const httplib::Request &req, httplib::Response &res)
   {
     const auto &v = voc.get_voc();
     res.set_content(nlohmann::json{v}.dump(), "application/json");
+  });
+  svr.Get("/login", [&lead](const httplib::Request &req, httplib::Response &res)
+  {
+    auto r = lead.login(req.get_param_value("userid"), req.get_param_value("passwd"));
+    res.set_content(r.dump(), "application/json");
+  });
+  svr.Get("/search", [&voc](const httplib::Request &req, httplib::Response &res)
+  {
+    auto r = voc.search(req.get_param_value("word"));
+    res.set_content(r.dump(), "application/json");
   });
   svr.set_logger([](const httplib::Request &req, const httplib::Response &res)
   {
