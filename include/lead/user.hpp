@@ -149,7 +149,7 @@ namespace lead
       }
       else
       {
-        flag = false;
+        flag = true;
         return {
             {"status",   "success"},
             {"question", wr.word->meaning},
