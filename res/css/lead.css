@@ -1,0 +1,431 @@
+﻿h1 {
+    font-weight: 700;
+    font-size: xx-large
+}
+
+p {
+    font-weight: 400;
+    font-size: large
+}
+
+body {
+    font-family: "Google Sans";
+}
+
+.mdui-btn, .mdui-fab {
+    position: relative;
+    display: inline-block;
+    box-sizing: border-box;
+    min-width: 66px;
+    height: 36px;
+    margin: 0;
+    padding: 0 16px;
+    overflow: hidden;
+    color: inherit;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 36px;
+    letter-spacing: .04em;
+    white-space: nowrap;
+    text-align: center;
+    text-transform: uppercase;
+    text-decoration: none;
+    vertical-align: middle;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    transition: all .2s cubic-bezier(.4, 0, .2, 1), box-shadow .2s cubic-bezier(.4, 0, 1, 1);
+    -ms-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+    will-change: box-shadow;
+    zoom: 1;
+    -webkit-user-drag: none
+}
+
+.mdui-btn:hover, .mdui-fab:hover {
+    background-color: rgba(0, 0, 0, .1)
+}
+
+.mdui-btn:not(.mdui-ripple):active, .mdui-fab:not(.mdui-ripple):active {
+    background-color: rgba(0, 0, 0, .165)
+}
+
+.mdui-btn:not(.mdui-ripple)[class*=mdui-color-]:active, .mdui-fab:not(.mdui-ripple)[class*=mdui-color-]:active {
+    opacity: .76
+}
+
+.mdui-btn.mdui-color-theme:not(.mdui-btn-raised) {
+    color: #1a73e8 !important;
+    background-color: transparent !important
+}
+
+.mdui-btn.mdui-color-theme:not(.mdui-btn-raised):hover {
+    background-color: rgba(26, 115, 232, .1) !important
+}
+
+.mdui-btn.mdui-color-theme:not(.mdui-btn-raised):not(.mdui-ripple).mdui-btn-active, .mdui-btn.mdui-color-theme:not(.mdui-btn-raised):not(.mdui-ripple):active {
+    background-color: rgba(26, 115, 232, .165) !important
+}
+
+.mdui-btn.mdui-color-theme:not(.mdui-btn-raised).mdui-ripple .mdui-ripple-wave {
+    background-color: rgba(26, 115, 232, .3) !important
+}
+
+.mdui-theme-layout-dark .mdui-btn.mdui-color-theme:not(.mdui-btn-raised) {
+    color: #8ab4f8 !important
+}
+
+.mdui-theme-layout-dark .mdui-btn.mdui-color-theme:not(.mdui-btn-raised):hover {
+    background-color: rgba(138, 180, 248, .1) !important
+}
+
+.mdui-theme-layout-dark .mdui-btn.mdui-color-theme:not(.mdui-btn-raised):not(.mdui-ripple).mdui-btn-active, .mdui-theme-layout-dark .mdui-btn.mdui-color-theme:not(.mdui-btn-raised):not(.mdui-ripple):active {
+    background-color: rgba(138, 180, 248, .165) !important
+}
+
+.mdui-theme-layout-dark .mdui-btn.mdui-color-theme:not(.mdui-btn-raised).mdui-ripple .mdui-ripple-wave {
+    background-color: rgba(138, 180, 248, .3) !important
+}
+
+.mdui-btn .mdui-icon-left, .mdui-btn .mdui-icon-left:before {
+    height: inherit;
+    font-size: 1.3em;
+    line-height: inherit
+}
+
+.mdui-btn .mdui-icon-left {
+    float: left;
+    margin-right: .4em
+}
+
+input.mdui-btn[type=submit] {
+    appearance: none
+}
+
+.mdui-btn-raised {
+    box-shadow: 0 3px 1px -2px rgba(0, 0, 0, .2), 0 2px 2px 0 rgba(0, 0, 0, .14), 0 1px 5px 0 rgba(0, 0, 0, .12)
+}
+
+.mdui-btn-raised:hover {
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, .2), 0 4px 5px 0 rgba(0, 0, 0, .14), 0 1px 10px 0 rgba(0, 0, 0, .12)
+}
+
+.mdui-btn-raised:active {
+    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, .2), 0 8px 10px 1px rgba(0, 0, 0, .14), 0 3px 14px 2px rgba(0, 0, 0, .12)
+}
+
+.mdui-btn[disabled], .mdui-btn[disabled]:active, .mdui-btn[disabled]:focus, .mdui-btn[disabled]:hover {
+    color: rgba(0, 0, 0, .26) !important;
+    background-color: transparent !important;
+    cursor: default !important;
+    opacity: 1 !important;
+    box-shadow: none !important
+}
+
+.mdui-btn[disabled] .mdui-icon, .mdui-btn[disabled]:active .mdui-icon, .mdui-btn[disabled]:focus .mdui-icon, .mdui-btn[disabled]:hover .mdui-icon {
+    color: rgba(0, 0, 0, .26) !important
+}
+
+.mdui-btn-raised[disabled], .mdui-btn-raised[disabled]:active, .mdui-btn-raised[disabled]:focus, .mdui-btn-raised[disabled]:hover {
+    background-color: rgba(0, 0, 0, .12) !important;
+    box-shadow: 0 3px 1px -2px rgba(0, 0, 0, .2), 0 2px 2px 0 rgba(0, 0, 0, .14), 0 1px 5px 0 rgba(0, 0, 0, .12) !important
+}
+
+.mdui-btn-icon {
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    margin-right: 0;
+    margin-left: 0;
+    padding: 0;
+    overflow: hidden;
+    font-size: 24px;
+    line-height: normal;
+    border-radius: 50%
+}
+
+.mdui-btn-icon .mdui-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    line-height: 24px;
+    transform: translate(-12px, -12px)
+}
+
+.mdui-btn-icon.mdui-ripple {
+    transform: translateZ(0)
+}
+
+.mdui-btn-dense {
+    height: 32px;
+    font-size: 13px;
+    line-height: 32px
+}
+
+.mdui-btn-dense.mdui-btn-icon {
+    width: 32px;
+    min-width: 32px
+}
+
+.dialog-interface {
+    max-width: 448px;
+    overflow-y: auto;
+}
+
+.dialog-interface > [mdui-dialog-close] {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    display: block;
+    color: white;
+}
+
+.dialog-interface > .mdui-dialog-title {
+    margin-bottom: 24px;
+    padding: 146px 40px 28px;
+}
+
+.dialog-interface > form {
+    padding: 0 40px 62px;
+}
+
+.dialog-interface .actions {
+    margin-top: 24px;
+    display: flex;
+}
+
+.dialog-interface .actions > .divider {
+    flex: 1 1;
+}
+
+.dialog-interface .actions > .more-options {
+    margin-left: -16px;
+}
+
+@media (max-width: 599.9px) {
+    .dialog-interface {
+        position: fixed !important;
+        top: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        height: 100% !important;
+        max-height: none !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+    }
+
+    .dialog-interface > [mdui-dialog-close] {
+        top: 10px;
+        left: 8px;
+    }
+
+    .dialog-interface > .mdui-dialog-title {
+        padding: 10px 16px 10px 52px;
+        line-height: 36px;
+    }
+
+    .dialog-interface > form {
+        padding: 0 24px 24px;
+    }
+
+    .dialog-interface .actions {
+        margin-top: 14px;
+    }
+}
+
+@media (max-width: 599.9px) {
+    .mdui-toolbar .search-icon {
+        display: flex;
+        width: 40px;
+        min-width: 40px;
+        height: 40px
+    }
+}
+
+.copyright {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 20px 16px
+}
+
+.copyright p {
+    margin: 0;
+    overflow: hidden;
+    color: rgba(0, 0, 0, .38);
+    font-size: 13px;
+    line-height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis
+}
+
+.mdui-theme-layout-dark .copyright p {
+    color: hsla(0, 0%, 100%, .38)
+}
+
+.mdui-drawer {
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+}
+
+.mdui-drawer .mdui-list {
+    flex: 1;
+    box-sizing: border-box
+}
+
+.mdui-drawer .mdui-list-item {
+    padding-left: 20px;
+    border-radius: 0 50px 50px 0
+}
+
+.mdui-drawer .mdui-list-item-icon {
+    transform: scale(.875)
+}
+
+.mdui-drawer .mdui-list-item-content {
+    font-weight: 400;
+    font-size: 14px
+}
+
+.mdui-drawer .mdui-list-item-active {
+    color: #1a73e8;
+    background-color: #e8f0fe
+}
+
+.mdui-theme-layout-dark .mdui-drawer .mdui-list-item-active {
+    color: #fff;
+    background-color: #424242
+}
+
+.mdui-drawer .mdui-list-item-active .mdui-list-item-icon {
+    color: #1a73e8
+}
+
+.mdui-theme-layout-dark .mdui-drawer .mdui-list-item-active .mdui-list-item-icon {
+    color: #fff
+}
+
+.mdui-drawer .copyright {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 20px 16px
+}
+
+.mdui-drawer .copyright p {
+    margin: 0;
+    overflow: hidden;
+    color: rgba(0, 0, 0, .38);
+    font-size: 13px;
+    line-height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis
+}
+
+.mdui-theme-layout-dark .mdui-drawer .copyright p {
+    color: hsla(0, 0%, 100%, .38)
+}
+
+.mdui-drawer .copyright a {
+    color: rgba(0, 0, 0, .52);
+    text-decoration: none
+}
+
+.mdui-theme-layout-dark .mdui-drawer .copyright a {
+    color: hsla(0, 0%, 100%, .52)
+}
+
+.mdui-drawer .copyright a:hover {
+    text-decoration: underline
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    width: 50%;
+    max-width: 722px;
+    height: 46px;
+    margin-left: 30px;
+    background-color: #3B8AD9;
+    border-radius: 8px;
+    transition-duration: .18s;
+    transition-property: background-color, box-shadow
+}
+
+@media (max-width: 599.9px) {
+    .search-bar {
+        display: none
+    }
+}
+
+.search-bar.focus {
+    background-color: #fff;
+    box-shadow: 0 1px 1px 0 rgba(65, 69, 73, .3), 0 1px 3px 1px rgba(65, 69, 73, .15)
+}
+
+.mdui-theme-layout-dark .search-bar {
+    background-color: #424242 !important
+}
+
+.mdui-theme-layout-dark .search-bar input {
+    color: #fff
+}
+
+.mdui-theme-layout-dark .search-bar .focus {
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, .6), 0 6px 10px 4px rgba(0, 0, 0, .3)
+}
+
+.search-bar input {
+    flex: 1;
+    height: 46px;
+    background-color: transparent;
+    border: none;
+    outline: none
+}
+
+.mdui-overlay {
+    position: fixed;
+    top: -5000px;
+    right: -5000px;
+    bottom: -5000px;
+    left: -5000px;
+    z-index: 2000;
+    background: rgba(0,0,0,.4);
+    backface-visibility: hidden;
+    visibility: hidden;
+    opacity: 0;
+    transition-duration: .3s;
+    transition-property: opacity,visibility;
+    will-change: opacity
+}
+
+.mdui-overlay-show {
+    visibility: visible;
+    opacity: 1
+}
+
+.mc-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: hsla(0,0%,100%,.65);
+    opacity: 0;
+    transition: opacity .2s ease;
+    will-change: opacity
+}
+
+.mc-loading-overlay-show {
+    opacity: 1
+}

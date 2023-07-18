@@ -1,149 +1,102 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <meta charset="utf-8">
-<link href="https://unpkg.com/mdui@1.0.2/dist/css/mdui.min.css" rel="stylesheet" />
-<script src="https://unpkg.com/mdui@1.0.2/dist/js/mdui.min.js"></script>
-<script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
-<script src="lead.js"></script>
-<style>
-    h1{font-weight: 700; font-size: xx-large}
-    p{font-weight: 400; font-size: large}
-    .container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .dialog-interface {
-        max-width: 448px;
-        overflow-y: auto;
-    }
-    .dialog-interface > [mdui-dialog-close] {
-        position: absolute;
-        top: 4px;
-        left: 4px;
-        display: block;
-        color: white;
-    }
-    .dialog-interface > .mdui-dialog-title {
-        margin-bottom: 24px;
-        padding: 146px 40px 28px;
-    }
-    .dialog-interface > form {
-        padding: 0 40px 62px;
-    }
-    .dialog-interface .actions {
-        margin-top: 24px;
-        display: flex;
-    }
-    .dialog-interface .actions > .divider {
-        flex: 1 1;
-    }
-    .dialog-interface .actions > .more-options {
-        margin-left: -16px;
-    }
-    @media (max-width: 599.9px) {
-        .dialog-interface {
-            position: fixed!important;
-            top: 0!important;
-            right: 0!important;
-            bottom: 0!important;
-            left: 0!important;
-            width: 100%!important;
-            max-width: none!important;
-            height: 100%!important;
-            max-height: none!important;
-            margin: 0!important;
-            border-radius: 0!important;
-        }
-        .dialog-interface > [mdui-dialog-close] {
-            top: 10px;
-            left: 8px;
-        }
-        .dialog-interface > .mdui-dialog-title {
-            padding: 10px 16px 10px 52px;
-            line-height: 36px;
-        }
-        .dialog-interface > form {
-            padding: 0 24px 24px;
-        }
-        .dialog-interface .actions {
-            margin-top: 14px;
-        }
-    }
-</style>
-<div class="mdui-toolbar mdui-color-indigo">
-    <span class="mdui-typo-title">Lead - 一个简约的背单词网站</span>
+<head>
+    <link href="https://unpkg.com/mdui@1.0.2/dist/css/mdui.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@100;200;300;400;500;700;900&display=swap"
+          rel="stylesheet"/>
+    <link href="lead.css" rel="stylesheet"/>
+    <script src="https://unpkg.com/mdui@1.0.2/dist/js/mdui.min.js"></script>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="lead.js"></script>
+</head>
+<body>
+<div class="mdui-toolbar mdui-color-blue-700">
+    <body class="mdui-drawer-body-right">
+    <div class="mdui-drawer mdui-drawer-close" id="left-drawer">
+        <a class="mdui-btn mdui-btn-icon" href="#" mdui-drawer-close>
+            <i class="mdui-icon material-icons mdui-text-color-black-icon">arrow_back</i>
+        </a>
+        <ul class="mdui-list">
+            <li class="mdui-list-item mdui-ripple mdui-list-item-active">
+                <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">home</i>
+                <div class="mdui-list-item-content">主页</div>
+            </li>
+            <li class="mdui-list-item mdui-ripple">
+                <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">account_circle</i>
+                <div class="mdui-list-item-content mdui-text-color-black-text">个人中心</div>
+            </li>
+            <li class="mdui-list-item mdui-ripple">
+                <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">info_outline</i>
+                <div class="mdui-list-item-content mdui-text-color-black-text">关于</div>
+            </li>
+        </ul>
+        <div class="copyright">
+            <p>© 2023 caozhanhao</p>
+            <p>Powered by
+                <a href="https://github.com/caozhanhao/lead" target="_blank">Lead</a>
+                & <a href="https://mdui.org" target="_blank">MDUI</a>
+            </p>
+        </div>
+    </div>
+    </body>
+    <a class="mdui-btn mdui-btn-icon" href="#" mdui-drawer="{target: '#left-drawer', overlay: true}">
+        <i class="mdui-icon material-icons mdui-text-color-white-icon">menu</i>
+    </a>
+    <span class="mdui-typo-title mdui-text-color-white">Lead</span>
     <div class="mdui-toolbar-spacer"></div>
-    <form id="search-form">
-      <div class="mdui-dialog dialog-interface" id="searchDialog">
-               <button class="mdui-btn mdui-btn-icon" mdui-dialog-close>
-                <i class="mdui-icon material-icons">close</i></button>
-           <div class="mdui-dialog-title mdui-color-indigo">搜索</div>
-           <div class="mdui-textfield">
-             <i class="mdui-icon material-icons">search</i>
-             <input id="search-word" class="mdui-textfield-input" type="text"/>
-           </div>
-          <div class="actions">
-             <div class="divider"></div>
-              <button type="submit" class="mdui-btn mdui-btn-raised mdui-color-indigo" mdui-dialog-close>搜索</button>
-          </div>
-      </div>
+    <form class="search-bar" id="search-form">
+        <button class="submit mdui-btn mdui-btn-icon mdui-text-color-white-icon" type="submit">
+            <i class="mdui-icon material-icons mdui-text-color-white-icon search-icon">search</i>
+        </button>
+        <input placeholder="搜索单词" type="text">
     </form>
-    <a href="#" class="mdui-btn mdui-btn-icon mdui-ripple" mdui-tooltip="{content: '搜索'}" onclick="load_search()">
-        <i class="mdui-icon material-icons" mdui-dialog="{target: '#searchDialog', history: false, modal: true}">search</i>
-    </a>
-    <a href="https://github.com/caozhanhao/lead" class="mdui-btn mdui-btn-icon mdui-ripple" mdui-tooltip="{content: 'lead源码'}">
-        <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 36 36" enable-background="new 0 0 36 36" xml:space="preserve" class="mdui-icon" style="width: 24px;height:24px;">
-        <path fill-rule="evenodd" clip-rule="evenodd" fill="#ffffff" d="M18,1.4C9,1.4,1.7,8.7,1.7,17.7c0,7.2,4.7,13.3,11.1,15.5c0.8,0.1,1.1-0.4,1.1-0.8c0-0.4,0-1.4,0-2.8c-4.5,1-5.5-2.2-5.5-2.2c-0.7-1.9-1.8-2.4-1.8-2.4c-1.5-1,0.1-1,0.1-1c1.6,0.1,2.5,1.7,2.5,1.7c1.5,2.5,3.8,1.8,4.7,1.4c0.1-1.1,0.6-1.8,1-2.2c-3.6-0.4-7.4-1.8-7.4-8.1c0-1.8,0.6-3.2,1.7-4.4c-0.2-0.4-0.7-2.1,0.2-4.3c0,0,1.4-0.4,4.5,1.7c1.3-0.4,2.7-0.5,4.1-0.5c1.4,0,2.8,0.2,4.1,0.5c3.1-2.1,4.5-1.7,4.5-1.7c0.9,2.2,0.3,3.9,0.2,4.3c1,1.1,1.7,2.6,1.7,4.4c0,6.3-3.8,7.6-7.4,8c0.6,0.5,1.1,1.5,1.1,3c0,2.2,0,3.9,0,4.5c0,0.4,0.3,0.9,1.1,0.8c6.5-2.2,11.1-8.3,11.1-15.5C34.3,8.7,27,1.4,18,1.4z"></path>
-      </svg>
-    </a>
+    <div class="mdui-toolbar-spacer"></div>
     <div class="mdui-dialog dialog-interface" id="loginDialog">
         <button class="mdui-btn mdui-btn-icon" mdui-dialog-close>
-            <i class="mdui-icon material-icons">close</i></button>
-        <div class="mdui-dialog-title mdui-color-indigo">登录</div>
+            <i class="mdui-icon material-icons mdui-text-color-white-icon">close</i></button>
+        <div class="mdui-dialog-title mdui-color-blue-700 mdui-text-color-white-text">登录</div>
         <form id="login-form">
             <div class="mdui-textfield mdui-textfield-floating-label">
-                <label class="mdui-textfield-label">用户名或邮箱</label>
-                <input id = "userid" class="mdui-textfield-input" required />
+                <label class="mdui-textfield-label">用户名</label>
+                <input class="mdui-textfield-input" id="userid" required/>
                 <div class="mdui-textfield-error">账号不能为空</div>
             </div>
             <div class="mdui-textfield mdui-textfield-floating-label">
                 <label class="mdui-textfield-label">密码</label>
-                <input id = "passwd" class="mdui-textfield-input" type="password" required />
+                <input class="mdui-textfield-input" id="passwd" required type="password"/>
                 <div class="mdui-textfield-error">密码不能为空</div>
             </div>
+            <p style="font-size: medium">首次登录将注册账号</p>
             <div class="actions">
-                <button class="mdui-btn mdui-ripple mdui-color-indigo" type="button">注册</button>
                 <div class="divider"></div>
-                <button type="submit" class="mdui-btn mdui-btn-raised mdui-color-indigo" mdui-dialog-close>登录</button>
+                <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" type="submit">登录</button>
             </div>
         </form>
     </div>
-    <a href="#" class="mdui-btn mdui-btn-icon mdui-ripple" mdui-tooltip="{content: '账户'}" onclick="load_login()">
-        <i class="mdui-icon material-icons" mdui-dialog="{target: '#loginDialog', history: false, modal: true}">account_circle</i>
+    <a class="mdui-btn mdui-btn-icon mdui-ripple" href="#" mdui-tooltip="{content: '账户'}">
+        <i class="mdui-icon material-icons mdui-text-color-white-icon" mdui-dialog="{target: '#loginDialog', history: false, modal: true}">account_circle</i>
     </a>
 </div>
+<div class="mdui-divider mdui-shadow-1"></div>
 <div class="mdui-container-fluid">
     <div class="item mdui-text-center">
         <p>
-            <span id = "word">word</span>
-            <span id = "pronunciation">pronunciation</span>
+            <span id="question">question</span>
         </p>
-        <a href="#" class="mdui-btn mdui-btn-icon mdui-ripple" mdui-tooltip="{content: '播放'}">
-            <i class="mdui-icon material-icons mdui-ripple" onclick="pronounce()">volume_up</i>
-        </a>
         <ul class="mdui-lists">
-            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('A')"><span id = "A">A</span></li>
+            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('A')"><span id="A">A</span></li>
             <div class="mdui-divider"></div>
-            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('B')"><span id = "B">B</span></li>
+            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('B')"><span id="B">B</span></li>
             <div class="mdui-divider"></div>
-            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('C')"><span id = "C">C</span></li>
+            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('C')"><span id="C">C</span></li>
             <div class="mdui-divider"></div>
-            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('D')"><span id = "D">D</span></li>
+            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('D')"><span id="D">D</span></li>
         </ul>
-        <button class="mdui-btn mdui-btn-raised mdui-color-indigo" onclick="pass()">已记住</button>
-        <button class="mdui-btn mdui-btn-raised mdui-color-indigo" onclick="quiz_prompt()">提示</button>
+        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="prev_quiz()">上一个</button>
+        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="pass()">已记住</button>
+        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="quiz_prompt()">提示</button>
     </div>
 </div>
+</body>
 </html>

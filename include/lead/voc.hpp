@@ -22,6 +22,7 @@
 #ifndef LEAD_VOC_HPP
 #define LEAD_VOC_HPP
 #pragma once
+
 #include "bundled/nlohmann/json.hpp"
 #include "utils.hpp"
 #include <tuple>
@@ -31,36 +32,38 @@
 #include <vector>
 #include <set>
 #include <random>
+
 namespace lead
 {
   class Word
   {
   public:
-    int reviewed_times;
-    int planned_times;
     std::string word;
     std::string meaning;
     std::string pronunciation;
     std::vector<std::tuple<std::string, std::string>> examples;
     
     Word(std::string word_, std::string meaning_, std::string pronunciation_)
-        : reviewed_times(0), planned_times(10), word(std::move(word_)),
-        meaning(std::move(meaning_)), pronunciation(pronunciation_) {}
+        : word(std::move(word_)), meaning(std::move(meaning_)), pronunciation(pronunciation_) {}
   };
   
   void to_json(nlohmann::json &j, const lead::Word &p)
   {
-    j = nlohmann::json{{"word",           p.word},
-                       {"meaning",        p.meaning},
-                       {"reviewed_times", p.reviewed_times},
-                       {"planned_times",  p.planned_times},
-                       {"examples",       p.examples}};
+    j = nlohmann::json{{"word",     p.word},
+                       {"meaning",  p.meaning},
+                       {"examples", p.examples}};
   }
   
   struct WordRef
   {
-    Word * word;
+    Word *word;
     size_t pos;
+    
+    WordRef(Word *w, size_t p) : word(w), pos(p) {}
+    
+    WordRef() : word(nullptr), pos(0) {}
+    
+    bool is_valid() { return word != nullptr; };
   };
   
   void to_json(nlohmann::json &j, const lead::WordRef &p)
@@ -72,15 +75,17 @@ namespace lead
   class VOC
   {
   private:
+    std::string name;
     std::vector<Word> vocabulary;
-    std::set<size_t> current;
   public:
+    void set_name(const std::string &name_)
+    {
+      name = name_;
+    }
+    
     void load(const std::vector<Word> &word)
     {
       vocabulary = word;
-      current.clear();
-      for (size_t i = 0; i < vocabulary.size(); ++i)
-        current.insert(i);
     }
     
     void load(const std::string &path)
@@ -90,68 +95,56 @@ namespace lead
       for (auto &r: data)
       {
         vocabulary.emplace_back(Word{r["word"].get<std::string>(), r["meaning"].get<std::string>(),
-            r["pronunciation"].get<std::string>()});
-        current.insert(vocabulary.size() - 1);
+                                     r["pronunciation"].get<std::string>()});
       }
     }
     
-    const WordRef get_word(int pos_ = -1)
+    std::vector<WordRef> get_similiar_words(WordRef wr, size_t n)
     {
-      size_t pos;
-      if (pos_ == -1)
-        pos = utils::randint(0, vocabulary.size());
-      else pos = pos_;
-      return {&vocabulary[pos], pos};
+      std::vector<WordRef> ret;
+      const auto distance_cmp = [](auto &&p1, auto &&p2) { return p1.second < p2.second; };
+      std::set<std::pair<size_t, int>, decltype(distance_cmp)> similiar(distance_cmp); // index, distance
+      for (size_t i = 0; i < vocabulary.size(); ++i)
+      {
+        if (i == wr.pos) continue;
+        
+        if (similiar.size() < n)
+        {
+          similiar.insert({i, utils::get_edit_distance(vocabulary[i].word, wr.word->word)});
+        }
+        else if (auto d = utils::get_edit_distance(vocabulary[i].word, wr.word->word); d < similiar.rbegin()->second)
+        {
+          similiar.erase(std::prev(similiar.end()));
+          similiar.insert({i, d});
+        }
+      }
+      for (auto &r: similiar)
+      {
+        ret.emplace_back(WordRef{&vocabulary[r.first], r.first});
+      }
+      return ret;
     }
-  
-     WordRef at(size_t w)
+    
+    WordRef at(size_t w)
     {
       return {&vocabulary[w], w};
     }
     
-    void pass(size_t pos)
+    WordRef search(const std::string &w)
     {
-      current.erase(pos);
+      for (size_t i; i < vocabulary.size(); ++i)
+      {
+        if (vocabulary[i].word == w)
+        {
+          return {&vocabulary[i], i};
+        }
+      }
+      return {};
     }
     
+    size_t size() const { return vocabulary.size(); }
     
     const auto &get_voc() const { return vocabulary; }
-  
-    nlohmann::json search(const std::string& word)
-    {
-      size_t i = 0;
-      for(;i < vocabulary.size(); ++i)
-      {
-        if(vocabulary[i].word == word)
-          return {{"status", "success"}, {"pos", i}, {"message", word}};
-      }
-      return {{"status", "failed"}, {"message", "没有找到" + word}};
-    }
-    
-    nlohmann::json generate_a_quiz(WordRef wr) const
-    {
-      int a = 0;
-      do utils::randint(0, vocabulary.size());
-      while(a == wr.pos && vocabulary.size() > 1);
-      int b = 0;
-      do b = utils::randint(0, vocabulary.size());
-      while((b == a || b == wr.pos) && vocabulary.size() > 2);
-      int c = 0;
-      do c = utils::randint(0, vocabulary.size());
-      while((c == b || c == a || c == wr.pos) && vocabulary.size() > 3);
-      std::vector<std::string> opt{"A", "B", "C", "D"};
-  
-      std::random_device rd;
-      std::mt19937 g(rd());
-      std::shuffle(opt.begin(), opt.end(), g);
-      return {{"options", {
-        {opt[0], vocabulary[a].meaning},
-        {opt[1], vocabulary[b].meaning},
-        {opt[2], vocabulary[c].meaning},
-        {opt[3], wr.word->meaning}}},
-              {"answer", opt[3]}
-      };
-    }
   };
 }
 #endif
