@@ -21,6 +21,7 @@ function apply_quiz(new_quiz) {
     $("#B").attr("class", "mdui-list-item", "mdui-ripple");
     $("#C").attr("class", "mdui-list-item", "mdui-ripple");
     $("#D").attr("class", "mdui-list-item", "mdui-ripple");
+    $("#examples").html("");
     $("#question").html(new_quiz["question"]);
     $("#A").html("A. " + new_quiz["options"]["A"]);
     $("#B").html("B. " + new_quiz["options"]["B"]);
@@ -110,13 +111,24 @@ function quiz_prompt(opt) {
         $("#" + opt).addClass("mdui-color-red");
         $.ajax({
             type: 'GET',
-            url: "api/quiz_prompted",
+            url: "api/quiz_prompt",
             data:
                 {
                     word_pos: pos,
                     user_id: userid,
                     password: passwd
                 },
+            success: function (result) {
+                if (result["status"] == "success") {
+                    var example_html = "";
+                    result["examples"].forEach(function (item, index, arr){
+                        example_html += "<li className=\"mdui-list-item mdui-ripple\">" + marked.parse(item["example"]) + "  " + item["translation"] + "</li>\n";
+                        if(index != arr.length - 1)
+                            example_html += "<li class=\"mdui-divider\"></li>\n";
+                    });
+                    $("#examples").html(example_html);
+                }
+            },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
                 console.log(XMLHttpRequest.status);
                 console.log(XMLHttpRequest.readyState);

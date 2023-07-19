@@ -35,16 +35,31 @@
 
 namespace lead
 {
-  class Word
+  struct Example
   {
-  public:
+    std::string example;
+    std::string translation;
+  };
+  struct Usages
+  {
+    std::string example;
+    std::string translation;
+  };
+  void from_json(const nlohmann::json &j, lead::Example &p)
+  {
+    p = {j["example"].get<std::string>(), j["translation"].get<std::string>()};
+  }
+  void to_json(nlohmann::json &j, const lead::Example &p)
+  {
+    j = nlohmann::json{{"example",     p.example},
+                       {"translation",  p.translation}};
+  }
+  
+  struct Word
+  {
     std::string word;
     std::string meaning;
-    std::string pronunciation;
-    std::vector<std::tuple<std::string, std::string>> examples;
-    
-    Word(std::string word_, std::string meaning_, std::string pronunciation_)
-        : word(std::move(word_)), meaning(std::move(meaning_)), pronunciation(pronunciation_) {}
+    std::vector<Example> examples;
   };
   
   void to_json(nlohmann::json &j, const lead::Word &p)
@@ -71,7 +86,6 @@ namespace lead
     j = nlohmann::json{{"word", *p.word},
                        {"pos",  p.pos}};
   }
-  
   class VOC
   {
   private:
@@ -94,8 +108,12 @@ namespace lead
       nlohmann::json data = nlohmann::json::parse(f);
       for (auto &r: data)
       {
-        vocabulary.emplace_back(Word{r["word"].get<std::string>(), r["meaning"].get<std::string>(),
-                                     r["pronunciation"].get<std::string>()});
+        vocabulary.emplace_back(
+            Word{
+              .word = r["word"].get<std::string>(),
+              .meaning = r["meaning"].get<std::string>(),
+              .examples = r["examples"].get<std::vector<Example>>()
+        });
       }
     }
     
@@ -103,16 +121,17 @@ namespace lead
     {
       std::vector<WordRef> ret;
       const auto distance_cmp = [](auto &&p1, auto &&p2) { return p1.second < p2.second; };
-      std::set<std::pair<size_t, int>, decltype(distance_cmp)> similiar(distance_cmp); // index, distance
+      std::multiset<std::pair<size_t, int>, decltype(distance_cmp)> similiar(distance_cmp); // index, distance
       for (size_t i = 0; i < vocabulary.size(); ++i)
       {
-        if (i == wr.pos) continue;
+        if (vocabulary[i].word == wr.word->word) continue;
         
+        auto d = utils::get_edit_distance(vocabulary[i].word, wr.word->word);
         if (similiar.size() < n)
         {
-          similiar.insert({i, utils::get_edit_distance(vocabulary[i].word, wr.word->word)});
+          similiar.insert({i, d});
         }
-        else if (auto d = utils::get_edit_distance(vocabulary[i].word, wr.word->word); d < similiar.rbegin()->second)
+        else if ( d < similiar.rbegin()->second)
         {
           similiar.erase(std::prev(similiar.end()));
           similiar.insert({i, d});

@@ -41,17 +41,27 @@ namespace lead
     UserManager user_manager;
   public:
     Server(const std::string &res_path_)
-        : res_path(res_path_), user_manager(res_path / "db" / "lead.db", res_path / "voc") {}
+        : res_path(res_path_), user_manager(res_path / "db" / "lead", res_path / "voc") {}
     
     void run()
     {
       httplib::Server svr;
       std::string index_html = utils::get_string_from_file(res_path / "html" / "index.html");
+      std::string account_html = utils::get_string_from_file(res_path / "html" / "account.html");
+      std::string about_html = utils::get_string_from_file(res_path / "html" / "about.html");
       std::string lead_js = utils::get_string_from_file(res_path / "js" / "lead.js");
       std::string lead_css = utils::get_string_from_file(res_path / "css" / "lead.css");
       svr.Get("/", [&index_html](const httplib::Request &req, httplib::Response &res)
       {
         res.set_content(index_html, "text/html");
+      });
+      svr.Get("/about.html", [&about_html](const httplib::Request &req, httplib::Response &res)
+      {
+        res.set_content(about_html, "text/html");
+      });
+      svr.Get("/account.html", [&account_html](const httplib::Request &req, httplib::Response &res)
+      {
+        res.set_content(account_html, "text/html");
       });
       svr.Get("/lead.js", [&lead_js](const httplib::Request &req, httplib::Response &res)
       {
@@ -108,13 +118,15 @@ namespace lead
           return {{"status", "success"}};
         });
       });
-      svr.Get("/api/quiz_prompted", [this](const httplib::Request &req, httplib::Response &res)
+      svr.Get("/api/quiz_prompt", [this](const httplib::Request &req, httplib::Response &res)
       {
         auth_do(req, res, [](UserRef ur, const httplib::Request &req) -> nlohmann::json
         {
-          auto &p = ur.word_record(std::stoi(req.get_param_value("word_pos"))).points;
+          size_t pos = std::stoi(req.get_param_value("word_pos"));
+          auto &p = ur.word_record(pos).points;
           ++p;
-          return {{"status", "success"}};
+          return {{"status", "success"},
+                  {"examples", ur.get_examples(pos)}};
         });
       });
       svr.Get("/api/search", [this](const httplib::Request &req, httplib::Response &res)
@@ -193,6 +205,14 @@ namespace lead
                        if (req.path == "/")
                        {
                          std::cout << "index.html\n";
+                       }
+                       else if (req.path == "/account.html")
+                       {
+                         std::cout << "account.html\n";
+                       }
+                       else if (req.path == "/about.html")
+                       {
+                         std::cout << "about.html\n";
                        }
                        else if (req.path == "/lead.js")
                        {

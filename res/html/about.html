@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <meta charset="utf-8">
 <head>
@@ -8,7 +8,6 @@
     <link href="lead.css" rel="stylesheet"/>
     <script src="https://unpkg.com/mdui@1.0.2/dist/js/mdui.min.js"></script>
     <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="lead.js"></script>
 </head>
 <body>
@@ -19,17 +18,17 @@
             <i class="mdui-icon material-icons mdui-text-color-black-icon">arrow_back</i>
         </a>
         <ul class="mdui-list">
-            <a class="mdui-list-item mdui-ripple mdui-list-item-active">
+            <a href="/" class="mdui-list-item mdui-ripple">
                 <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">home</i>
-                <div class="mdui-list-item-content">主页</div>
+                <div class="mdui-list-item-content mdui-text-color-black-text">主页</div>
             </a>
             <a href="account.html" class="mdui-list-item mdui-ripple">
                 <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">account_circle</i>
                 <div class="mdui-list-item-content mdui-text-color-black-text">个人中心</div>
             </a>
-            <a href="about.html" class="mdui-list-item mdui-ripple">
+            <a class="mdui-list-item mdui-ripple mdui-list-item-active">
                 <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">info_outline</i>
-                <div class="mdui-list-item-content mdui-text-color-black-text">关于</div>
+                <div class="mdui-list-item-content">关于</div>
             </a>
         </ul>
         <div class="copyright">
@@ -45,13 +44,6 @@
         <i class="mdui-icon material-icons mdui-text-color-white-icon">menu</i>
     </a>
     <span class="mdui-typo-title mdui-text-color-white">Lead</span>
-    <div class="mdui-toolbar-spacer"></div>
-    <form class="search-bar" id="search-form">
-        <button class="submit mdui-btn mdui-btn-icon mdui-text-color-white-icon" type="submit">
-            <i class="mdui-icon material-icons mdui-text-color-white-icon search-icon">search</i>
-        </button>
-        <input placeholder="搜索单词" type="text">
-    </form>
     <div class="mdui-toolbar-spacer"></div>
     <div class="mdui-dialog dialog-interface" id="loginDialog">
         <button class="mdui-btn mdui-btn-icon" mdui-dialog-close>
@@ -71,34 +63,36 @@
             <p style="font-size: medium">首次登录将注册账号</p>
             <div class="actions">
                 <div class="divider"></div>
-                <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" type="submit">登录</button>
+                <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" type="submit">
+                    登录
+                </button>
             </div>
         </form>
     </div>
     <a class="mdui-btn mdui-btn-icon mdui-ripple" href="#" mdui-tooltip="{content: '账户'}">
-        <i class="mdui-icon material-icons mdui-text-color-white-icon" mdui-dialog="{target: '#loginDialog', history: false, modal: true}">account_circle</i>
+        <i class="mdui-icon material-icons mdui-text-color-white-icon"
+           mdui-dialog="{target: '#loginDialog', history: false, modal: true}">account_circle</i>
     </a>
 </div>
 <div class="mdui-divider mdui-shadow-1"></div>
-<div class="mdui-container-fluid">
-    <div class="item mdui-text-center">
+<div class="mdui-container-fluid mdui-text-center">
+    <div class="banner">
+        <h1>Lead</h1>
+        <div class="meta">一个简约的背单词网站</div>
+        <div class="more-meta mdui-typo">
+            <span>
+                <a href="https://github.com/caozhanhao/lead" rel="nofollow" target="_blank">Github</a>
+            </span>
+            <span>
+                <a href="https://gitee.com/cmvy2020/lead" rel="nofollow" target="_blank">Gitee</a>
+            </span>
+        </div>
+    </div>
+    <div class="info">
+        <h2>致谢</h2>
         <p>
-            <span id="question">question</span>
+            xxx
         </p>
-        <ul class="mdui-list">
-            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('A')"><span id="A">A</span></li>
-            <div class="mdui-divider"></div>
-            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('B')"><span id="B">B</span></li>
-            <div class="mdui-divider"></div>
-            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('C')"><span id="C">C</span></li>
-            <div class="mdui-divider"></div>
-            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('D')"><span id="D">D</span></li>
-        </ul>
-        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="prev_quiz()">上一个</button>
-        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="pass()">已记住</button>
-        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="quiz_prompt()">提示</button>
-        <ul class="mdui-list" id="examples">
-        </ul>
     </div>
 </div>
 </body>

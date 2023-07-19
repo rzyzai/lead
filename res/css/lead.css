@@ -348,7 +348,7 @@ input.mdui-btn[type=submit] {
 .search-bar {
     display: flex;
     align-items: center;
-    width: 50%;
+    width: 30%;
     max-width: 722px;
     height: 46px;
     margin-left: 30px;
@@ -367,6 +367,10 @@ input.mdui-btn[type=submit] {
 .search-bar.focus {
     background-color: #fff;
     box-shadow: 0 1px 1px 0 rgba(65, 69, 73, .3), 0 1px 3px 1px rgba(65, 69, 73, .15)
+}
+
+.search-bar input::placeholder {
+    color: #8DBBE9;
 }
 
 .mdui-theme-layout-dark .search-bar {
@@ -428,4 +432,49 @@ input.mdui-btn[type=submit] {
 
 .mc-loading-overlay-show {
     opacity: 1
+}
+
+.banner {
+    padding-top: 48px;
+    padding-bottom: 64px;
+}
+
+.banner h1 {
+    margin: 0 0 24px;
+    font-weight: 400;
+    font-size: 32px
+}
+
+.banner .meta {
+    margin: 0 auto 48px;
+    font-size: 20px;
+    opacity: .76
+}
+
+.banner .more-meta span+span {
+    padding-left: 32px
+}
+
+@media screen and (max-width: 600px) {
+    .banner {
+        padding-top:20px;
+        padding-bottom: 32px
+    }
+
+    .banner h1 {
+        font-size: 22px
+    }
+
+    .banner .meta {
+        margin-bottom: 38px;
+        font-size: 16px
+    }
+
+    .banner .more-meta span:first-child {
+        display: block
+    }
+}
+
+.info h2{
+font-weight: 400;
 }

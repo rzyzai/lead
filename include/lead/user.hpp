@@ -124,7 +124,7 @@ namespace lead
     {
       return word_records[w];
     }
-    
+  
     nlohmann::json get_quiz(WordRef wr) const
     {
       auto words = current_voc->get_similiar_words(wr, 3);
@@ -138,7 +138,7 @@ namespace lead
         flag = false;
         return {
             {"status",   "success"},
-            {"question", wr.word->word + " " + wr.word->pronunciation},
+            {"question", wr.word->word},
             {"options",  {
                              {opt[0], words[0].word->meaning},
                              {opt[1], words[1].word->meaning},
@@ -162,6 +162,11 @@ namespace lead
         };
       }
       return {};
+    }
+    nlohmann::json get_examples(size_t pos) const
+    {
+      auto wr = current_voc->at(pos);
+      return wr.word->examples;
     }
     
     nlohmann::json search(const std::string &word)
