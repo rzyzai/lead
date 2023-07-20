@@ -129,28 +129,26 @@ function quiz_prompt(opt) {
 }
 
 function get_explanation(opt) {
-    if (!prompted) {
-        prompted = true;
-        $("#" + opt).addClass("mdui-color-red");
-        $.ajax({
-            type: 'GET',
-            url: "api/explanation",
-            data:
-                {
-                    word_index: index
-                },
-            success: function (result) {
-                if (result["status"] == "success") {
-                    $("#explanation").html(result["explanation"]);
-                }
+    $("#" + opt).addClass("mdui-color-red");
+    $.ajax({
+        type: 'GET',
+        url: "api/explanation",
+        data:
+            {
+                word_index: index
             },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                console.log(XMLHttpRequest.status);
-                console.log(XMLHttpRequest.readyState);
-                console.log(textStatus);
+        success: function (result) {
+            if (result["status"] == "success") {
+                $("#explanation").html('<div class="mdui-card explanation-card"><div class="mdui-card-content">' + result["explanation"] + '</div></div>');
             }
-        });
-    }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            console.log(XMLHttpRequest.status);
+            console.log(XMLHttpRequest.readyState);
+            console.log(textStatus);
+        }
+    });
+
 }
 
 function pass() {

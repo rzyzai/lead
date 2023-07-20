@@ -51,6 +51,10 @@ namespace lead
       std::string about_html = utils::get_string_from_file(res_path / "html" / "about.html");
       std::string lead_js = utils::get_string_from_file(res_path / "js" / "lead.js");
       std::string lead_css = utils::get_string_from_file(res_path / "css" / "lead.css");
+      std::string jpg1 = utils::get_string_from_file(res_path / "img" / "1.jpg");
+      std::string jpg2 = utils::get_string_from_file(res_path / "img" / "2.jpg");
+      std::string jpg3 = utils::get_string_from_file(res_path / "img" / "3.jpg");
+      std::string jpg4 = utils::get_string_from_file(res_path / "img" / "4.jpg");
       svr.Get("/", [&index_html](const httplib::Request &req, httplib::Response &res)
       {
         res.set_content(index_html, "text/html");
@@ -70,6 +74,22 @@ namespace lead
       svr.Get("/lead.css", [&lead_css](const httplib::Request &req, httplib::Response &res)
       {
         res.set_content(lead_css, "text/css");
+      });
+      svr.Get("/1.jpg", [&jpg1](const httplib::Request &req, httplib::Response &res)
+      {
+        res.set_content(jpg1, "image/jpeg");
+      });
+      svr.Get("/2.jpg", [&jpg2](const httplib::Request &req, httplib::Response &res)
+      {
+        res.set_content(jpg2, "image/jpeg");
+      });
+      svr.Get("/3.jpg", [&jpg3](const httplib::Request &req, httplib::Response &res)
+      {
+        res.set_content(jpg3, "image/jpeg");
+      });
+      svr.Get("/4.jpg", [&jpg4](const httplib::Request &req, httplib::Response &res)
+      {
+        res.set_content(jpg4, "image/jpeg");
       });
       svr.Get("/api/get_quiz", [this](const httplib::Request &req, httplib::Response &res)
       {
@@ -228,6 +248,23 @@ namespace lead
                        {
                          std::cout << "lead.css\n";
                        }
+                       else if (req.path == "/1.jpg")
+                       {
+                         std::cout << "1.jpg\n";
+                       }
+                       else if (req.path == "/2.jpg")
+                       {
+                         std::cout << "2.jpg\n";
+                       }
+                       else if (req.path == "/3.jpg")
+                       {
+                         std::cout << "3.jpg\n";
+                       }
+                       else if (req.path == "/4.jpg")
+                       {
+                         std::cout << "4.jpg\n";
+                       }
+                       
                        else
                        {
                          std::cout << res.body << "\n";
