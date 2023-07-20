@@ -76,9 +76,9 @@ namespace lead
         auth_do(req, res, [](UserRef ur, const httplib::Request &req) -> nlohmann::json
         {
           WordRef wr;
-          if (req.has_param("word_pos"))
+          if (req.has_param("word_index"))
           {
-            wr = ur.get_word(std::stoi(req.get_param_value("word_pos")));
+            wr = ur.get_word(std::stoi(req.get_param_value("word_index")));
           }
           else
           {
@@ -89,14 +89,14 @@ namespace lead
               {"status", "success"},
               {"word",   wr.word->word},
               {"quiz",   quiz},
-              {"pos",    wr.pos}};
+              {"index",    wr.index}};
         });
       });
       svr.Get("/api/pass", [this](const httplib::Request &req, httplib::Response &res)
       {
         auth_do(req, res, [](UserRef ur, const httplib::Request &req) -> nlohmann::json
         {
-          ur.word_record(std::stoi(req.get_param_value("word_pos"))).points = 0;
+          ur.word_record(std::stoi(req.get_param_value("word_index"))).points = 0;
           return {{"status", "success"}};
         });
       });
@@ -104,7 +104,7 @@ namespace lead
       {
         auth_do(req, res, [](UserRef ur, const httplib::Request &req) -> nlohmann::json
         {
-          auto &p = ur.word_record(std::stoi(req.get_param_value("word_pos"))).points;
+          auto &p = ur.word_record(std::stoi(req.get_param_value("word_index"))).points;
           if (p != 0) --p;
           return {{"status", "success"}};
         });
@@ -113,7 +113,7 @@ namespace lead
       {
         auth_do(req, res, [](UserRef ur, const httplib::Request &req) -> nlohmann::json
         {
-          auto &p = ur.word_record(std::stoi(req.get_param_value("word_pos"))).points;
+          auto &p = ur.word_record(std::stoi(req.get_param_value("word_index"))).points;
           p += 3;
           return {{"status", "success"}};
         });
@@ -122,12 +122,18 @@ namespace lead
       {
         auth_do(req, res, [](UserRef ur, const httplib::Request &req) -> nlohmann::json
         {
-          size_t pos = std::stoi(req.get_param_value("word_pos"));
-          auto &p = ur.word_record(pos).points;
+          size_t index = std::stoi(req.get_param_value("word_index"));
+          auto &p = ur.word_record(index).points;
           ++p;
-          return {{"status", "success"},
-                  {"examples", ur.get_examples(pos)}};
+          return {{"status", "success"}};
         });
+      });
+      svr.Get("/api/explanation", [this](const httplib::Request &req, httplib::Response &res)
+      {
+          res.set_content(nlohmann::json{{"status", "success"},
+                  {"explanation",
+                   utils::get_string_from_file(res_path / "voc" / "entries"
+                   / ("explanation-" + req.get_param_value("word_index")))}}.dump(), "application/json");
       });
       svr.Get("/api/search", [this](const httplib::Request &req, httplib::Response &res)
       {

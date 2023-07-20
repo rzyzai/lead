@@ -1,6 +1,6 @@
 let data_list = [];
 let word = "";
-let pos = 0;
+let index = 0;
 let prompted = false;
 let userid = "__lead_guest__";
 let passwd = "__lead_guest__";
@@ -11,7 +11,7 @@ function prev_quiz() {
     } else {
         data_list.pop();
         word = data_list[data_list.length - 1]["word"]
-        pos = data_list[data_list.length - 1]["pos"]
+        index = data_list[data_list.length - 1]["index"]
         apply_quiz(data_list[data_list.length - 1]["quiz"])
     }
 }
@@ -21,7 +21,7 @@ function apply_quiz(new_quiz) {
     $("#B").attr("class", "mdui-list-item", "mdui-ripple");
     $("#C").attr("class", "mdui-list-item", "mdui-ripple");
     $("#D").attr("class", "mdui-list-item", "mdui-ripple");
-    $("#examples").html("");
+    $("#explanation").html("");
     $("#question").html(new_quiz["question"]);
     $("#A").html("A. " + new_quiz["options"]["A"]);
     $("#B").html("B. " + new_quiz["options"]["B"]);
@@ -30,24 +30,24 @@ function apply_quiz(new_quiz) {
     prompted = false;
 }
 
-function get_quiz(word_pos = -1) {
+function get_quiz(word_index = -1) {
     $.ajax({
         type: 'GET',
         url: "api/get_quiz",
         data:
-            (word_pos == -1) ?
+            (word_index == -1) ?
                 ({
                     user_id: userid,
                     password: passwd
                 }) : ({
-                    word_pos: word_pos,
+                    word_index: word_index,
                     user_id: userid,
                     password: passwd
                 }),
         success: function (result) {
             data_list.push(result)
             word = result["word"]
-            pos = result["pos"]
+            index = result["index"]
             apply_quiz(data_list[data_list.length - 1]["quiz"])
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -70,7 +70,7 @@ function quiz_select(opt) {
                 url: "api/quiz_passed",
                 data:
                     {
-                        word_pos: pos,
+                        word_index: index,
                         user_id: userid,
                         password: passwd
                     },
@@ -90,7 +90,7 @@ function quiz_select(opt) {
                 url: "api/quiz_failed",
                 data:
                     {
-                        word_pos: pos,
+                        word_index: index,
                         user_id: userid,
                         password: passwd
                     },
@@ -114,21 +114,10 @@ function quiz_prompt(opt) {
             url: "api/quiz_prompt",
             data:
                 {
-                    word_pos: pos,
+                    word_index: index,
                     user_id: userid,
                     password: passwd
                 },
-            success: function (result) {
-                if (result["status"] == "success") {
-                    var example_html = "";
-                    result["examples"].forEach(function (item, index, arr){
-                        example_html += "<li className=\"mdui-list-item mdui-ripple\">" + marked.parse(item["example"]) + "  " + item["translation"] + "</li>\n";
-                        if(index != arr.length - 1)
-                            example_html += "<li class=\"mdui-divider\"></li>\n";
-                    });
-                    $("#examples").html(example_html);
-                }
-            },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
                 console.log(XMLHttpRequest.status);
                 console.log(XMLHttpRequest.readyState);
@@ -139,13 +128,38 @@ function quiz_prompt(opt) {
     }
 }
 
+function get_explanation(opt) {
+    if (!prompted) {
+        prompted = true;
+        $("#" + opt).addClass("mdui-color-red");
+        $.ajax({
+            type: 'GET',
+            url: "api/explanation",
+            data:
+                {
+                    word_index: index
+                },
+            success: function (result) {
+                if (result["status"] == "success") {
+                    $("#explanation").html(result["explanation"]);
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(XMLHttpRequest.status);
+                console.log(XMLHttpRequest.readyState);
+                console.log(textStatus);
+            }
+        });
+    }
+}
+
 function pass() {
     $.ajax({
         type: 'GET',
         url: "api/pass",
         data:
             {
-                word_pos: pos,
+                word_index: index,
                 user_id: userid,
                 password: passwd
             },
@@ -193,13 +207,13 @@ document.getElementById('search-form').addEventListener('submit', event => {
         url: "api/search",
         data:
             {
-                word_pos: search_word,
+                word_index: search_word,
                 user_id: userid,
                 password: passwd
             },
         success: function (result) {
             if (result["status"] == "success")
-                get_quiz(result["pos"])
+                get_quiz(result["index"])
             mdui.snackbar({message: result["message"]});
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {

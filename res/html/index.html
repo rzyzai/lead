@@ -8,7 +8,6 @@
     <link href="lead.css" rel="stylesheet"/>
     <script src="https://unpkg.com/mdui@1.0.2/dist/js/mdui.min.js"></script>
     <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="lead.js"></script>
 </head>
 <body>
@@ -96,8 +95,9 @@
         </ul>
         <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="prev_quiz()">上一个</button>
         <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="pass()">已记住</button>
-        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="quiz_prompt()">提示</button>
-        <ul class="mdui-list" id="examples">
+        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="quiz_prompt()">答案</button>
+        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="get_explanation()">词条</button>
+        <ul class="mdui-list" id="explanation">
         </ul>
     </div>
 </div>

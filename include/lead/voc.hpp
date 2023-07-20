@@ -35,48 +35,26 @@
 
 namespace lead
 {
-  struct Example
-  {
-    std::string example;
-    std::string translation;
-  };
-  struct Usages
-  {
-    std::string example;
-    std::string translation;
-  };
-  void from_json(const nlohmann::json &j, lead::Example &p)
-  {
-    p = {j["example"].get<std::string>(), j["translation"].get<std::string>()};
-  }
-  void to_json(nlohmann::json &j, const lead::Example &p)
-  {
-    j = nlohmann::json{{"example",     p.example},
-                       {"translation",  p.translation}};
-  }
-  
   struct Word
   {
     std::string word;
     std::string meaning;
-    std::vector<Example> examples;
   };
   
   void to_json(nlohmann::json &j, const lead::Word &p)
   {
     j = nlohmann::json{{"word",     p.word},
-                       {"meaning",  p.meaning},
-                       {"examples", p.examples}};
+                       {"meaning",  p.meaning}};
   }
   
   struct WordRef
   {
     Word *word;
-    size_t pos;
+    size_t index;
     
-    WordRef(Word *w, size_t p) : word(w), pos(p) {}
+    WordRef(Word *w, size_t p) : word(w), index(p) {}
     
-    WordRef() : word(nullptr), pos(0) {}
+    WordRef() : word(nullptr), index(0) {}
     
     bool is_valid() { return word != nullptr; };
   };
@@ -84,7 +62,7 @@ namespace lead
   void to_json(nlohmann::json &j, const lead::WordRef &p)
   {
     j = nlohmann::json{{"word", *p.word},
-                       {"pos",  p.pos}};
+                       {"index",  p.index}};
   }
   class VOC
   {
@@ -111,8 +89,7 @@ namespace lead
         vocabulary.emplace_back(
             Word{
               .word = r["word"].get<std::string>(),
-              .meaning = r["meaning"].get<std::string>(),
-              .examples = r["examples"].get<std::vector<Example>>()
+              .meaning = r["meanings"].get<std::string>()
         });
       }
     }

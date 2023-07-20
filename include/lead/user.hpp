@@ -61,7 +61,7 @@ namespace lead
     std::string user_id;
     std::string password;
     VOC *current_voc;
-    size_t voc_pos;
+    size_t voc_index;
     std::vector<WordRecord> word_records;
     leveldb::DB *db;
   public:
@@ -73,8 +73,8 @@ namespace lead
       nlohmann::json info{user_info};
       info["user_id"].get_to<std::string>(user_id);
       info["password"].get_to<std::string>(password);
-      info["current_voc"].get_to<size_t>(voc_pos);
-      current_voc = &(*vocs)[voc_pos];
+      info["current_voc"].get_to<size_t>(voc_index);
+      current_voc = &(*vocs)[voc_index];
       for (auto &r: info["words_points"])
       {
         word_records.emplace_back(r.get<WordRecord>());
@@ -82,7 +82,7 @@ namespace lead
     }
     
     UserRef(std::string userid, std::string passwd, leveldb::DB *db_, std::vector<VOC> *vocs)
-        : user_id(std::move(userid)), password(std::move(passwd)), db(db_), valid(true), voc_pos(0),
+        : user_id(std::move(userid)), password(std::move(passwd)), db(db_), valid(true), voc_index(0),
           current_voc(&(*vocs)[0])
     {
       word_records.insert(word_records.begin(), current_voc->size(), WordRecord{10});
@@ -116,8 +116,8 @@ namespace lead
           candidate.emplace_back(i);
         }
       }
-      size_t pos = candidate[utils::randnum<size_t>(0, candidate.size())];
-      return current_voc->at(pos);
+      size_t index = candidate[utils::randnum<size_t>(0, candidate.size())];
+      return current_voc->at(index);
     }
     
     WordRecord &word_record(size_t w)
@@ -163,19 +163,14 @@ namespace lead
       }
       return {};
     }
-    nlohmann::json get_examples(size_t pos) const
-    {
-      auto wr = current_voc->at(pos);
-      return wr.word->examples;
-    }
-    
+
     nlohmann::json search(const std::string &word)
     {
       WordRef wr = current_voc->search(word);
       if (wr.is_valid())
       {
         return {{"status",  "success"},
-                {"pos",     wr.pos},
+                {"index",     wr.index},
                 {"message", wr.word->word}};
       }
       return {{"status",  "failed"},
@@ -188,7 +183,7 @@ namespace lead
     j = nlohmann::json{
         {"user_id",     p.user_id},
         {"password",    p.password},
-        {"current_voc", p.voc_pos},
+        {"current_voc", p.voc_index},
         {"word_points", p.word_records}
     };
   }
@@ -229,16 +224,9 @@ namespace lead
       options.create_if_missing = true;
       leveldb::Status status = leveldb::DB::Open(options, db_path, &db);
       assert(status.ok());
-      
-      for (auto &dir: std::filesystem::directory_iterator(voc_dir_path))
-      {
-        vocabularies.emplace_back(VOC{});
-        if (!dir.is_directory())
-        {
-          vocabularies.back().set_name(dir.path().filename());
-          vocabularies.back().load(dir.path());
-        }
-      }
+      vocabularies.emplace_back(VOC{});
+      vocabularies[0].set_name("voc");
+      vocabularies[0].load(voc_dir_path + "/" + "index.json");
     }
     
     ~UserManager()
