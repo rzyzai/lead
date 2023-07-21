@@ -51,10 +51,6 @@ namespace lead
       std::string about_html = utils::get_string_from_file(res_path / "html" / "about.html");
       std::string lead_js = utils::get_string_from_file(res_path / "js" / "lead.js");
       std::string lead_css = utils::get_string_from_file(res_path / "css" / "lead.css");
-      std::string jpg1 = utils::get_string_from_file(res_path / "img" / "1.jpg");
-      std::string jpg2 = utils::get_string_from_file(res_path / "img" / "2.jpg");
-      std::string jpg3 = utils::get_string_from_file(res_path / "img" / "3.jpg");
-      std::string jpg4 = utils::get_string_from_file(res_path / "img" / "4.jpg");
       svr.Get("/", [&index_html](const httplib::Request &req, httplib::Response &res)
       {
         res.set_content(index_html, "text/html");
@@ -75,22 +71,6 @@ namespace lead
       {
         res.set_content(lead_css, "text/css");
       });
-      svr.Get("/1.jpg", [&jpg1](const httplib::Request &req, httplib::Response &res)
-      {
-        res.set_content(jpg1, "image/jpeg");
-      });
-      svr.Get("/2.jpg", [&jpg2](const httplib::Request &req, httplib::Response &res)
-      {
-        res.set_content(jpg2, "image/jpeg");
-      });
-      svr.Get("/3.jpg", [&jpg3](const httplib::Request &req, httplib::Response &res)
-      {
-        res.set_content(jpg3, "image/jpeg");
-      });
-      svr.Get("/4.jpg", [&jpg4](const httplib::Request &req, httplib::Response &res)
-      {
-        res.set_content(jpg4, "image/jpeg");
-      });
       svr.Get("/api/get_quiz", [this](const httplib::Request &req, httplib::Response &res)
       {
         auth_do(req, res, [](UserRef ur, const httplib::Request &req) -> nlohmann::json
@@ -109,7 +89,8 @@ namespace lead
               {"status", "success"},
               {"word",   wr.word->word},
               {"quiz",   quiz},
-              {"index",    wr.index}};
+              {"index",  wr.index}
+              };
         });
       });
       svr.Get("/api/pass", [this](const httplib::Request &req, httplib::Response &res)
@@ -140,26 +121,23 @@ namespace lead
       });
       svr.Get("/api/quiz_prompt", [this](const httplib::Request &req, httplib::Response &res)
       {
-        auth_do(req, res, [](UserRef ur, const httplib::Request &req) -> nlohmann::json
+        auth_do(req, res, [this](UserRef ur, const httplib::Request &req) -> nlohmann::json
         {
           size_t index = std::stoi(req.get_param_value("word_index"));
           auto &p = ur.word_record(index).points;
           ++p;
-          return {{"status", "success"}};
+          return {{"status", "success"},
+                  {"A", ur.get_explanation(std::stoi(req.get_param_value("A_index")))},
+                  {"B", ur.get_explanation(std::stoi(req.get_param_value("B_index")))},
+                  {"C", ur.get_explanation(std::stoi(req.get_param_value("C_index")))},
+                  {"D", ur.get_explanation(std::stoi(req.get_param_value("D_index")))}};
         });
-      });
-      svr.Get("/api/explanation", [this](const httplib::Request &req, httplib::Response &res)
-      {
-          res.set_content(nlohmann::json{{"status", "success"},
-                  {"explanation",
-                   utils::get_string_from_file(res_path / "voc" / "entries"
-                   / ("explanation-" + req.get_param_value("word_index")))}}.dump(), "application/json");
       });
       svr.Get("/api/search", [this](const httplib::Request &req, httplib::Response &res)
       {
         auth_do(req, res, [](UserRef ur, const httplib::Request &req) -> nlohmann::json
         {
-          return ur.search(req.get_param_value("search_word"));
+          return ur.search(req.get_param_value("word"));
         });
       });
       svr.Get("/api/login", [this](const httplib::Request &req, httplib::Response &res)
@@ -248,23 +226,6 @@ namespace lead
                        {
                          std::cout << "lead.css\n";
                        }
-                       else if (req.path == "/1.jpg")
-                       {
-                         std::cout << "1.jpg\n";
-                       }
-                       else if (req.path == "/2.jpg")
-                       {
-                         std::cout << "2.jpg\n";
-                       }
-                       else if (req.path == "/3.jpg")
-                       {
-                         std::cout << "3.jpg\n";
-                       }
-                       else if (req.path == "/4.jpg")
-                       {
-                         std::cout << "4.jpg\n";
-                       }
-                       
                        else
                        {
                          std::cout << res.body << "\n";

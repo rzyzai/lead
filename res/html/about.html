@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
-<meta charset="utf-8">
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Lead</title>
     <link href="https://unpkg.com/mdui@1.0.2/dist/css/mdui.min.css" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@100;200;300;400;500;700;900&display=swap"
           rel="stylesheet"/>
@@ -43,7 +45,7 @@
     </a>
     <span class="mdui-typo-title mdui-text-color-white">Lead</span>
     <div class="mdui-toolbar-spacer"></div>
-    <div class="mdui-dialog dialog-interface" id="loginDialog">
+    <!--<div class="mdui-dialog dialog-interface" id="loginDialog">
         <button class="mdui-btn mdui-btn-icon" mdui-dialog-close>
             <i class="mdui-icon material-icons mdui-text-color-white-icon">close</i></button>
         <div class="mdui-dialog-title mdui-color-blue-700 mdui-text-color-white-text">登录</div>
@@ -70,7 +72,7 @@
     <a class="mdui-btn mdui-btn-icon mdui-ripple" href="#" mdui-tooltip="{content: '账户'}">
         <i class="mdui-icon material-icons mdui-text-color-white-icon"
            mdui-dialog="{target: '#loginDialog', history: false, modal: true}">account_circle</i>
-    </a>
+    </a>-->
 </div>
 <div class="mdui-divider mdui-shadow-1"></div>
 <div class="mdui-container-fluid mdui-text-center">
@@ -87,11 +89,32 @@
         </div>
     </div>
     <div class="info">
-        <h2>致谢</h2>
-        <img class="mdui-img-circle" src="1.jpg"/>
-        <img class="mdui-img-circle" src="2.jpg"/>
-        <img class="mdui-img-circle" src="3.jpg"/>
-        <img class="mdui-img-circle" src="4.jpg"/>
+        <h3>开发</h3>
+        <div class="mdui-chip">
+        <span class="mdui-chip-icon mdui-color-indigo">
+            <i class="mdui-icon material-icons">developer_mode</i>
+        </span>
+            <span class="mdui-chip-title">Cao, Z.-W.</span>
+        </div>
+        <h3>测试</h3>
+        <div class="mdui-chip">
+        <span class="mdui-chip-icon mdui-color-blue">
+            <i class="mdui-icon material-icons">bug_report</i>
+        </span>
+            <span class="mdui-chip-title">Sun, Q.</span>
+        </div>
+        <div class="mdui-chip">
+        <span class="mdui-chip-icon mdui-color-blue">
+            <i class="mdui-icon material-icons">bug_report</i>
+        </span>
+            <span class="mdui-chip-title">Zhang, Z.</span>
+        </div>
+        <div class="mdui-chip">
+        <span class="mdui-chip-icon mdui-color-blue">
+            <i class="mdui-icon material-icons">bug_report</i>
+        </span>
+            <span class="mdui-chip-title">Zhang, B.-W.</span>
+        </div>
     </div>
 </div>
 </body>

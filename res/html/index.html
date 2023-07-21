@@ -1,7 +1,9 @@
 ﻿<!DOCTYPE html>
 <html>
-<meta charset="utf-8">
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Lead</title>
     <link href="https://unpkg.com/mdui@1.0.2/dist/css/mdui.min.css" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@100;200;300;400;500;700;900&display=swap"
           rel="stylesheet"/>
@@ -47,10 +49,44 @@
         <button class="submit mdui-btn mdui-btn-icon mdui-text-color-white-icon" type="submit">
             <i class="mdui-icon material-icons mdui-text-color-white-icon search-icon">search</i>
         </button>
-        <input placeholder="搜索单词" type="text">
+        <input placeholder="搜索单词" type="text" id="search-value">
     </form>
+    <script>
+        var search = document.getElementById("search-form");
+        search.onsubmit = function () {
+            var search_word = document.getElementById("search-value").value;
+            $.ajax({
+                type: 'GET',
+                url: "api/search",
+                data:
+                    {
+                        word: search_word,
+                        user_id: userid,
+                        password: passwd
+                    },
+                success: function (result) {
+                    if (result["status"] == "success") {
+                        $("#search-message").html(result["message"]);
+                        var content = "";
+                        for (var explanation in result["explanations"])
+                            content += result["explanations"][explanation];
+                        $("#search-content").html(content);
+                        var inst = new mdui.Dialog("#search-result-dialog", {destroyOnClosed: true});
+                        inst.open();
+                    } else
+                        mdui.snackbar(result["message"]);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    console.log(XMLHttpRequest.status);
+                    console.log(XMLHttpRequest.readyState);
+                    console.log(textStatus);
+                }
+            });
+        }
+    </script>
     <div class="mdui-toolbar-spacer"></div>
-    <div class="mdui-dialog dialog-interface" id="loginDialog">
+    <!--
+    <div class="mdui-dialog dialog-interface" id="login-dialog">
         <button class="mdui-btn mdui-btn-icon" mdui-dialog-close>
             <i class="mdui-icon material-icons mdui-text-color-white-icon">close</i></button>
         <div class="mdui-dialog-title mdui-color-blue-700 mdui-text-color-white-text">登录</div>
@@ -73,8 +109,8 @@
         </form>
     </div>
     <a class="mdui-btn mdui-btn-icon mdui-ripple" href="#" mdui-tooltip="{content: '账户'}">
-        <i class="mdui-icon material-icons mdui-text-color-white-icon" mdui-dialog="{target: '#loginDialog', history: false, modal: true}">account_circle</i>
-    </a>
+        <i class="mdui-icon material-icons mdui-text-color-white-icon" mdui-dialog="{target: '#login-dialog', history: false, modal: true}">account_circle</i>
+    </a>-->
 </div>
 <div class="mdui-divider mdui-shadow-1"></div>
 <div class="mdui-container-fluid">
@@ -93,8 +129,14 @@
         </ul>
         <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="prev_quiz()">上一个</button>
         <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="pass()">已记住</button>
-        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="quiz_prompt()">答案</button>
-        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="get_explanation()">词条</button>
+        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="quiz_prompt()">查看解析</button>
+    </div>
+    <div class="mdui-dialog" id="search-result-dialog">
+        <div class="mdui-dialog-title" id="search-message">message</div>
+        <div class="mdui-dialog-content" id="search-content">content</div>
+        <div class="mdui-dialog-actions">
+            <button class="mdui-btn mdui-ripple" mdui-dialog-close>关闭</button>
+        </div>
     </div>
     <div class="explanation" id="explanation">
     </div>

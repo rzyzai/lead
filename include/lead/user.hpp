@@ -124,10 +124,19 @@ namespace lead
     {
       return word_records[w];
     }
+    
+    std::string get_explanation(size_t index)
+    {
+      return current_voc->get_explanation(index);
+    }
   
     nlohmann::json get_quiz(WordRef wr) const
     {
-      auto words = current_voc->get_similiar_words(wr, 3);
+      auto words = current_voc->get_similiar_words(wr, 3, [this](WordRef wr) -> bool
+      {
+        if(word_records[wr.index].points == 0) return false;
+        return true;
+      });
       std::vector<std::string> opt{"A", "B", "C", "D"};
       std::random_device rd;
       std::mt19937 g(rd());
@@ -144,6 +153,11 @@ namespace lead
                              {opt[1], words[1].word->meaning},
                              {opt[2], words[2].word->meaning},
                              {opt[3], wr.word->meaning}}},
+            {"indexes",  {
+                             {opt[0], words[0].index},
+                             {opt[1], words[1].index},
+                             {opt[2], words[2].index},
+                             {opt[3], wr.index}}},
             {"answer",   opt[3]}
         };
       }
@@ -158,6 +172,11 @@ namespace lead
                              {opt[1], words[1].word->word},
                              {opt[2], words[2].word->word},
                              {opt[3], wr.word->word}}},
+            {"indexes",  {
+                             {opt[0], words[0].index},
+                             {opt[1], words[1].index},
+                             {opt[2], words[2].index},
+                             {opt[3], wr.index}}},
             {"answer",   opt[3]}
         };
       }
@@ -166,12 +185,16 @@ namespace lead
 
     nlohmann::json search(const std::string &word)
     {
-      WordRef wr = current_voc->search(word);
-      if (wr.is_valid())
+      auto wr = current_voc->search(word);
+      std::vector<std::string> explanations;
+      for(auto& r : wr)
+        explanations.emplace_back(get_explanation(r));
+      if (!wr.empty())
       {
         return {{"status",  "success"},
-                {"index",     wr.index},
-                {"message", wr.word->word}};
+                {"indexes",     wr},
+                {"explanations", explanations},
+                {"message", "找到了" + std::to_string(wr.size()) + "个结果"}};
       }
       return {{"status",  "failed"},
               {"message", "没有找到" + word}};
@@ -226,7 +249,7 @@ namespace lead
       assert(status.ok());
       vocabularies.emplace_back(VOC{});
       vocabularies[0].set_name("voc");
-      vocabularies[0].load(voc_dir_path + "/" + "index.json");
+      vocabularies[0].load(voc_dir_path + "/" + "index.json", voc_dir_path + "/" + "data.json");
     }
     
     ~UserManager()

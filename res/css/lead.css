@@ -417,7 +417,7 @@ input.mdui-btn[type=submit] {
 }
 
 .banner .more-meta span+span {
-    padding-left: 32px
+    padding-left: 8px
 }
 
 @media screen and (max-width: 600px) {
@@ -452,7 +452,6 @@ font-weight: 400;
     padding-right: 8px;
 }
 
-.explanation-card
-{
-    border-radius: 8px;
+.tester {
+    padding-left: 16px
 }

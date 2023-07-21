@@ -10,9 +10,9 @@ function prev_quiz() {
         mdui.snackbar("没有上一个了");
     } else {
         data_list.pop();
-        word = data_list[data_list.length - 1]["word"]
-        index = data_list[data_list.length - 1]["index"]
-        apply_quiz(data_list[data_list.length - 1]["quiz"])
+        word = data_list[data_list.length - 1]["word"];
+        index = data_list[data_list.length - 1]["index"];
+        apply_quiz(data_list[data_list.length - 1]["quiz"]);
     }
 }
 
@@ -105,6 +105,15 @@ function quiz_select(opt) {
     }
 }
 
+function get_explanation_panel(result, opt)
+{
+    return '<div class="mdui-panel-item mdui-panel-item-open">' +
+        '<div class="mdui-panel-item-header">' +
+        '<div class="mdui-panel-item-title">' + opt + '</div>' +
+        '<div class="mdui-panel-item-summary">' + data_list[data_list.length - 1]["quiz"]["options"][opt] + '</div></div>' +
+        '<div class="mdui-panel-item-body">' + result[opt] + '</div></div>';
+}
+
 function quiz_prompt(opt) {
     if (!prompted) {
         prompted = true;
@@ -114,10 +123,24 @@ function quiz_prompt(opt) {
             url: "api/quiz_prompt",
             data:
                 {
+                    A_index: data_list[data_list.length - 1]["quiz"]["indexes"]["A"],
+                    B_index: data_list[data_list.length - 1]["quiz"]["indexes"]["B"],
+                    C_index: data_list[data_list.length - 1]["quiz"]["indexes"]["C"],
+                    D_index: data_list[data_list.length - 1]["quiz"]["indexes"]["D"],
                     word_index: index,
                     user_id: userid,
                     password: passwd
                 },
+            success: function (result) {
+                if (result["status"] == "success") {
+                    $("#explanation").html('<div class="mdui-panel" mdui-panel>' +
+                        get_explanation_panel(result, "A") +
+                        get_explanation_panel(result, "B") +
+                        get_explanation_panel(result, "C") +
+                        get_explanation_panel(result, "D") +
+                        '</div>');
+                }
+            },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
                 console.log(XMLHttpRequest.status);
                 console.log(XMLHttpRequest.readyState);
@@ -126,29 +149,6 @@ function quiz_prompt(opt) {
         });
         $("#" + data_list[data_list.length - 1]["quiz"]["answer"]).addClass("mdui-color-green");
     }
-}
-
-function get_explanation(opt) {
-    $("#" + opt).addClass("mdui-color-red");
-    $.ajax({
-        type: 'GET',
-        url: "api/explanation",
-        data:
-            {
-                word_index: index
-            },
-        success: function (result) {
-            if (result["status"] == "success") {
-                $("#explanation").html('<div class="mdui-card explanation-card"><div class="mdui-card-content">' + result["explanation"] + '</div></div>');
-            }
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest.status);
-            console.log(XMLHttpRequest.readyState);
-            console.log(textStatus);
-        }
-    });
-
 }
 
 function pass() {
@@ -170,7 +170,7 @@ function pass() {
     get_quiz()
 }
 
-
+/*
 document.getElementById('login-form').addEventListener('submit', event => {
     var uid = document.getElementById("userid").value;
     var p = document.getElementById("passwd").value;
@@ -197,28 +197,4 @@ document.getElementById('login-form').addEventListener('submit', event => {
     });
     event.preventDefault();
 });
-
-document.getElementById('search-form').addEventListener('submit', event => {
-    var search_word = document.getElementById("search-word").value;
-    $.ajax({
-        type: 'GET',
-        url: "api/search",
-        data:
-            {
-                word_index: search_word,
-                user_id: userid,
-                password: passwd
-            },
-        success: function (result) {
-            if (result["status"] == "success")
-                get_quiz(result["index"])
-            mdui.snackbar({message: result["message"]});
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest.status);
-            console.log(XMLHttpRequest.readyState);
-            console.log(textStatus);
-        }
-    });
-    event.preventDefault();
-});
+*/

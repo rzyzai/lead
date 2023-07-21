@@ -39,6 +39,7 @@ namespace lead
   {
     std::string word;
     std::string meaning;
+    std::string explanation;
   };
   
   void to_json(nlohmann::json &j, const lead::Word &p)
@@ -80,29 +81,49 @@ namespace lead
       vocabulary = word;
     }
     
-    void load(const std::string &path)
+    void load(const std::string &voc_index_path, const std::string &voc_data_path)
     {
-      std::ifstream f(path);
-      nlohmann::json data = nlohmann::json::parse(f);
-      for (auto &r: data)
+      std::ifstream index_file(voc_index_path);
+      std::ifstream data_file(voc_data_path);
+      nlohmann::json voc_index = nlohmann::json::parse(index_file);
+      nlohmann::json voc_data = nlohmann::json::parse(data_file);
+      for (auto &r: voc_index)
       {
         vocabulary.emplace_back(
             Word{
               .word = r["word"].get<std::string>(),
-              .meaning = r["meanings"].get<std::string>()
+              .meaning = r["meanings"].get<std::string>(),
+              .explanation = voc_data[std::to_string(r["index"].get<int>())].get<std::string>()
         });
       }
+      index_file.close();
+      data_file.close();
     }
     
-    std::vector<WordRef> get_similiar_words(WordRef wr, size_t n)
+    std::string get_explanation(size_t index)
+    {
+      return vocabulary[index].explanation;
+    }
+    
+    std::vector<WordRef> get_similiar_words(WordRef wr, size_t n, const std::function<bool(WordRef)>& selector)
     {
       std::vector<WordRef> ret;
       const auto distance_cmp = [](auto &&p1, auto &&p2) { return p1.second < p2.second; };
       std::multiset<std::pair<size_t, int>, decltype(distance_cmp)> similiar(distance_cmp); // index, distance
+      const auto is_ambiguous = [this, &wr, &similiar](size_t i) -> bool
+      {
+         if(vocabulary[i].word == wr.word->word) return true;
+         for(auto& r : similiar)
+         {
+           if (vocabulary[r.first].word == vocabulary[i].word)
+             return true;
+         }
+         return false;
+      };
+      
       for (size_t i = 0; i < vocabulary.size(); ++i)
       {
-        if (vocabulary[i].word == wr.word->word) continue;
-        
+        if (is_ambiguous(i) || !selector(at(i))) continue;
         auto d = utils::get_edit_distance(vocabulary[i].word, wr.word->word);
         if (similiar.size() < n)
         {
@@ -126,16 +147,15 @@ namespace lead
       return {&vocabulary[w], w};
     }
     
-    WordRef search(const std::string &w)
+    std::vector<size_t> search(const std::string &w)
     {
-      for (size_t i; i < vocabulary.size(); ++i)
+      std::vector<size_t> ret;
+      for (size_t i = 0; i < vocabulary.size(); ++i)
       {
         if (vocabulary[i].word == w)
-        {
-          return {&vocabulary[i], i};
-        }
+          ret.emplace_back(i);
       }
-      return {};
+      return ret;
     }
     
     size_t size() const { return vocabulary.size(); }
