@@ -49,11 +49,18 @@
         <button class="submit mdui-btn mdui-btn-icon mdui-text-color-white-icon" type="submit">
             <i class="mdui-icon material-icons mdui-text-color-white-icon search-icon">search</i>
         </button>
-        <input placeholder="搜索单词" type="text" id="search-value">
+        <input placeholder="搜索" type="text" id="search-value">
     </form>
+    <div class="mdui-dialog" id="search-result-dialog">
+        <div class="mdui-dialog-title" id="search-message"></div>
+        <div class="mdui-dialog-content" id="search-content"></div>
+        <div class="mdui-dialog-actions">
+            <button class="mdui-btn mdui-ripple" mdui-dialog-close>关闭</button>
+        </div>
+    </div>
     <script>
         var search = document.getElementById("search-form");
-        search.onsubmit = function () {
+        search.onsubmit = function (event) {
             var search_word = document.getElementById("search-value").value;
             $.ajax({
                 type: 'GET',
@@ -71,8 +78,8 @@
                         for (var explanation in result["explanations"])
                             content += result["explanations"][explanation];
                         $("#search-content").html(content);
-                        var inst = new mdui.Dialog("#search-result-dialog", {destroyOnClosed: true});
-                        inst.open();
+                        search_dialog_inst = new mdui.Dialog("#search-result-dialog");
+                        search_dialog_inst.open();
                     } else
                         mdui.snackbar(result["message"]);
                 },
@@ -82,6 +89,7 @@
                     console.log(textStatus);
                 }
             });
+            event.preventDefault();
         }
     </script>
     <div class="mdui-toolbar-spacer"></div>
@@ -130,13 +138,6 @@
         <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="prev_quiz()">上一个</button>
         <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="pass()">已记住</button>
         <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="quiz_prompt()">查看解析</button>
-    </div>
-    <div class="mdui-dialog" id="search-result-dialog">
-        <div class="mdui-dialog-title" id="search-message">message</div>
-        <div class="mdui-dialog-content" id="search-content">content</div>
-        <div class="mdui-dialog-actions">
-            <button class="mdui-btn mdui-ripple" mdui-dialog-close>关闭</button>
-        </div>
     </div>
     <div class="explanation" id="explanation">
     </div>

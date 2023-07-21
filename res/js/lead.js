@@ -4,6 +4,7 @@ let index = 0;
 let prompted = false;
 let userid = "__lead_guest__";
 let passwd = "__lead_guest__";
+let search_dialog_inst = null;
 
 function prev_quiz() {
     if (data_list.length == 1) {
