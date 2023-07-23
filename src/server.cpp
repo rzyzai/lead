@@ -37,31 +37,12 @@ namespace lead
   void Server::run()
   {
     httplib::Server svr;
-    std::string index_html = utils::get_string_from_file(res_path / "html" / "index.html");
-    std::string record_html = utils::get_string_from_file(res_path / "html" / "record.html");
-    std::string about_html = utils::get_string_from_file(res_path / "html" / "about.html");
-    std::string lead_js = utils::get_string_from_file(res_path / "js" / "lead.js");
-    std::string lead_css = utils::get_string_from_file(res_path / "css" / "lead.css");
-    svr.Get("/", [&index_html](const httplib::Request &req, httplib::Response &res)
-    {
-      res.set_content(index_html, "text/html");
-    });
-    svr.Get("/about.html", [&about_html](const httplib::Request &req, httplib::Response &res)
-    {
-      res.set_content(about_html, "text/html");
-    });
-    svr.Get("/record.html", [&record_html](const httplib::Request &req, httplib::Response &res)
-    {
-      res.set_content(record_html, "text/html");
-    });
-    svr.Get("/lead.js", [&lead_js](const httplib::Request &req, httplib::Response &res)
-    {
-      res.set_content(lead_js, "text/javascript");
-    });
-    svr.Get("/lead.css", [&lead_css](const httplib::Request &req, httplib::Response &res)
-    {
-      res.set_content(lead_css, "text/css");
-    });
+    svr.set_mount_point("/", res_path / "index.html");
+    svr.set_mount_point("/", res_path / "html");
+    svr.set_mount_point("/css", res_path / "css");
+    svr.set_mount_point("/fonts", res_path / "fonts");
+    svr.set_mount_point("/icons", res_path / "icons");
+    svr.set_mount_point("/js", res_path / "js");
     svr.Get("/api/get_quiz", [this](const httplib::Request &req, httplib::Response &res)
     {
       WordRef wr;
@@ -154,31 +135,7 @@ namespace lead
                      {
                        std::cout << "    " << r.first << ": " << r.second << "\n";
                      }
-                     std::cout << "Response: \n" << "  Body: ";
-                     if (req.path == "/")
-                     {
-                       std::cout << "index.html\n";
-                     }
-                     else if (req.path == "/record.html")
-                     {
-                       std::cout << "record.html\n";
-                     }
-                     else if (req.path == "/about.html")
-                     {
-                       std::cout << "about.html\n";
-                     }
-                     else if (req.path == "/lead.js")
-                     {
-                       std::cout << "lead.js\n";
-                     }
-                     else if (req.path == "/lead.css")
-                     {
-                       std::cout << "lead.css\n";
-                     }
-                     else
-                     {
-                       std::cout << res.body << "\n";
-                     }
+                     std::cout << "Response: \n" << "  Body: " << res.body << "\n";
       
                      auto tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
                      struct tm *ptm = localtime(&tt);
