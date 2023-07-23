@@ -38,16 +38,16 @@ namespace lead
   {
   private:
     std::filesystem::path res_path;
-    UserManager user_manager;
+    User user;
   public:
     Server(const std::string &res_path_)
-        : res_path(res_path_), user_manager(res_path / "db" / "lead", res_path / "voc") {}
+        : res_path(res_path_), user(res_path / "voc") {}
     
     void run()
     {
       httplib::Server svr;
       std::string index_html = utils::get_string_from_file(res_path / "html" / "index.html");
-      std::string account_html = utils::get_string_from_file(res_path / "html" / "account.html");
+      std::string record_html = utils::get_string_from_file(res_path / "html" / "record.html");
       std::string about_html = utils::get_string_from_file(res_path / "html" / "about.html");
       std::string lead_js = utils::get_string_from_file(res_path / "js" / "lead.js");
       std::string lead_css = utils::get_string_from_file(res_path / "css" / "lead.css");
@@ -59,9 +59,9 @@ namespace lead
       {
         res.set_content(about_html, "text/html");
       });
-      svr.Get("/account.html", [&account_html](const httplib::Request &req, httplib::Response &res)
+      svr.Get("/record.html", [&record_html](const httplib::Request &req, httplib::Response &res)
       {
-        res.set_content(account_html, "text/html");
+        res.set_content(record_html, "text/html");
       });
       svr.Get("/lead.js", [&lead_js](const httplib::Request &req, httplib::Response &res)
       {
@@ -73,97 +73,54 @@ namespace lead
       });
       svr.Get("/api/get_quiz", [this](const httplib::Request &req, httplib::Response &res)
       {
-        auth_do(req, res, [](UserRef ur, const httplib::Request &req) -> nlohmann::json
-        {
           WordRef wr;
           if (req.has_param("word_index"))
-          {
-            wr = ur.get_word(std::stoi(req.get_param_value("word_index")));
-          }
+            wr = user.get_word(std::stoi(req.get_param_value("word_index")));
           else
-          {
-            wr = ur.get_random_word();
-          }
-          auto quiz = ur.get_quiz(wr);
-          return {
+            wr = user.get_random_word();
+          auto quiz = user.get_quiz(wr);
+          res.set_content(nlohmann::json{
               {"status", "success"},
               {"word",   wr.word->word},
               {"quiz",   quiz},
               {"index",  wr.index}
-              };
-        });
+              }.dump(), "application/json");
       });
       svr.Get("/api/pass", [this](const httplib::Request &req, httplib::Response &res)
       {
-        auth_do(req, res, [](UserRef ur, const httplib::Request &req) -> nlohmann::json
-        {
-          ur.word_record(std::stoi(req.get_param_value("word_index"))).points = 0;
-          return {{"status", "success"}};
-        });
+          user.word_record(std::stoi(req.get_param_value("word_index"))).points = 0;
+          res.set_content(nlohmann::json{{"status", "success"}}.dump(), "application/json");
       });
       svr.Get("/api/quiz_passed", [this](const httplib::Request &req, httplib::Response &res)
       {
-        auth_do(req, res, [](UserRef ur, const httplib::Request &req) -> nlohmann::json
-        {
-          auto &p = ur.word_record(std::stoi(req.get_param_value("word_index"))).points;
+          auto &p = user.word_record(std::stoi(req.get_param_value("word_index"))).points;
           if (p != 0) --p;
-          return {{"status", "success"}};
-        });
+          res.set_content(nlohmann::json{{"status", "success"}}.dump(), "application/json");
       });
       svr.Get("/api/quiz_failed", [this](const httplib::Request &req, httplib::Response &res)
       {
-        auth_do(req, res, [](UserRef ur, const httplib::Request &req) -> nlohmann::json
-        {
-          auto &p = ur.word_record(std::stoi(req.get_param_value("word_index"))).points;
+          auto &p = user.word_record(std::stoi(req.get_param_value("word_index"))).points;
           p += 3;
-          return {{"status", "success"}};
-        });
+          res.set_content(nlohmann::json{{"status", "success"}}.dump(), "application/json");
       });
       svr.Get("/api/quiz_prompt", [this](const httplib::Request &req, httplib::Response &res)
       {
-        auth_do(req, res, [this](UserRef ur, const httplib::Request &req) -> nlohmann::json
-        {
           size_t index = std::stoi(req.get_param_value("word_index"));
-          auto &p = ur.word_record(index).points;
+          auto &p = user.word_record(index).points;
           ++p;
-          return {{"status", "success"},
-                  {"A", ur.get_explanation(std::stoi(req.get_param_value("A_index")))},
-                  {"B", ur.get_explanation(std::stoi(req.get_param_value("B_index")))},
-                  {"C", ur.get_explanation(std::stoi(req.get_param_value("C_index")))},
-                  {"D", ur.get_explanation(std::stoi(req.get_param_value("D_index")))}};
-        });
+          res.set_content(nlohmann::json{{"status", "success"},
+                  {"A", user.get_explanation(std::stoi(req.get_param_value("A_index")))},
+                  {"B", user.get_explanation(std::stoi(req.get_param_value("B_index")))},
+                  {"C", user.get_explanation(std::stoi(req.get_param_value("C_index")))},
+                  {"D", user.get_explanation(std::stoi(req.get_param_value("D_index")))}}.dump(), "application/json");
       });
       svr.Get("/api/search", [this](const httplib::Request &req, httplib::Response &res)
       {
-        auth_do(req, res, [](UserRef ur, const httplib::Request &req) -> nlohmann::json
-        {
-          return ur.search(req.get_param_value("word"));
-        });
+          res.set_content(user.search(req.get_param_value("word")).dump(), "application/json");
       });
-      svr.Get("/api/login", [this](const httplib::Request &req, httplib::Response &res)
+      svr.Get("/api/get_progress", [this](const httplib::Request &req, httplib::Response &res)
       {
-        nlohmann::json body{req.body};
-        auto[status, ur] = user_manager.get_user(body["user_id"], body["password"]);
-        if (status == UserManagerStatus::success)
-        {
-          res.set_content(nlohmann::json{{"status", "success"},
-                                         {"type",   "login"}}.dump(), "application/json");
-        }
-        else if (status == UserManagerStatus::user_not_found)
-        {
-          auto[status, new_ur] = user_manager.create_user(body["user_id"], body["password"]);
-          if (status == UserManagerStatus::success)
-          {
-            res.set_content(nlohmann::json{{"status", "success"},
-                                           {"type",   "register"}}.dump(), "application/json");
-          }
-          else
-          {
-            res.set_content(nlohmann::json{{"status",  "failed"},
-                                           {"type",    "register"},
-                                           {"message", to_string(status)}}.dump(), "application/json");
-          }
-        }
+        res.set_content(user.get_progress().dump(), "application/json");
       });
       svr.set_exception_handler([](const auto &req, auto &res, std::exception_ptr ep)
                                 {
@@ -210,9 +167,9 @@ namespace lead
                        {
                          std::cout << "index.html\n";
                        }
-                       else if (req.path == "/account.html")
+                       else if (req.path == "/record.html")
                        {
-                         std::cout << "account.html\n";
+                         std::cout << "record.html\n";
                        }
                        else if (req.path == "/about.html")
                        {
@@ -240,25 +197,6 @@ namespace lead
                        std::cout << utils::green("^^^^^^^^^^") << date << utils::green("^^^^^^^^^^") << std::endl;
                      });
       svr.listen("0.0.0.0", 8080);
-    }
-  
-  private:
-    void auth_do(const httplib::Request &req, httplib::Response &res,
-                 const std::function<nlohmann::json(UserRef, const httplib::Request &)> &func)
-    {
-      auto[status, ur] = user_manager.get_user(req.get_param_value("user_id"), req.get_param_value("password"));
-      if (status == UserManagerStatus::success)
-      {
-        auto res_json = func(ur, req);
-        res.set_content(res_json.dump(), "application/json");
-      }
-      else
-      {
-        res.set_content(nlohmann::json
-                            {
-                                {"status",  "failed"},
-                                {"message", to_string(status)}}.dump(), "application/json");
-      }
     }
   };
 }

@@ -2,8 +2,6 @@ let data_list = [];
 let word = "";
 let index = 0;
 let prompted = false;
-let userid = "__lead_guest__";
-let passwd = "__lead_guest__";
 let search_dialog_inst = null;
 
 function prev_quiz() {
@@ -36,15 +34,7 @@ function get_quiz(word_index = -1) {
         type: 'GET',
         url: "api/get_quiz",
         data:
-            (word_index == -1) ?
-                ({
-                    user_id: userid,
-                    password: passwd
-                }) : ({
-                    word_index: word_index,
-                    user_id: userid,
-                    password: passwd
-                }),
+            (word_index == -1) ? ({}) : ({word_index: word_index}),
         success: function (result) {
             data_list.push(result)
             word = result["word"]
@@ -59,10 +49,6 @@ function get_quiz(word_index = -1) {
     });
 }
 
-window.onload = function () {
-    get_quiz(-1);
-};
-
 function quiz_select(opt) {
     if (opt == data_list[data_list.length - 1]["quiz"]["answer"]) {
         if (!prompted) {
@@ -72,8 +58,6 @@ function quiz_select(opt) {
                 data:
                     {
                         word_index: index,
-                        user_id: userid,
-                        password: passwd
                     },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     console.log(XMLHttpRequest.status);
@@ -92,8 +76,6 @@ function quiz_select(opt) {
                 data:
                     {
                         word_index: index,
-                        user_id: userid,
-                        password: passwd
                     },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     console.log(XMLHttpRequest.status);
@@ -129,8 +111,6 @@ function quiz_prompt(opt) {
                     C_index: data_list[data_list.length - 1]["quiz"]["indexes"]["C"],
                     D_index: data_list[data_list.length - 1]["quiz"]["indexes"]["D"],
                     word_index: index,
-                    user_id: userid,
-                    password: passwd
                 },
             success: function (result) {
                 if (result["status"] == "success") {
@@ -159,8 +139,6 @@ function pass() {
         data:
             {
                 word_index: index,
-                user_id: userid,
-                password: passwd
             },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             console.log(XMLHttpRequest.status);
@@ -171,24 +149,17 @@ function pass() {
     get_quiz()
 }
 
-/*
-document.getElementById('login-form').addEventListener('submit', event => {
-    var uid = document.getElementById("userid").value;
-    var p = document.getElementById("passwd").value;
+function get_progress()
+{
     $.ajax({
         type: 'GET',
-        url: "api/login",
-        data:
-            {
-                user_id: uid,
-                password: p
-            },
+        url: "api/get_progress",
         success: function (result) {
             if (result["status"] == "success") {
-                userid = uid;
-                passwd = p;
+                $("#passed_word_count").html(result["passed_word_count"]);
+                $("#word_count").html(result["word_count"]);
+                $("#progress_bar").attr('style', 'width:' + (result["passed_word_count"] / result["word_count"]) * 100 + '%;')
             }
-            mdui.snackbar({message: result["message"]});
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             console.log(XMLHttpRequest.status);
@@ -196,6 +167,4 @@ document.getElementById('login-form').addEventListener('submit', event => {
             console.log(textStatus);
         }
     });
-    event.preventDefault();
-});
-*/
+}

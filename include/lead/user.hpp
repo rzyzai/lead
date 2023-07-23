@@ -33,9 +33,11 @@
 
 namespace lead
 {
+  constexpr size_t planned_review_times = 10;
   struct WordRecord
   {
     size_t points;
+    WordRecord(): points(planned_review_times) {}
   };
   
   void to_json(nlohmann::json &j, const lead::WordRecord &p)
@@ -48,91 +50,49 @@ namespace lead
     j.get_to(p.points);
   }
   
-  class UserManager;
-  
-  class UserRef
+  class User
   {
-    friend void to_json(nlohmann::json &j, const lead::UserRef &p);
-    
-    friend class UserManager;
-  
   private:
-    bool valid;
-    std::string user_id;
-    std::string password;
-    VOC *current_voc;
-    size_t voc_index;
+    VOC vocabulary;
     std::vector<WordRecord> word_records;
-    leveldb::DB *db;
   public:
-    UserRef() : valid(false), db(nullptr) {}
-    
-    UserRef(const std::string &user_info, leveldb::DB *db_, std::vector<VOC> *vocs)
-        : db(db_), valid(true)
+    User(const std::string &voc_dir_path)
     {
-      nlohmann::json info{user_info};
-      info["user_id"].get_to<std::string>(user_id);
-      info["password"].get_to<std::string>(password);
-      info["current_voc"].get_to<size_t>(voc_index);
-      current_voc = &(*vocs)[voc_index];
-      for (auto &r: info["words_points"])
-      {
-        word_records.emplace_back(r.get<WordRecord>());
-      }
+      vocabulary.load(voc_dir_path + "/" + "index.json", voc_dir_path + "/" + "data.json");
+      word_records.insert(word_records.end(), vocabulary.size(), {});
     }
-    
-    UserRef(std::string userid, std::string passwd, leveldb::DB *db_, std::vector<VOC> *vocs)
-        : user_id(std::move(userid)), password(std::move(passwd)), db(db_), valid(true), voc_index(0),
-          current_voc(&(*vocs)[0])
+  
+    WordRef get_word(size_t w) const
     {
-      word_records.insert(word_records.begin(), current_voc->size(), WordRecord{10});
+      return vocabulary.at(w);
     }
-    
-    ~UserRef()
-    {
-      if (user_id != "__lead_guest__")
-      {
-        leveldb::Status s = db->Put(leveldb::WriteOptions(), user_id, nlohmann::json{*this}.dump());
-      }
-    }
-    
-    bool is_valid() const
-    {
-      return valid;
-    }
-    
-    WordRef get_word(size_t w)
-    {
-      return current_voc->at(w);
-    }
-    
-    WordRef get_random_word()
+  
+    WordRef get_random_word() const
     {
       std::vector<size_t> candidate;
       for (size_t i = 0; i < word_records.size(); ++i)
       {
         if (word_records[i].points != 0)
-        {
           candidate.emplace_back(i);
-        }
       }
+      if(candidate.empty()) return {};
       size_t index = candidate[utils::randnum<size_t>(0, candidate.size())];
-      return current_voc->at(index);
+      return vocabulary.at(index);
     }
-    
+  
     WordRecord &word_record(size_t w)
     {
       return word_records[w];
     }
-    
-    std::string get_explanation(size_t index)
+  
+    std::string get_explanation(size_t index) const
     {
-      return current_voc->get_explanation(index);
+      return vocabulary.get_explanation(index);
     }
   
     nlohmann::json get_quiz(WordRef wr) const
     {
-      auto words = current_voc->get_similiar_words(wr, 3, [this](WordRef wr) -> bool
+      auto words = vocabulary.get_similiar_words(wr, 3, [this](WordRef wr) -> bool
       {
         if(word_records[wr.index].points == 0) return false;
         return true;
@@ -182,10 +142,10 @@ namespace lead
       }
       return {};
     }
-
-    nlohmann::json search(const std::string &word)
+  
+    nlohmann::json search(const std::string &word) const
     {
-      auto wr = current_voc->search(word);
+      auto wr = vocabulary.search(word);
       std::vector<std::string> explanations;
       for(auto& r : wr)
         explanations.emplace_back(get_explanation(r));
@@ -199,100 +159,16 @@ namespace lead
       return {{"status",  "failed"},
               {"message", "没有找到" + word}};
     }
-  };
   
-  void to_json(nlohmann::json &j, const lead::UserRef &p)
-  {
-    j = nlohmann::json{
-        {"user_id",     p.user_id},
-        {"password",    p.password},
-        {"current_voc", p.voc_index},
-        {"word_points", p.word_records}
-    };
-  }
-  
-  enum class UserManagerStatus
-  {
-    success,
-    user_not_found,
-    incorrect_userid_or_password,
-    db_error
-  };
-  
-  std::string to_string(UserManagerStatus s)
-  {
-    switch (s)
+    nlohmann::json get_progress() const
     {
-      case UserManagerStatus::success:
-        return "Success";
-      case UserManagerStatus::user_not_found:
-        return "User not found";
-      case UserManagerStatus::incorrect_userid_or_password:
-        return "Incorrect user id or password";
-      case UserManagerStatus::db_error:
-        return "DB error";
-    }
-    return "Unknown";
-  }
-  
-  class UserManager
-  {
-  private:
-    std::vector<VOC> vocabularies;
-    leveldb::DB *db;
-  public:
-    UserManager(const std::string &db_path, const std::string &voc_dir_path)
-    {
-      leveldb::Options options;
-      options.create_if_missing = true;
-      leveldb::Status status = leveldb::DB::Open(options, db_path, &db);
-      assert(status.ok());
-      vocabularies.emplace_back(VOC{});
-      vocabularies[0].set_name("voc");
-      vocabularies[0].load(voc_dir_path + "/" + "index.json", voc_dir_path + "/" + "data.json");
-    }
-    
-    ~UserManager()
-    {
-      delete db;
-    }
-    
-    std::tuple<UserManagerStatus, UserRef> create_user(const std::string &userid, const std::string &passwd)
-    {
-      UserRef ur{userid, passwd, db, &vocabularies};
-      leveldb::Status s = db->Put(leveldb::WriteOptions(), userid, nlohmann::json{ur}.dump());
-      if (s.ok()) return {UserManagerStatus::success, ur};
-      return {UserManagerStatus::db_error, {}};
-    }
-    
-    std::tuple<UserManagerStatus, UserRef> get_user(const std::string &userid, const std::string &passwd)
-    {
-      if (userid == "__lead_guest__" && passwd == "__lead_guest__")
+      size_t passed = 0;
+      for(size_t i = 0; i < word_records.size(); ++i)
       {
-        return {UserManagerStatus::success, {"__lead_guest__", "__lead_guest__", db, &vocabularies}};
+        if(word_records[i].points == 0)
+          ++passed;
       }
-      std::string value;
-      leveldb::Status s = db->Get(leveldb::ReadOptions(), userid, &value);
-      UserRef ur{value, db, &vocabularies};
-      if (s.ok())
-      {
-        if (passwd == ur.password)
-        {
-          return {UserManagerStatus::success, ur};
-        }
-        else
-        {
-          return {UserManagerStatus::incorrect_userid_or_password, {}};
-        }
-      }
-      else if (s.IsNotFound())
-      {
-        return {UserManagerStatus::user_not_found, {}};
-      }
-      else
-      {
-        return {UserManagerStatus::db_error, {}};
-      }
+      return {{"status", "success"}, {"passed_word_count", passed}, {"word_count", word_records.size()}};
     }
   };
 }

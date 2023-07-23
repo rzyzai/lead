@@ -50,12 +50,15 @@ namespace lead
   
   struct WordRef
   {
-    Word *word;
+    const Word * word;
     size_t index;
     
-    WordRef(Word *w, size_t p) : word(w), index(p) {}
+    WordRef(const Word * w, size_t p) : word(w), index(p) {}
     
     WordRef() : word(nullptr), index(0) {}
+    
+    WordRef(const WordRef&) = default;
+    WordRef& operator=(const WordRef&) = default;
     
     bool is_valid() { return word != nullptr; };
   };
@@ -68,14 +71,8 @@ namespace lead
   class VOC
   {
   private:
-    std::string name;
     std::vector<Word> vocabulary;
   public:
-    void set_name(const std::string &name_)
-    {
-      name = name_;
-    }
-    
     void load(const std::vector<Word> &word)
     {
       vocabulary = word;
@@ -100,12 +97,12 @@ namespace lead
       data_file.close();
     }
     
-    std::string get_explanation(size_t index)
+    std::string get_explanation(size_t index) const
     {
       return vocabulary[index].explanation;
     }
     
-    std::vector<WordRef> get_similiar_words(WordRef wr, size_t n, const std::function<bool(WordRef)>& selector)
+    std::vector<WordRef> get_similiar_words(WordRef wr, size_t n, const std::function<bool(WordRef)>& selector) const
     {
       std::vector<WordRef> ret;
       const auto distance_cmp = [](auto &&p1, auto &&p2) { return p1.second < p2.second; };
@@ -142,12 +139,12 @@ namespace lead
       return ret;
     }
     
-    WordRef at(size_t w)
+    WordRef at(size_t w) const
     {
       return {&vocabulary[w], w};
     }
     
-    std::vector<size_t> search(const std::string &w)
+    std::vector<size_t> search(const std::string &w) const
     {
       std::vector<size_t> ret;
       for (size_t i = 0; i < vocabulary.size(); ++i)
@@ -159,8 +156,6 @@ namespace lead
     }
     
     size_t size() const { return vocabulary.size(); }
-    
-    const auto &get_voc() const { return vocabulary; }
   };
 }
 #endif

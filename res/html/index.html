@@ -10,9 +10,12 @@
     <script src="https://unpkg.com/mdui@1.0.2/dist/js/mdui.min.js"></script>
     <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="lead.js"></script>
+    <script type="text/javascript">
+        window.onload = function () {get_quiz(-1);};
+    </script>
 </head>
 <body>
-<div class="mdui-toolbar mdui-color-blue-700">
+<div class="mdui-toolbar mdui-color-blue-700 mdui-shadow-5">
     <div class="mdui-drawer mdui-drawer-close" id="left-drawer">
         <a class="mdui-btn mdui-btn-icon" href="#" mdui-drawer-close>
             <i class="mdui-icon material-icons mdui-text-color-black-icon">arrow_back</i>
@@ -22,9 +25,9 @@
                 <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">home</i>
                 <div class="mdui-list-item-content">主页</div>
             </a>
-            <a href="account.html" class="mdui-list-item mdui-ripple">
-                <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">account_circle</i>
-                <div class="mdui-list-item-content mdui-text-color-black-text">个人中心</div>
+            <a href="record.html" class="mdui-list-item mdui-ripple">
+                <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">fiber_smart_record</i>
+                <div class="mdui-list-item-content mdui-text-color-black-text">记录</div>
             </a>
             <a href="about.html" class="mdui-list-item mdui-ripple">
                 <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">info_outline</i>
@@ -92,34 +95,7 @@
         }
     </script>
     <div class="mdui-toolbar-spacer"></div>
-    <!--
-    <div class="mdui-dialog dialog-interface" id="login-dialog">
-        <button class="mdui-btn mdui-btn-icon" mdui-dialog-close>
-            <i class="mdui-icon material-icons mdui-text-color-white-icon">close</i></button>
-        <div class="mdui-dialog-title mdui-color-blue-700 mdui-text-color-white-text">登录</div>
-        <form id="login-form">
-            <div class="mdui-textfield mdui-textfield-floating-label">
-                <label class="mdui-textfield-label">用户名</label>
-                <input class="mdui-textfield-input" id="userid" required/>
-                <div class="mdui-textfield-error">账号不能为空</div>
-            </div>
-            <div class="mdui-textfield mdui-textfield-floating-label">
-                <label class="mdui-textfield-label">密码</label>
-                <input class="mdui-textfield-input" id="passwd" required type="password"/>
-                <div class="mdui-textfield-error">密码不能为空</div>
-            </div>
-            <p style="font-size: medium">首次登录将注册账号</p>
-            <div class="actions">
-                <div class="divider"></div>
-                <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" type="submit">登录</button>
-            </div>
-        </form>
-    </div>
-    <a class="mdui-btn mdui-btn-icon mdui-ripple" href="#" mdui-tooltip="{content: '账户'}">
-        <i class="mdui-icon material-icons mdui-text-color-white-icon" mdui-dialog="{target: '#login-dialog', history: false, modal: true}">account_circle</i>
-    </a>-->
 </div>
-<div class="mdui-divider mdui-shadow-1"></div>
 <div class="mdui-container-fluid">
     <div class="item mdui-text-center">
         <p>
