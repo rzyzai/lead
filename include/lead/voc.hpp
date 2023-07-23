@@ -42,120 +42,44 @@ namespace lead
     std::string explanation;
   };
   
-  void to_json(nlohmann::json &j, const lead::Word &p)
-  {
-    j = nlohmann::json{{"word",     p.word},
-                       {"meaning",  p.meaning}};
-  }
+  void to_json(nlohmann::json &j, const lead::Word &p);
   
   struct WordRef
   {
-    const Word * word;
+    const Word *word;
     size_t index;
     
-    WordRef(const Word * w, size_t p) : word(w), index(p) {}
+    WordRef(const Word *w, size_t p) : word(w), index(p) {}
     
     WordRef() : word(nullptr), index(0) {}
     
-    WordRef(const WordRef&) = default;
-    WordRef& operator=(const WordRef&) = default;
+    WordRef(const WordRef &) = default;
+    
+    WordRef &operator=(const WordRef &) = default;
     
     bool is_valid() { return word != nullptr; };
   };
   
-  void to_json(nlohmann::json &j, const lead::WordRef &p)
-  {
-    j = nlohmann::json{{"word", *p.word},
-                       {"index",  p.index}};
-  }
+  void to_json(nlohmann::json &j, const lead::WordRef &p);
+  
   class VOC
   {
   private:
     std::vector<Word> vocabulary;
   public:
-    void load(const std::vector<Word> &word)
-    {
-      vocabulary = word;
-    }
+    void load(const std::vector<Word> &word);
     
-    void load(const std::string &voc_index_path, const std::string &voc_data_path)
-    {
-      std::ifstream index_file(voc_index_path);
-      std::ifstream data_file(voc_data_path);
-      nlohmann::json voc_index = nlohmann::json::parse(index_file);
-      nlohmann::json voc_data = nlohmann::json::parse(data_file);
-      for (auto &r: voc_index)
-      {
-        vocabulary.emplace_back(
-            Word{
-              .word = r["word"].get<std::string>(),
-              .meaning = r["meanings"].get<std::string>(),
-              .explanation = voc_data[std::to_string(r["index"].get<int>())].get<std::string>()
-        });
-      }
-      index_file.close();
-      data_file.close();
-    }
+    void load(const std::string &voc_index_path, const std::string &voc_data_path);
     
-    std::string get_explanation(size_t index) const
-    {
-      return vocabulary[index].explanation;
-    }
+    std::string get_explanation(size_t index) const;
     
-    std::vector<WordRef> get_similiar_words(WordRef wr, size_t n, const std::function<bool(WordRef)>& selector) const
-    {
-      std::vector<WordRef> ret;
-      const auto distance_cmp = [](auto &&p1, auto &&p2) { return p1.second < p2.second; };
-      std::multiset<std::pair<size_t, int>, decltype(distance_cmp)> similiar(distance_cmp); // index, distance
-      const auto is_ambiguous = [this, &wr, &similiar](size_t i) -> bool
-      {
-         if(vocabulary[i].word == wr.word->word) return true;
-         for(auto& r : similiar)
-         {
-           if (vocabulary[r.first].word == vocabulary[i].word)
-             return true;
-         }
-         return false;
-      };
-      
-      for (size_t i = 0; i < vocabulary.size(); ++i)
-      {
-        if (is_ambiguous(i) || !selector(at(i))) continue;
-        auto d = utils::get_edit_distance(vocabulary[i].word, wr.word->word);
-        if (similiar.size() < n)
-        {
-          similiar.insert({i, d});
-        }
-        else if ( d < similiar.rbegin()->second)
-        {
-          similiar.erase(std::prev(similiar.end()));
-          similiar.insert({i, d});
-        }
-      }
-      for (auto &r: similiar)
-      {
-        ret.emplace_back(WordRef{&vocabulary[r.first], r.first});
-      }
-      return ret;
-    }
+    std::vector<WordRef> get_similiar_words(WordRef wr, size_t n, const std::function<bool(WordRef)> &selector) const;
     
-    WordRef at(size_t w) const
-    {
-      return {&vocabulary[w], w};
-    }
+    WordRef at(size_t w) const;
     
-    std::vector<size_t> search(const std::string &w) const
-    {
-      std::vector<size_t> ret;
-      for (size_t i = 0; i < vocabulary.size(); ++i)
-      {
-        if (vocabulary[i].word == w)
-          ret.emplace_back(i);
-      }
-      return ret;
-    }
+    std::vector<size_t> search(const std::string &w) const;
     
-    size_t size() const { return vocabulary.size(); }
+    size_t size() const;
   };
 }
 #endif

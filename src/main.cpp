@@ -20,10 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #include "lead/server.hpp"
+#include <filesystem>
 
-int main()
+void detect_file(const std::filesystem::path& path)
 {
-  lead::Server svr("../res");
+  if(!std::filesystem::is_regular_file(path))
+  {
+    std::cerr << "Missing file: " << path << "." << std::endl;
+    std::exit(-1);
+  }
+}
+
+int main(int argc, char* argv[])
+{
+  if (argc != 4)
+  {
+    std::cerr << "Usage: lead addr port resource_path" << std::endl;
+    return -1;
+  }
+  for(auto& r : std::string(argv[2]))
+  {
+    if(!std::isdigit(r))
+    {
+      std::cerr << "Invalid port." << std::endl;
+      std::cerr << "Usage: lead addr port resource_path" << std::endl;
+      return -1;
+    }
+  }
+  std::filesystem::path res(argv[3]);
+  detect_file(res / "css" / "lead.css");
+  detect_file(res / "html" / "about.html");
+  detect_file(res / "html" / "index.html");
+  detect_file(res / "html" / "record.html");
+  detect_file(res / "js" / "lead.js");
+  detect_file(res / "voc" / "data.json");
+  detect_file(res / "voc" / "index.json");
+  
+  lead::Server svr(argv[1], std::stoi(argv[2]), res);
   svr.run();
   return 0;
 }
