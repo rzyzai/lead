@@ -60,11 +60,30 @@ namespace lead::utils
   std::string yellow(const std::string &str);
   
   std::string blue(const std::string &str);
+  
   std::string magenta(const std::string &str);
   
   std::string cyan(const std::string &str);
+  
   std::string white(const std::string &str);
   
   int get_edit_distance(const std::string &s1, const std::string &s2);
+  
+  template<typename T>
+  T split(const std::string& str, const std::string& delims = " ")
+  {
+    T ret;
+    size_t first = 0;
+    while (first < str.size())
+    {
+      const auto second = str.find_first_of(delims, first);
+      if (first != second)
+        ret.insert(ret.end(), str.substr(first, second - first));
+      if (second == std::string::npos)
+        break;
+      first = second + 1;
+    }
+    return ret;
+  }
 }
 #endif

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead</title>
+    <link href="css/mdui.min.css" rel="stylesheet"/>
+    <link href="css/googlefont.css"
+          rel="stylesheet"/>
+    <link href="css/lead.css" rel="stylesheet"/>
+    <script src="js/mdui.min.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/lead.js"></script>
+    <script>
+        window.onload = function () {
+            var result = JSON.parse(window.sessionStorage.getItem("search_result"));
+            var content = '<div class="mdui-panel" mdui-panel>';
+            for (var explanation in result["explanations"])
+                content += get_explanation_panel(parseInt(explanation) + 1, "",
+                    result["explanations"][explanation]);
+            content += '</div>'
+            $("#search-result").html(content);
+            $("#search-title").html(result["message"]);
+        }
+    </script>
+</head>
+<body>
+<div class="mdui-toolbar mdui-color-blue-700 mdui-shadow-5">
+    <a class="mdui-btn mdui-btn-icon" href="javascript:history.back(-1)">
+        <i class="mdui-icon material-icons">arrow_back</i>
+    </a>
+    <span class="mdui-typo-title mdui-text-color-white" id="search-title"></span>
+    <div class="mdui-toolbar-spacer"></div>
+</div>
+<div class="explanation" id="search-result">
+</div>
+</body>
+</html>

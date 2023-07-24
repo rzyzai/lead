@@ -25,6 +25,7 @@
 #include <tuple>
 #include <string>
 #include <fstream>
+#include <algorithm>
 #include <iostream>
 #include <vector>
 #include <set>
@@ -78,15 +79,13 @@ namespace lead
     std::vector<WordRef> ret;
     const auto distance_cmp = [](auto &&p1, auto &&p2) { return p1.second < p2.second; };
     std::multiset<std::pair<size_t, int>, decltype(distance_cmp)> similiar(distance_cmp); // index, distance
-    const auto is_ambiguous = [this, &wr, &similiar](size_t i) -> bool
+    const auto is_ambiguous = [&wr, &similiar](size_t i) -> bool
     {
-      if (vocabulary[i].word == wr.word->word) return true;
-      for (auto &r: similiar)
-      {
-        if (vocabulary[r.first].word == vocabulary[i].word)
-          return true;
-      }
-      return false;
+      int min_distance = 0;
+      min_distance = (std::abs)(static_cast<int>(wr.index - i));
+      for(auto& r : similiar)
+        min_distance = (std::min)((std::abs)(static_cast<int>(r.first - i)), min_distance);
+      return (min_distance < 10);
     };
     
     for (size_t i = 0; i < vocabulary.size(); ++i)
@@ -103,10 +102,9 @@ namespace lead
         similiar.insert({i, d});
       }
     }
+
     for (auto &r: similiar)
-    {
       ret.emplace_back(WordRef{&vocabulary[r.first], r.first});
-    }
     return ret;
   }
   
@@ -120,7 +118,7 @@ namespace lead
     std::vector<size_t> ret;
     for (size_t i = 0; i < vocabulary.size(); ++i)
     {
-      if (vocabulary[i].word == w)
+      if (vocabulary[i].word == w || vocabulary[i].meaning.find(w) != std::string::npos)
         ret.emplace_back(i);
     }
     return ret;

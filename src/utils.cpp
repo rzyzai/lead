@@ -25,6 +25,7 @@
 #include <sstream>
 #include <fstream>
 #include <random>
+#include <unordered_set>
 
 namespace lead::utils
 {

@@ -2,7 +2,6 @@ let data_list = [];
 let word = "";
 let index = 0;
 let prompted = false;
-let search_dialog_inst = null;
 
 function prev_quiz() {
     if (data_list.length == 1) {
@@ -88,13 +87,18 @@ function quiz_select(opt) {
     }
 }
 
-function get_explanation_panel(result, opt)
+function get_explanation_panel(title, summary, body)
 {
     return '<div class="mdui-panel-item mdui-panel-item-open">' +
         '<div class="mdui-panel-item-header">' +
-        '<div class="mdui-panel-item-title">' + opt + '</div>' +
-        '<div class="mdui-panel-item-summary">' + data_list[data_list.length - 1]["quiz"]["options"][opt] + '</div></div>' +
-        '<div class="mdui-panel-item-body">' + result[opt] + '</div></div>';
+        '<div class="mdui-panel-item-title">' + title + '</div>' +
+        '<div class="mdui-panel-item-summary">' + summary + '</div></div>' +
+        '<div class="mdui-panel-item-body">' + body + '</div></div>';
+}
+
+function prompt_explanation_panel(result, opt)
+{
+    return get_explanation_panel(opt, data_list[data_list.length - 1]["quiz"]["options"][opt], result[opt]);
 }
 
 function quiz_prompt(opt) {
@@ -115,10 +119,10 @@ function quiz_prompt(opt) {
             success: function (result) {
                 if (result["status"] == "success") {
                     $("#explanation").html('<div class="mdui-panel" mdui-panel>' +
-                        get_explanation_panel(result, "A") +
-                        get_explanation_panel(result, "B") +
-                        get_explanation_panel(result, "C") +
-                        get_explanation_panel(result, "D") +
+                        prompt_explanation_panel(result, "A") +
+                        prompt_explanation_panel(result, "B") +
+                        prompt_explanation_panel(result, "C") +
+                        prompt_explanation_panel(result, "D") +
                         '</div>');
                 }
             },

@@ -358,6 +358,10 @@ input.mdui-btn[type=submit] {
     color: #8DBBE9;
 }
 
+.search-bar input {
+    color: #FFFFFF;
+}
+
 .mdui-theme-layout-dark .search-bar {
     background-color: #424242 !important
 }

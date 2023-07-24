@@ -63,7 +63,7 @@ namespace lead
     std::string get_explanation(size_t index) const;
     
     nlohmann::json get_quiz(WordRef wr) const;
-    
+  
     nlohmann::json search(const std::string &word) const;
     
     nlohmann::json get_progress() const;
