@@ -38,7 +38,6 @@ namespace lead
   struct WordRecord
   {
     size_t points;
-    
     WordRecord() : points(planned_review_times) {}
   };
   
@@ -51,8 +50,9 @@ namespace lead
   private:
     VOC vocabulary;
     std::vector<WordRecord> word_records;
+    std::string record_path;
   public:
-    User(const std::string &voc_dir_path);
+    User(const std::string &voc_dir_path, const std::string &record_dir_path);
     
     WordRef get_word(size_t w) const;
     
@@ -67,6 +67,8 @@ namespace lead
     nlohmann::json search(const std::string &word) const;
     
     nlohmann::json get_progress() const;
+  
+    void write_records();
   };
 }
 #endif

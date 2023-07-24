@@ -32,7 +32,7 @@
 namespace lead
 {
   Server::Server(const std::string addr, int port, const std::string &res_path_)
-      : listen_addr(addr), listen_port(port), res_path(res_path_), user(res_path / "voc") {}
+      : listen_addr(addr), listen_port(port), res_path(res_path_), user(res_path / "voc", res_path / "records") {}
   
   void Server::run()
   {
@@ -57,6 +57,7 @@ namespace lead
           {"quiz",   quiz},
           {"index",  wr.index}
       }.dump(), "application/json");
+      user.write_records();
     });
     svr.Get("/api/pass", [this](const httplib::Request &req, httplib::Response &res)
     {
@@ -135,7 +136,17 @@ namespace lead
                      {
                        std::cout << "    " << r.first << ": " << r.second << "\n";
                      }
-                     std::cout << "Response: \n" << "  Body: " << res.body << "\n";
+      
+                     if (utils::begin_with(req.path, "/css") || utils::begin_with(req.path, "/fonts")
+                         || utils::begin_with(req.path, "/html") || utils::begin_with(req.path, "/icons")
+                         || utils::begin_with(req.path, "/js") || req.path == "/")
+                     {
+                       std::cout << "Response: \n";
+                     }
+                     else
+                     {
+                       std::cout << "Response: \n" << "  Body: " << res.body << "\n";
+                     }
       
                      auto tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
                      struct tm *ptm = localtime(&tt);
@@ -145,6 +156,7 @@ namespace lead
                              (int) ptm->tm_hour, (int) ptm->tm_min, (int) ptm->tm_sec);
                      std::cout << utils::green("^^^^^^^^^^") << date << utils::green("^^^^^^^^^^") << std::endl;
                    });
+    std::cout << "Server started at '" << listen_addr << ":" << listen_port << "'." << std::endl;
     svr.listen(listen_addr, listen_port);
   }
 }

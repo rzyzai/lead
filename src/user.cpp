@@ -31,7 +31,7 @@ namespace lead
 {
   void to_json(nlohmann::json &j, const lead::WordRecord &p)
   {
-    j = nlohmann::json{p.points};
+    j =  p.points;
   }
   
   void from_json(const nlohmann::json &j, lead::WordRecord &p)
@@ -39,10 +39,33 @@ namespace lead
     j.get_to(p.points);
   }
   
-  User::User(const std::string &voc_dir_path)
+  User::User(const std::string &voc_dir_path, const std::string &record_dir_path)
   {
+    std::cout << "Loading vocabulary at '" << voc_dir_path << "'." << std::endl;
     vocabulary.load(voc_dir_path + "/" + "index.json", voc_dir_path + "/" + "data.json");
-    word_records.insert(word_records.end(), vocabulary.size(), {});
+    std::filesystem::path record_path_fs = record_dir_path;
+    record_path_fs /= "record.json";
+    record_path = record_path_fs;
+    std::cout << "Loading record at '" << record_path << "'." << std::endl;
+    std::ifstream record_file(record_path);
+    
+    try
+    {
+      nlohmann::json record = nlohmann::json::parse(record_file);
+      if (record["record"].size() != vocabulary.size())
+      {
+        std::cerr << "Records don't match with vocabulary. Ignored '" << record_path << "'." << std::endl;
+        word_records.insert(word_records.end(), vocabulary.size(), {});
+      }
+      else
+        word_records = record["record"].get<std::vector<WordRecord>>();
+    }
+    catch(...)
+    {
+      std::cerr << "Exception occurred when parsing 'record.json'. Ignored '" << record_path << "'." << std::endl;
+      word_records.insert(word_records.end(), vocabulary.size(), {});
+    }
+    record_file.close();
   }
   
   WordRef User::get_word(size_t w) const
@@ -154,5 +177,12 @@ namespace lead
     return {{"status",            "success"},
             {"passed_word_count", passed},
             {"word_count",        word_records.size()}};
+  }
+  
+  void User::write_records()
+  {
+    std::fstream record_file(record_path, std::ios::out | std::ios::trunc);
+    record_file << nlohmann::json{{"record", word_records}}.dump();
+    record_file.close();
   }
 }
