@@ -112,7 +112,6 @@ namespace lead
     {
       flag = false;
       return {
-          {"status",   "success"},
           {"question", wr.word->word},
           {"options",  {
                            {opt[0], words[0].word->meaning},
@@ -131,7 +130,6 @@ namespace lead
     {
       flag = true;
       return {
-          {"status",   "success"},
           {"question", wr.word->meaning},
           {"options",  {
                            {opt[0], words[0].word->word},
