@@ -38,6 +38,7 @@ namespace lead
   {
     httplib::Server svr;
     svr.set_mount_point("/", res_path / "index.html");
+    svr.set_mount_point("/favicon.ico", res_path / "icon" / "favicon.ico");
     svr.set_mount_point("/", res_path / "html");
     svr.set_mount_point("/css", res_path / "css");
     svr.set_mount_point("/fonts", res_path / "fonts");

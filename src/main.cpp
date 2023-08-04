@@ -69,10 +69,11 @@ int main(int argc, char* argv[])
              "fonts/roboto/Roboto-RegularItalic.woff2", "fonts/roboto/Roboto-Thin.woff",
              "fonts/roboto/Roboto-Thin.woff2", "fonts/roboto/Roboto-ThinItalic.woff",
              "fonts/roboto/Roboto-ThinItalic.woff2", "html/about.html", "html/index.html", "html/record.html",
-             "icons/material-icons/LICENSE.txt", "icons/material-icons/MaterialIcons-Regular.ijmap",
-             "icons/material-icons/MaterialIcons-Regular.woff", "icons/material-icons/MaterialIcons-Regular.woff2",
-             "js/jquery.min.js", "js/lead.js", "js/mdui.esm.js", "js/mdui.esm.js.map", "js/mdui.js", "js/mdui.js.map",
-             "js/mdui.min.js", "js/mdui.min.js.map", "records/record.json", "voc/data.json", "voc/index.json");
+             "html/search.html", "icons/favicon.ico", "icons/material-icons/LICENSE.txt",
+             "icons/material-icons/MaterialIcons-Regular.ijmap", "icons/material-icons/MaterialIcons-Regular.woff",
+             "icons/material-icons/MaterialIcons-Regular.woff2", "js/jquery.min.js", "js/lead.js", "js/mdui.esm.js",
+             "js/mdui.esm.js.map", "js/mdui.js", "js/mdui.js.map", "js/mdui.min.js", "js/mdui.min.js.map",
+             "records/record.json", "voc/voc.json");
   lead::Server svr(argv[1], std::stoi(argv[2]), res);
   svr.run();
   return 0;

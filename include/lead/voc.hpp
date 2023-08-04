@@ -39,7 +39,7 @@ namespace lead
   {
     std::string word;
     std::string meaning;
-    std::string explanation;
+    nlohmann::json detail;
   };
   
   void to_json(nlohmann::json &j, const lead::Word &p);
@@ -69,7 +69,7 @@ namespace lead
   public:
     void load(const std::vector<Word> &word);
     
-    void load(const std::string &voc_index_path, const std::string &voc_data_path);
+    void load(const std::string &voc_path);
     
     std::string get_explanation(size_t index) const;
     

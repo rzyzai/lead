@@ -42,7 +42,7 @@ namespace lead
   User::User(const std::string &voc_dir_path, const std::string &record_dir_path)
   {
     std::cout << "Loading vocabulary at '" << voc_dir_path << "'." << std::endl;
-    vocabulary.load(voc_dir_path + "/" + "index.json", voc_dir_path + "/" + "data.json");
+    vocabulary.load(voc_dir_path + "/" + "voc.json");
     std::filesystem::path record_path_fs = record_dir_path;
     record_path_fs /= "record.json";
     record_path = record_path_fs;

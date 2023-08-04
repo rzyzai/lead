@@ -454,8 +454,44 @@ font-weight: 400;
     padding-bottom: 16px;
     padding-left: 8px;
     padding-right: 8px;
+    font-size: 16px;
 }
 
 .tester {
     padding-left: 16px
+}
+
+.example
+{
+    font-size: 16px;
+}
+
+.meaning
+{
+    font-size: 16px;
+}
+
+li::marker
+{
+    font-size: 18px;
+}
+
+.ul
+{
+    list-style: none;
+}
+
+.collocation
+{
+    font-size: 18px;
+}
+
+.discrimination
+{
+    font-size: 18px;
+}
+
+.explanation_quiz
+{
+    font-size: 16px;
 }

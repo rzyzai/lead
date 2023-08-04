@@ -6,11 +6,10 @@ Lead
 <strong>一个简约的背单词网站</strong>
 </p>
 
-
 ### 示例
+
 | ![main](examples/main.png) |  ![search](examples/search.png) |
 |----------------------------|---------------------------------|
-
 
 ### API
 
@@ -89,13 +88,18 @@ Lead
 注: 解析为 html 片段，具体如下
 
 ```html
-
-<div class="mdui-typo"><h1 id="be-meant-to">be meant to</h1>\n<h2 id="_1">释义</h2>\n<h4 id="1">
-    1.<strong>旨在；目的是</strong></h4>\n
-    <div class="mdui-typo">
-        <blockquote><p>Festivals are meant to celebrate important times of year.\n节日旨在庆祝一年中的重要日子。</p>
-            <footer>人教③ – 1</footer>
-    </div>
+<div class=\"mdui-typo\"><h1>effective<i> adj</i></h1>英 /ɪ'fektɪv/ 美 /ɪ'fektɪv/ <h3>释义</h3>
+    <ol class=\"mdui-list\">
+        <li><span class=\"meaning\"><strong><span class=\"meaning\">有效的；生效的</span> ★ </strong>反 ineffective<ul
+                class=\"mdui-list\"><li><div class=\"mdui-typo\"><blockquote><span id=\"example\" class=\"example\">take effective measures / steps采取有效措施</span></div></li><li><div
+                class=\"mdui-typo\"><blockquote><span id=\"example\" class=\"example\">The more I understood fish, the more I became effective at finding and catching them.对鱼越了解，我越能有效地发现和捕捉到鱼。</span><footer>2015 广东</footer></div></li></ul></span>
+        </li>
+    </ol>
+    <h3>派生词汇</h3>
+    <ul class=\"mdui-list\">
+        <li>effectively /ɪ'fektɪvli/ adv</li>
+        <li>effectiveness /ɪˌfek'tɪvnɪs/ n [U]</li>
+    </ul>
 </div>
 ```
 
