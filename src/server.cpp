@@ -56,7 +56,7 @@ namespace lead
           {"status", "success"},
           {"word",   wr.word->word},
           {"quiz",   quiz},
-          {"index",  wr.index}
+          {"word_index",  wr.index}
       }.dump(), "application/json");
       user.write_records();
     });
@@ -82,21 +82,70 @@ namespace lead
       size_t index = std::stoi(req.get_param_value("word_index"));
       auto &p = user.word_record(index).points;
       ++p;
+      auto a = std::stoi(req.get_param_value("A_index"));
+      auto b = std::stoi(req.get_param_value("B_index"));
+      auto c = std::stoi(req.get_param_value("C_index"));
+      auto d = std::stoi(req.get_param_value("D_index"));
       res.set_content(nlohmann::json{{"status", "success"},
-                                     {"A",      user.get_explanation(std::stoi(req.get_param_value("A_index")))},
-                                     {"B",      user.get_explanation(std::stoi(req.get_param_value("B_index")))},
-                                     {"C",      user.get_explanation(std::stoi(req.get_param_value("C_index")))},
-                                     {"D",      user.get_explanation(
-                                         std::stoi(req.get_param_value("D_index")))}}.dump(), "application/json");
+                                     {"A",  {{"is_marked", user.is_marked(a)}, {"explanation", user.get_explanation(a)}}},
+                                     {"B",  {{"is_marked", user.is_marked(b)}, {"explanation", user.get_explanation(b)}}},
+                                     {"C",  {{"is_marked", user.is_marked(c)}, {"explanation", user.get_explanation(c)}}},
+                                     {"D",  {{"is_marked", user.is_marked(d)}, {"explanation", user.get_explanation(d)}}}
+      }.dump(), "application/json");
     });
     svr.Get("/api/search", [this](const httplib::Request &req, httplib::Response &res)
     {
       res.set_content(user.search(req.get_param_value("word")).dump(), "application/json");
     });
-    svr.Get("/api/get_progress", [this](const httplib::Request &req, httplib::Response &res)
+  
+    svr.Get("/api/get_record", [this](const httplib::Request &req, httplib::Response &res)
     {
-      res.set_content(user.get_progress().dump(), "application/json");
+      res.set_content(user.get_record().dump(), "application/json");
     });
+    
+    svr.Get("/api/mark_word", [this](const httplib::Request &req, httplib::Response &res)
+    {
+      int ret = user.mark_word(std::stoi(req.get_param_value("word_index")));
+      if(ret == 0)
+      {
+        user.write_records();
+        res.set_content(nlohmann::json{{"status", "success"}}.dump(), "application/json");
+      }
+      else
+      {
+        user.write_records();
+        res.set_content(nlohmann::json{{"status", "failed"}, {"message", "已经收藏过了"}}.dump(), "application/json");
+      }
+    });
+  
+    svr.Get("/api/unmark_word", [this](const httplib::Request &req, httplib::Response &res)
+    {
+      int ret = user.unmark_word(std::stoi(req.get_param_value("word_index")));
+      if(ret == 0)
+      {
+        user.write_records();
+        res.set_content(nlohmann::json{{"status", "success"}}.dump(), "application/json");
+      }
+      else
+      {
+        user.write_records();
+        res.set_content(nlohmann::json{{"status", "failed"}, {"message", "没有收藏过该单词"}}.dump(), "application/json");
+      }
+    });
+  
+    svr.Get("/api/memorize_word", [this](const httplib::Request &req, httplib::Response &res)
+    {
+      WordRef wr = user.memorize_word();
+      user.write_records();
+      res.set_content(nlohmann::json{
+          {"status", "success"},
+          {"word",   wr.word->word},
+          {"meaning",   wr.word->meaning},
+          {"content",   user.get_explanation(wr.index)},
+          {"word_index",  wr.index}
+      }.dump(), "application/json");
+    });
+    
     svr.set_exception_handler([](const auto &req, auto &res, std::exception_ptr ep)
                               {
                                 auto fmt = "<h1>Error 500</h1><p>%s</p>";

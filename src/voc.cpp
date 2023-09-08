@@ -61,6 +61,9 @@ namespace lead
           });
     }
     voc_file.close();
+    
+    for(size_t i = 0; i < vocabulary.size(); ++i)
+      get_explanation(i);
   }
   
   void parse_example(const nlohmann::json &data, std::string &ret);
@@ -101,7 +104,7 @@ namespace lead
     // TODO highlight
     ret += "<div class=\"mdui-typo\"><blockquote><span id=\"example\" class=\"example\">" + en;
     if (data.contains("chi"))
-      ret += data["chi"].get<std::string>();
+      ret += + "<br/>" + data["chi"].get<std::string>();
     
     ret += "</span>";
     if (data.contains("source"))
@@ -220,12 +223,15 @@ namespace lead
   void parse_derivative(const nlohmann::json &data, std::string &ret)
   {
     ret += data["word"].get<std::string>();
+    
+    if (data.contains("pos"))
+      ret += "<i>  " + data["pos"].get<std::string>() + "</i>";
+    
     if (data.contains("ph"))
       ret += " " + data["ph"].get<std::string>();
-    if (data.contains("pos"))
-      ret += " " + data["pos"].get<std::string>();
+    
     if (data.contains("usage"))
-      ret += " " + data["usage"].get<std::string>();
+      ret += "<br/>" + data["usage"].get<std::string>();
     
     // Examples
     try_parse_examples(data, ret);
@@ -267,51 +273,64 @@ namespace lead
   }
   
   
-  void parse_list(const nlohmann::json &data, std::string &ret, const std::string &tag,
+  void parse_list(const nlohmann::json &data, std::string &ret, const std::string &list_type, const std::string &tag,
                   const std::function<void(const nlohmann::json &, std::string &)> &fn)
   {
     if (data.contains(tag))
     {
-      ret += "<ul class=\"mdui-list\">";
+      ret += "<" + list_type + " class=\"mdui-list\">";
       for (auto &r: data[tag])
       {
         ret += "<li>";
         fn(r, ret);
         ret += "</li>";
       }
-      ret += "</ul>";
+      ret += "</" + list_type + ">";
     }
   }
   
   void try_parse_examples(const nlohmann::json &data, std::string &ret)
   {
-    parse_list(data, ret, "examples", parse_example);
+    if (data.contains("examples"))
+    {
+      for (auto &r: data["examples"])
+        parse_example(r, ret);
+    }
   }
   
   void try_parse_patterns(const nlohmann::json &data, std::string &ret)
   {
-    parse_list(data, ret, "patterns", parse_pattern);
+    parse_list(data, ret, "ul", "patterns", parse_pattern);
   }
   
   void try_parse_notes(const nlohmann::json &data, std::string &ret)
   {
-    parse_list(data, ret, "notes", parse_note);
+    parse_list(data, ret, "ul","notes", parse_note);
   }
   
   void try_parse_discriminations(const nlohmann::json &data, std::string &ret)
   {
-    parse_list(data, ret, "discriminations", parse_discrimination);
+    parse_list(data, ret, "ul","discriminations", parse_discrimination);
   }
   
   void try_parse_collocations(const nlohmann::json &data, std::string &ret)
   {
-    parse_list(data, ret, "collocations", parse_collocation);
+    parse_list(data, ret, "ul", "collocations", parse_collocation);
   }
   
   void try_parse_explanations(const nlohmann::json &data, std::string &ret)
   {
-    parse_list(data, ret, "explanations",
-               [](const nlohmann::json &data, std::string &ret) { parse_explanation(data, ret); });
+    if (data.contains("explanations"))
+    {
+      ret += "<ol class=\"mdui-list\">";
+      for (auto &r: data["explanations"])
+      {
+        ret += "<li><strong>";
+        parse_explanation(r, ret, "</strong>");
+        ret += "</li>";
+      }
+      ret += "</ol>";
+    }
   }
   
   std::string VOC::get_explanation(size_t index) const
@@ -335,7 +354,7 @@ namespace lead
     
     // Usage
     if (detail.contains("usage"))
-      ret += detail["usage"].get<std::string>();
+      ret += "<br/>" + detail["usage"].get<std::string>();
     
     // Explanations
     if (detail.contains("explanations"))

@@ -59,6 +59,7 @@ namespace lead
       }
       else
         word_records = record["record"].get<std::vector<WordRecord>>();
+      marked_words = record["marked_words"].get<std::vector<size_t>>();
     }
     catch(...)
     {
@@ -94,6 +95,11 @@ namespace lead
   std::string User::get_explanation(size_t index) const
   {
     return vocabulary.get_explanation(index);
+  }
+  
+  WordRef User::memorize_word()
+  {
+    return get_random_word();
   }
   
   nlohmann::json User::get_quiz(WordRef wr) const
@@ -150,21 +156,49 @@ namespace lead
   nlohmann::json User::search(const std::string &word) const
   {
     auto wr = vocabulary.search(word);
-    std::vector<std::string> explanations;
+    std::vector<nlohmann::json> words;
     for (auto &r: wr)
-      explanations.emplace_back(get_explanation(r));
+    {
+      WordRef word = vocabulary.at(r);
+      words.emplace_back(nlohmann::json{{"word", word.word->word},
+                                        {"word_index", r},
+                                        {"meaning", word.word->meaning},
+                                        {"explanation", get_explanation(r)},
+                                        {"is_marked", is_marked(r)}});
+    }
     if (!wr.empty())
     {
       return {{"status",       "success"},
-              {"indexes",      wr},
-              {"explanations", explanations},
+              {"words",        words},
               {"message",      "找到了" + std::to_string(wr.size()) + "个结果"}};
     }
     return {{"status",  "failed"},
             {"message", "没有找到" + word}};
   }
   
-  nlohmann::json User::get_progress() const
+  int User::mark_word(size_t index)
+  {
+    if(std::find(marked_words.begin(), marked_words.end(), index) != marked_words.end())
+      return -1;
+    marked_words.emplace_back(index);
+    return 0;
+  }
+  
+  int User::unmark_word(size_t index)
+  {
+    if(auto it = std::find(marked_words.begin(), marked_words.end(), index); it != marked_words.end())
+      marked_words.erase(it);
+    else
+      return -1;
+    return 0;
+  }
+  
+  bool User::is_marked(size_t index) const
+  {
+    return std::find(marked_words.begin(), marked_words.end(), index) != marked_words.end();
+  }
+  
+  nlohmann::json User::get_record() const
   {
     size_t passed = 0;
     for (size_t i = 0; i < word_records.size(); ++i)
@@ -172,15 +206,27 @@ namespace lead
       if (word_records[i].points == 0)
         ++passed;
     }
+  
+    std::vector<nlohmann::json> ret_marked_words;
+    for (auto &r: marked_words)
+    {
+      WordRef word = vocabulary.at(r);
+      ret_marked_words.emplace_back(nlohmann::json{{"word",        word.word->word},
+                                                   {"word_index", word.index},
+                                                   {"meaning",     word.word->meaning},
+                                                   {"explanation", get_explanation(r)}});
+    }
+    
     return {{"status",            "success"},
             {"passed_word_count", passed},
-            {"word_count",        word_records.size()}};
+            {"word_count",        word_records.size()},
+            {"marked_words", ret_marked_words}};
   }
   
   void User::write_records()
   {
     std::fstream record_file(record_path, std::ios::out | std::ios::trunc);
-    record_file << nlohmann::json{{"record", word_records}}.dump();
+    record_file << nlohmann::json{{"record", word_records}, {"marked_words", marked_words}}.dump();
     record_file.close();
   }
 }

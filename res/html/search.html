@@ -11,16 +11,7 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/lead.js"></script>
     <script>
-        window.onload = function () {
-            var result = JSON.parse(window.sessionStorage.getItem("search_result"));
-            var content = '<div class="mdui-panel" mdui-panel>';
-            for (var explanation in result["explanations"])
-                content += get_explanation_panel(parseInt(explanation) + 1, "",
-                    result["explanations"][explanation]);
-            content += '</div>'
-            $("#search-result").html(content);
-            $("#search-title").html(result["message"]);
-        }
+        window.onload = init_search_result;
     </script>
 </head>
 <body>

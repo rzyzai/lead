@@ -445,7 +445,7 @@ input.mdui-btn[type=submit] {
 }
 
 .info h2{
-font-weight: 400;
+    font-weight: 400;
 }
 
 .explanation
@@ -455,7 +455,6 @@ font-weight: 400;
     padding-left: 8px;
     padding-right: 8px;
     font-size: 16px;
-    list-style-type:none;
 }
 
 .tester {
@@ -477,14 +476,9 @@ li::marker
     font-size: 18px;
 }
 
-.ul
-{
-    list-style: none;
-}
-
 .collocation
 {
-    font-size: 18px;
+    font-size: 20px;
 }
 
 .discrimination
@@ -495,4 +489,10 @@ li::marker
 .explanation_quiz
 {
     font-size: 16px;
+}
+
+.progressbar
+{
+    padding-top: 8px;
+    padding-bottom: 16px;
 }
