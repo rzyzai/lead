@@ -24,8 +24,6 @@
 #include "bundled/nlohmann/json.hpp"
 #include <tuple>
 #include <string>
-#include <fstream>
-#include <algorithm>
 #include <vector>
 #include <set>
 #include <functional>
@@ -102,7 +100,10 @@ namespace lead
     auto en = data["en"].get<std::string>();
     // TODO highlight
     ret += "<div class=\"mdui-typo\"><blockquote><span id=\"example\" class=\"example\">" + en;
-    ret += data["chi"].get<std::string>() + "</span>";
+    if (data.contains("chi"))
+      ret += data["chi"].get<std::string>();
+    
+    ret += "</span>";
     if (data.contains("source"))
       ret += "<footer>" + data["source"].get<std::string>() + "</footer>";
     ret += "</div>";
@@ -119,11 +120,20 @@ namespace lead
   void parse_discrimination(const nlohmann::json &data, std::string &ret)
   {
     ret += "<span class=\"discrimination\">辨析 ";
-    for (auto &word: data["words"])
-      ret += word["word"].get<std::string>() + ", ";
-    ret.pop_back();
-    ret.pop_back();
-    ret += "";
+    if (data["words"].is_string())
+      ret += data["words"].get<std::string>();
+    else
+    {
+      for (auto &word: data["words"])
+      {
+        ret += word["word"].get<std::string>() + ", ";
+      }
+      if (ret[ret.size() - 2] == ',' && ret.back() == ' ')
+      {
+        ret.pop_back();
+        ret.pop_back();
+      }
+    }
     ret += "</span><br/>";
     // Explanation
     if (data.contains("explanation"))
@@ -131,22 +141,29 @@ namespace lead
     // Examples
     try_parse_examples(data, ret);
     // Discrimination word
-    ret += "<ol class=\"mdui-list\">";
-    for (auto &r: data["words"])
+    if (data["words"].is_array())
     {
-      ret += "<strong>" + r["word"].get<std::string>() + "</strong>" + r["desc"].get<std::string>();
-      if (r.contains("examples"))
+      ret += "<ol class=\"mdui-list\">";
+      for (auto &r: data["words"])
       {
-        for (auto &t: r["examples"])
-          parse_example(t, ret);
+        ret += "<strong>" + r["word"].get<std::string>() + "</strong>";
+        if (r.contains("desc"))
+          ret += r["desc"].get<std::string>();
+        if (r.contains("examples"))
+        {
+          for (auto &t: r["examples"])
+            parse_example(t, ret);
+        }
       }
+      ret += "</ol>";
     }
-    ret += "</ol>";
   }
   
   void parse_pattern(const nlohmann::json &data, std::string &ret)
   {
-    ret += data["pattern"].get<std::string>();
+    if (data.contains("pattern"))
+      ret += data["pattern"].get<std::string>();
+    
     // Examples
     try_parse_examples(data, ret);
     
@@ -177,8 +194,8 @@ namespace lead
       ret += "(" + data["en"].get<std::string>() + ")";
     
     // Synonym
-    if (data.contains("Synonym"))
-      ret += "近 " + data["Synonym"].get<std::string>();
+    if (data.contains("synonym"))
+      ret += "近 " + data["synonym"].get<std::string>();
     
     // Antonym
     if (data.contains("antonym"))
@@ -293,7 +310,8 @@ namespace lead
   
   void try_parse_explanations(const nlohmann::json &data, std::string &ret)
   {
-    parse_list(data, ret, "explanations", [](const nlohmann::json &data, std::string &ret){parse_explanation(data, ret);});
+    parse_list(data, ret, "explanations",
+               [](const nlohmann::json &data, std::string &ret) { parse_explanation(data, ret); });
   }
   
   std::string VOC::get_explanation(size_t index) const
@@ -429,14 +447,14 @@ namespace lead
   {
     std::vector<size_t> ret;
     bool is_word = true;
-    for(auto& r : w)
+    for (auto &r: w)
     {
-      if(!std::isalpha(r))
+      if (!std::isalpha(r))
         is_word = false;
     }
     for (size_t i = 0; i < vocabulary.size(); ++i)
     {
-      if(is_word)
+      if (is_word)
       {
         if (vocabulary[i].word == w)
           ret.emplace_back(i);

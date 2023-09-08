@@ -455,6 +455,7 @@ font-weight: 400;
     padding-left: 8px;
     padding-right: 8px;
     font-size: 16px;
+    list-style-type:none;
 }
 
 .tester {

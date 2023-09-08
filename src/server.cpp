@@ -157,6 +157,7 @@ namespace lead
                              (int) ptm->tm_hour, (int) ptm->tm_min, (int) ptm->tm_sec);
                      std::cout << utils::green("^^^^^^^^^^") << date << utils::green("^^^^^^^^^^") << std::endl;
                    });
+    
     std::cout << "Server started at '" << listen_addr << ":" << listen_port << "'." << std::endl;
     svr.listen(listen_addr, listen_port);
   }
