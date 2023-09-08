@@ -11,7 +11,7 @@ Lead
 | ![main](examples/main.png) |  ![search](examples/search.png) |
 |----------------------------|---------------------------------|
 
-### API
+### API （待更新）
 
 #### 获取题目 `/api/get_quiz`
 
@@ -153,3 +153,6 @@ Lead
 - [nlohmann/json](https://github.com/nlohmann/json)
 - [cpp-httplib](https://github.com/yhirose/cpp-httplib)
 - [MDUI](https://www.mdui.org/)
+
+### 日照一中AI社
+lead 来自[日照一中AI社](https://github.com/rzyzai)
