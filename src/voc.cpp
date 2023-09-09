@@ -61,9 +61,9 @@ namespace lead
           });
     }
     voc_file.close();
-    
-    for(size_t i = 0; i < vocabulary.size(); ++i)
-      get_explanation(i);
+// explanation generation test
+//    for(size_t i = 0; i < vocabulary.size(); ++i)
+//      get_explanation(i);
   }
   
   void parse_example(const nlohmann::json &data, std::string &ret);
@@ -104,11 +104,15 @@ namespace lead
     // TODO highlight
     ret += "<div class=\"mdui-typo\"><blockquote><span id=\"example\" class=\"example\">" + en;
     if (data.contains("chi"))
-      ret += + "<br/>" + data["chi"].get<std::string>();
+    {
+      ret += +"<br/>" + data["chi"].get<std::string>();
+    }
     
     ret += "</span>";
     if (data.contains("source"))
+    {
       ret += "<footer>" + data["source"].get<std::string>() + "</footer>";
+    }
     ret += "</div>";
   }
   
@@ -124,7 +128,9 @@ namespace lead
   {
     ret += "<span class=\"discrimination\">辨析 ";
     if (data["words"].is_string())
+    {
       ret += data["words"].get<std::string>();
+    }
     else
     {
       for (auto &word: data["words"])
@@ -140,7 +146,9 @@ namespace lead
     ret += "</span><br/>";
     // Explanation
     if (data.contains("explanation"))
+    {
       ret += data["explanation"].get<std::string>();
+    }
     // Examples
     try_parse_examples(data, ret);
     // Discrimination word
@@ -151,11 +159,15 @@ namespace lead
       {
         ret += "<strong>" + r["word"].get<std::string>() + "</strong>";
         if (r.contains("desc"))
+        {
           ret += r["desc"].get<std::string>();
+        }
         if (r.contains("examples"))
         {
           for (auto &t: r["examples"])
+          {
             parse_example(t, ret);
+          }
         }
       }
       ret += "</ol>";
@@ -165,7 +177,9 @@ namespace lead
   void parse_pattern(const nlohmann::json &data, std::string &ret)
   {
     if (data.contains("pattern"))
+    {
       ret += data["pattern"].get<std::string>();
+    }
     
     // Examples
     try_parse_examples(data, ret);
@@ -190,19 +204,27 @@ namespace lead
     // Meaning
     ret += "<span class=\"meaning\">" + data["chi"].get<std::string>() + "</span>";
     if (data["vital"].get<bool>())
+    {
       ret += " ★ ";
+    }
     ret += mark;
     // English translation
     if (data.contains("en"))
+    {
       ret += "(" + data["en"].get<std::string>() + ")";
+    }
     
     // Synonym
     if (data.contains("synonym"))
+    {
       ret += "近 " + data["synonym"].get<std::string>();
+    }
     
     // Antonym
     if (data.contains("antonym"))
+    {
       ret += "反 " + data["antonym"].get<std::string>();
+    }
     
     // Examples
     try_parse_examples(data, ret);
@@ -225,13 +247,19 @@ namespace lead
     ret += data["word"].get<std::string>();
     
     if (data.contains("pos"))
+    {
       ret += "<i>  " + data["pos"].get<std::string>() + "</i>";
+    }
     
     if (data.contains("ph"))
+    {
       ret += " " + data["ph"].get<std::string>();
+    }
     
     if (data.contains("usage"))
+    {
       ret += "<br/>" + data["usage"].get<std::string>();
+    }
     
     // Examples
     try_parse_examples(data, ret);
@@ -245,25 +273,34 @@ namespace lead
   
   void parse_quiz_question(const nlohmann::json &data, std::string &ret)
   {
+    // Source
+    if (data.contains("source"))
+    {
+      ret += "[" + data["source"].get<std::string>() + "] ";
+    }
     // Subject
     ret += data["subject"].get<std::string>();
     
-    // Source
-    if (data.contains("source"))
-      ret += " (" + data["source"].get<std::string>() + ")";
-    
     // Options
     if (data.contains("option_A"))
-      ret += "A. " + data["option_A"].get<std::string>();
+    {
+      ret += "<br/>A. " + data["option_A"].get<std::string>();
+    }
     
     if (data.contains("option_B"))
-      ret += "B. " + data["option_B"].get<std::string>();
+    {
+      ret += "<br/>B. " + data["option_B"].get<std::string>();
+    }
     
     if (data.contains("option_C"))
-      ret += "C. " + data["option_C"].get<std::string>();
+    {
+      ret += "<br/>C. " + data["option_C"].get<std::string>();
+    }
     
     if (data.contains("option_D"))
-      ret += "D. " + data["option_D"].get<std::string>();
+    {
+      ret += "<br/>D. " + data["option_D"].get<std::string>();
+    }
     
   }
   
@@ -294,7 +331,9 @@ namespace lead
     if (data.contains("examples"))
     {
       for (auto &r: data["examples"])
+      {
         parse_example(r, ret);
+      }
     }
   }
   
@@ -305,12 +344,12 @@ namespace lead
   
   void try_parse_notes(const nlohmann::json &data, std::string &ret)
   {
-    parse_list(data, ret, "ul","notes", parse_note);
+    parse_list(data, ret, "ul", "notes", parse_note);
   }
   
   void try_parse_discriminations(const nlohmann::json &data, std::string &ret)
   {
-    parse_list(data, ret, "ul","discriminations", parse_discrimination);
+    parse_list(data, ret, "ul", "discriminations", parse_discrimination);
   }
   
   void try_parse_collocations(const nlohmann::json &data, std::string &ret)
@@ -341,20 +380,30 @@ namespace lead
     ret += "<h1>" + vocabulary[index].word;
     // part of speech
     if (detail.contains("pos"))
+    {
       ret += "<i>  " + detail["pos"].get<std::string>() + "</i>";
+    }
     // vital
     if (detail["vital"].get<bool>())
+    {
       ret += " ★";
+    }
     ret += "</h1>";
     // Pronunciation
     if (detail.contains("en_ph"))
+    {
       ret += "英 /" + detail["en_ph"].get<std::string>() + "/  ";
+    }
     if (detail.contains("usa_ph"))
+    {
       ret += "美 /" + detail["usa_ph"].get<std::string>() + "/  ";
+    }
     
     // Usage
     if (detail.contains("usage"))
+    {
       ret += "<br/>" + detail["usage"].get<std::string>();
+    }
     
     // Explanations
     if (detail.contains("explanations"))
@@ -433,7 +482,9 @@ namespace lead
       int min_distance = 0;
       min_distance = (std::abs)(static_cast<int>(wr.index - i));
       for (auto &r: similiar)
+      {
         min_distance = (std::min)((std::abs)(static_cast<int>(r.first - i)), min_distance);
+      }
       return (min_distance < 10);
     };
     
@@ -453,7 +504,9 @@ namespace lead
     }
     
     for (auto &r: similiar)
+    {
       ret.emplace_back(WordRef{&vocabulary[r.first], r.first});
+    }
     return ret;
   }
   
@@ -469,19 +522,25 @@ namespace lead
     for (auto &r: w)
     {
       if (!std::isalpha(r))
+      {
         is_word = false;
+      }
     }
     for (size_t i = 0; i < vocabulary.size(); ++i)
     {
       if (is_word)
       {
         if (vocabulary[i].word == w)
+        {
           ret.emplace_back(i);
+        }
       }
       else
       {
         if (vocabulary[i].meaning.find(w) != std::string::npos)
+        {
           ret.emplace_back(i);
+        }
       }
     }
     return ret;
