@@ -123,6 +123,7 @@ namespace lead
     {
       --plan_pos;
       while(word_records[plan_pos].points == 0 && plan_pos != 0) --plan_pos;
+      if(word_records[plan_pos].points == 0) return {};
       return vocabulary.at(plan_pos);
     }
     return {};
@@ -130,21 +131,10 @@ namespace lead
   
   nlohmann::json User::get_quiz(WordRef wr) const
   {
-    if(!wr.is_valid())
-    {
-      std::vector<size_t> c;
-      for(size_t i = 0; i < word_records.size(); ++i)
-      {
-        if (word_records[i].points < planned_review_times && word_records[i].points > 0)
-          c.emplace_back(i);
-      }
-      if(!c.empty())
-        wr = vocabulary.at(c[utils::randnum<size_t>(0, c.size())]);
-      else
-        wr = get_random_word();
-    }
-    
-    auto words = vocabulary.get_similiar_words(wr, 3, [](WordRef wr) -> bool{return true;});
+    if (!wr.is_valid())
+      wr = get_random_word();
+  
+    auto words = vocabulary.get_similiar_words(wr, 3, [](WordRef wr) -> bool { return true; });
     std::vector<std::string> opt{"A", "B", "C", "D"};
     std::random_device rd;
     std::mt19937 g(rd());
