@@ -92,7 +92,7 @@
     </script>
 </div>
 <div class="mdui-container-fluid">
-    <div class="item mdui-text-center">
+    <div class="mdui-text-center">
         <p>
             <span id="question">question</span>
         </p>
@@ -105,10 +105,13 @@
             <div class="mdui-divider"></div>
             <li class="mdui-list-item mdui-ripple" onclick="quiz_select('D')"><span id="D">D</span></li>
         </ul>
+
+        <div class="quiz-button mdui-text-center">
         <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="prev_quiz()">上一个</button>
         <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="pass(quiz_word_index);next_quiz()">已记住</button>
         <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="mark_word(quiz_word_index)">收藏</button>
         <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="quiz_prompt()">查看解析</button>
+        </div>
     </div>
     <div class="explanation" id="explanation">
     </div>

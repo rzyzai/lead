@@ -223,6 +223,13 @@ namespace lead
             {"marked_words", ret_marked_words}};
   }
   
+  nlohmann::json User::get_plan() const
+  {
+    return {{"status",              "success"},
+            {"finished_word_count", 0},
+            {"planned_word_count",  10}};
+  }
+  
   void User::write_records()
   {
     std::fstream record_file(record_path, std::ios::out | std::ios::trunc);

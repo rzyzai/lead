@@ -12,21 +12,26 @@ let memorize_index = 0;
 let memorize_meaning = "";
 
 let search_data = null;
+
 function init_home()
 {
     $.ajax({
         type: 'GET',
         url: "api/get_plan",
         success: function (result) {
-            if(result["finished_word_count"] == result["planned_word_count"])
+            if(result["status"] == "success") {
+                if (result["finished_word_count"] == result["planned_word_count"]) {
+                    $("#message").html("<h3>今日计划已完成</h3>");
+                } else {
+                    $("#finished_word_count").html(result["finished_word_count"]);
+                    $("#planned_word_count").html(result["planned_word_count"]);
+                }
+                $("#progress_bar").attr('style', 'width:' + (result["finished_word_count"] / result["planned_word_count"]) * 100 + '%;');
+            }
+            else
             {
-                $("#message").html("<h3>今日计划已完成</h3>");
+                mdui.snackbar(result["message"]);
             }
-            else {
-                $("#finished_word_count").html(result["finished_word_count"]);
-                $("#planned_word_count").html(result["planned_word_count"]);
-            }
-            $("#progress_bar").attr('style', 'width:' + (result["finished_word_count"] / result["planned_word_count"]) * 100 + '%;');
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             console.log(XMLHttpRequest.status);
@@ -39,6 +44,8 @@ function init_home()
 function init_search_result() {
     if(search_data == null)
         search_data = JSON.parse(window.sessionStorage.getItem("search_result"));
+    else
+        window.sessionStorage.setItem("search_result", search_data);
     var content = '<div class="mdui-panel" mdui-panel>';
     for (var word in search_data["words"])
         content += search_explanation_panel(search_data["words"], word);
@@ -284,12 +291,12 @@ function search_explanation_panel(words, pos) {
 
 
 function record_explanation_panel(word) {
-    return get_explanation_panel(word["word"],
+    return '<div class="record-mark-panel"><div class="item-box">' + get_explanation_panel(word["word"],
         word["meaning"],
         word["explanation"],
         '<button class=\"mdui-btn mdui-ripple\" onclick=\"unmark_word('
-        + word["word_index"] + ');$(this).parent().parent().remove();\">' +
-        '<i class="mdui-icon material-icons">delete</i>取消收藏</button>');
+        + word["word_index"] + ');$(this).parent().parent().parent().remove();\">' +
+        '<i class="mdui-icon material-icons">delete</i>取消收藏</button>') + '</div><div class="item-del">取消删除</div></div>';
 }
 
 
@@ -359,6 +366,10 @@ function get_record()
                 $("#passed_word_count").html(result["passed_word_count"]);
                 $("#word_count").html(result["word_count"]);
                 $("#progress_bar").attr('style', 'width:' + (result["passed_word_count"] / result["word_count"]) * 100 + '%;')
+            }
+            else
+            {
+                mdui.snackbar(result["message"]);
             }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {

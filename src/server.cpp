@@ -102,6 +102,11 @@ namespace lead
     {
       res.set_content(user.get_record().dump(), "application/json");
     });
+  
+    svr.Get("/api/get_plan", [this](const httplib::Request &req, httplib::Response &res)
+    {
+      res.set_content(user.get_plan().dump(), "application/json");
+    });
     
     svr.Get("/api/mark_word", [this](const httplib::Request &req, httplib::Response &res)
     {

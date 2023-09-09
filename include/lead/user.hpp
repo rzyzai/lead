@@ -74,8 +74,10 @@ namespace lead
     int unmark_word(size_t index);
     
     bool is_marked(size_t index) const;
-    
+  
     nlohmann::json get_record() const;
+    
+    nlohmann::json get_plan() const;
   
     void write_records();
   };
