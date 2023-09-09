@@ -4,6 +4,7 @@ let quiz_word = "";
 let quiz_word_index = 0;
 let quiz_prompt_data = null;
 let quiz_prompted = false;
+let quiz_prompt_panel_isopen = [false, false, false, false];
 
 let memorize_data_list = [];
 let memorize_data_list_pos = 0;
@@ -56,11 +57,21 @@ function init_search_result() {
 
 function init_prompt() {
     $("#explanation").html('<div class="mdui-panel" mdui-panel>' +
-        prompt_explanation_panel(quiz_prompt_data, "A") +
-        prompt_explanation_panel(quiz_prompt_data, "B") +
-        prompt_explanation_panel(quiz_prompt_data, "C") +
-        prompt_explanation_panel(quiz_prompt_data, "D") +
+        prompt_explanation_panel(quiz_prompt_data, "A", quiz_prompt_panel_isopen[0]) +
+        prompt_explanation_panel(quiz_prompt_data, "B", quiz_prompt_panel_isopen[1]) +
+        prompt_explanation_panel(quiz_prompt_data, "C", quiz_prompt_panel_isopen[2]) +
+        prompt_explanation_panel(quiz_prompt_data, "D", quiz_prompt_panel_isopen[3]) +
         '</div>');
+    mdui.mutation();
+}
+
+function save_quiz_prompt_panel_status()
+{
+    var panels = document.getElementsByClassName("mdui-panel-item");
+    quiz_prompt_panel_isopen[0] = panels[0].classList.length > 1;
+    quiz_prompt_panel_isopen[1] = panels[1].classList.length > 1;
+    quiz_prompt_panel_isopen[2] = panels[2].classList.length > 1;
+    quiz_prompt_panel_isopen[3] = panels[3].classList.length > 1;
 }
 
 function update_memorize_data()
@@ -239,34 +250,41 @@ function quiz_select(opt) {
     }
 }
 
-function get_explanation_panel(title, summary, body, actions)
-{
-    actions = typeof actions !== 'undefined' ?  actions : "";
-    let ret = '<div class="mdui-panel-item mdui-panel-item-open">' +
-        '<div class="mdui-panel-item-header">' +
+function get_explanation_panel(title, summary, body, actions, open) {
+    actions = typeof actions !== 'undefined' ? actions : "";
+    open = typeof open !== 'undefined' ? open : true;
+    let ret = '';
+    if(open)
+        ret += '<div class="mdui-panel-item mdui-panel-item-open">';
+    else
+        ret += '<div class="mdui-panel-item">';
+    ret += '<div class="mdui-panel-item-header">' +
         '<div class="mdui-panel-item-title">' + title + '</div>' +
-        '<div class="mdui-panel-item-summary">' + summary + '</div></div>' +
-        '<div class="mdui-panel-item-body">' + body + '</div>';
-    if(actions != "") {
-        ret += '<div class="mdui-panel-item-actions">' + actions + '</div>' }
-    ret += '</div>';
+        '<div class="mdui-panel-item-summary">' + summary + '</div>';
+    if(!open)
+       ret += '<i class="mdui-panel-item-arrow mdui-icon material-icons">keyboard_arrow_down</i>';
+    ret += '</div><div class="mdui-panel-item-body">' + body;
+    if (actions != "") {
+        ret += '<div class="mdui-float-right">' + actions + '</div>';
+    }
+    ret += '</div></div>';
     return ret;
 }
 
-function prompt_explanation_panel(result, opt)
+function prompt_explanation_panel(result, opt, open)
 {
     let actions = "";
     if (result[opt]["is_marked"]) {
-        actions = '<button class=\"mdui-btn mdui-ripple\" onclick=\"unmark_word('
+        actions = '<button class=\"mdui-btn mdui-ripple\" onclick=\"save_quiz_prompt_panel_status();unmark_word('
             + quiz_data_list[quiz_data_list.length - 1]["quiz"]["indexes"][opt] + ');' +
             'quiz_prompt_data[\'' + opt + '\'][\'is_marked\']=false;init_prompt()\"><i class="mdui-icon material-icons">delete</i>取消收藏</button>';
     } else {
-        actions = '<button class=\"mdui-btn mdui-ripple\" onclick=\"mark_word('
+        actions = '<button class=\"mdui-btn mdui-ripple\" onclick=\"save_quiz_prompt_panel_status();mark_word('
             + quiz_data_list[quiz_data_list.length - 1]["quiz"]["indexes"][opt] + ');' +
             'quiz_prompt_data[\'' + opt + '\'][\'is_marked\']=true;init_prompt()\"><i class="mdui-icon material-icons">star</i>收藏</button>';
     }
     return get_explanation_panel(opt, quiz_data_list[quiz_data_list.length - 1]["quiz"]["options"][opt],
-        result[opt]["explanation"], actions);
+        result[opt]["explanation"], actions, open);
 }
 
 function search_explanation_panel(words, pos) {
@@ -291,12 +309,12 @@ function search_explanation_panel(words, pos) {
 
 
 function record_explanation_panel(word) {
-    return '<div class="record-mark-panel"><div class="item-box">' + get_explanation_panel(word["word"],
+    return get_explanation_panel(word["word"],
         word["meaning"],
         word["explanation"],
         '<button class=\"mdui-btn mdui-ripple\" onclick=\"unmark_word('
-        + word["word_index"] + ');$(this).parent().parent().parent().remove();\">' +
-        '<i class="mdui-icon material-icons">delete</i>取消收藏</button>') + '</div><div class="item-del">取消删除</div></div>';
+        + word["word_index"] + ');$(this).parent().parent().parent().fadeTo(\'normal\', 0.01, function(){$(this).slideUp(\'normal\', function() {$(this).remove();});});;\">' +
+        '<i class="mdui-icon material-icons">delete</i>取消收藏</button>', false);
 }
 
 
@@ -366,6 +384,7 @@ function get_record()
                 $("#passed_word_count").html(result["passed_word_count"]);
                 $("#word_count").html(result["word_count"]);
                 $("#progress_bar").attr('style', 'width:' + (result["passed_word_count"] / result["word_count"]) * 100 + '%;')
+                mdui.mutation();
             }
             else
             {

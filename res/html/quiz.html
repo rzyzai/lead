@@ -11,10 +11,12 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/lead.js"></script>
     <script type="text/javascript">
-        window.onload = function () {next_quiz(-1);};
+        window.onload = function () {
+            next_quiz(-1);
+        };
     </script>
 </head>
-<body>
+<body class="mdui-bottom-nav-fixed">
 <div class="mdui-toolbar mdui-color-blue-700 mdui-shadow-5">
     <div class="mdui-drawer mdui-drawer-close" id="left-drawer">
         <a class="mdui-btn mdui-btn-icon" href="#" mdui-drawer-close>
@@ -43,9 +45,9 @@
             </a>
         </ul>
         <div class="copyright">
-            <p>© 2023 caozhanhao</p>
+            <p>© 2023 <a href="https://rzyzai.tech" target="_blank">日照一中AI社</a></p>
             <p>Powered by
-                <a href="https://github.com/caozhanhao/lead" target="_blank">Lead</a>
+                <a href="https://github.com/rzyzai/lead" target="_blank">Lead</a>
                 & <a href="https://mdui.org" target="_blank">MDUI</a>
             </p>
         </div>
@@ -73,12 +75,10 @@
                         word: search_word
                     },
                 success: function (result) {
-                    if (result["status"] == "success")
-                    {
+                    if (result["status"] == "success") {
                         window.sessionStorage.setItem("search_result", JSON.stringify(result));
                         window.location.href = "search.html";
-                    }
-                    else
+                    } else
                         mdui.snackbar(result["message"]);
                 },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -93,28 +93,39 @@
 </div>
 <div class="mdui-container-fluid">
     <div class="mdui-text-center">
-        <p>
-            <span id="question">question</span>
-        </p>
-        <ul class="mdui-list">
-            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('A')"><span id="A">A</span></li>
-            <div class="mdui-divider"></div>
-            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('B')"><span id="B">B</span></li>
-            <div class="mdui-divider"></div>
-            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('C')"><span id="C">C</span></li>
-            <div class="mdui-divider"></div>
-            <li class="mdui-list-item mdui-ripple" onclick="quiz_select('D')"><span id="D">D</span></li>
-        </ul>
-
-        <div class="quiz-button mdui-text-center">
-        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="prev_quiz()">上一个</button>
-        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="pass(quiz_word_index);next_quiz()">已记住</button>
-        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="mark_word(quiz_word_index)">收藏</button>
-        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="quiz_prompt()">查看解析</button>
-        </div>
+    <p>
+        <span id="question">question</span>
+    </p>
     </div>
-    <div class="explanation" id="explanation">
+    <ul class="mdui-list">
+        <li class="mdui-list-item mdui-ripple" onclick="quiz_select('A')"><span id="A">A</span></li>
+        <div class="mdui-divider"></div>
+        <li class="mdui-list-item mdui-ripple" onclick="quiz_select('B')"><span id="B">B</span></li>
+        <div class="mdui-divider"></div>
+        <li class="mdui-list-item mdui-ripple" onclick="quiz_select('C')"><span id="C">C</span></li>
+        <div class="mdui-divider"></div>
+        <li class="mdui-list-item mdui-ripple" onclick="quiz_select('D')"><span id="D">D</span></li>
+    </ul>
+    <div class="mdui-container-fluid explanation" id="explanation">
     </div>
+</div>
+<div class="mdui-bottom-nav mdui-color-white">
+    <a onclick="prev_quiz()">
+        <i class="mdui-icon material-icons">navigate_before</i>
+        <label>上一个</label>
+    </a>
+    <a onclick="pass(quiz_word_index);next_quiz()">
+        <i class="mdui-icon material-icons">check</i>
+        <label>已记住</label>
+    </a>
+    <a onclick="mark_word(quiz_word_index)">
+        <i class="mdui-icon material-icons">star</i>
+        <label>收藏</label>
+    </a>
+    <a onclick="quiz_prompt()">
+        <i class="mdui-icon material-icons">school</i>
+        <label>查看解析</label>
+    </a>
 </div>
 </body>
 </html>

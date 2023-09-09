@@ -14,7 +14,7 @@
         window.onload = next_word;
     </script>
 </head>
-<body>
+<body class="mdui-bottom-nav-fixed">
 <div class="mdui-toolbar mdui-color-blue-700 mdui-shadow-5">
     <div class="mdui-drawer mdui-drawer-close" id="left-drawer">
         <a class="mdui-btn mdui-btn-icon" href="#" mdui-drawer-close>
@@ -26,8 +26,8 @@
                 <div class="mdui-list-item-content mdui-text-color-black-text">主页</div>
             </a>
             <a class="mdui-list-item mdui-ripple mdui-list-item-active">
-                            <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">show_chart</i>
-                            <div class="mdui-list-item-content">记忆</div>
+                <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">show_chart</i>
+                <div class="mdui-list-item-content">记忆</div>
             </a>
             <a href="marked.html" class="mdui-list-item mdui-ripple">
                 <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">bookmark</i>
@@ -43,9 +43,9 @@
             </a>
         </ul>
         <div class="copyright">
-            <p>© 2023 caozhanhao</p>
+            <p>© 2023 <a href="https://rzyzai.tech" target="_blank">日照一中AI社</a></p>
             <p>Powered by
-                <a href="https://github.com/caozhanhao/lead" target="_blank">Lead</a>
+                <a href="https://github.com/rzyzai/lead" target="_blank">Lead</a>
                 & <a href="https://mdui.org" target="_blank">MDUI</a>
             </p>
         </div>
@@ -73,12 +73,10 @@
                         word: search_word
                     },
                 success: function (result) {
-                    if (result["status"] == "success")
-                    {
+                    if (result["status"] == "success") {
                         window.sessionStorage.setItem("search_result", JSON.stringify(result));
                         window.location.href = "search.html";
-                    }
-                    else
+                    } else
                         mdui.snackbar(result["message"]);
                 },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -91,15 +89,25 @@
         }
     </script>
 </div>
-<div class="mdui-container-fluid">
-    <div class="explanation" id="explanation">
-    </div>
-    <div class="memorize-button mdui-text-center">
-        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="prev_word()">上一个</button>
-        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="next_word()">下一个</button>
-        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="mark_word(memorize_index)">收藏</button>
-        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="pass(memorize_index);next_word()">已记住</button>
-    </div>
+<div class="mdui-container-fluid explanation" id="explanation">
+</div>
+<div class="mdui-bottom-nav mdui-color-white">
+    <a onclick="prev_word()">
+        <i class="mdui-icon material-icons">navigate_before</i>
+        <label>上一个</label>
+    </a>
+    <a onclick="next_word()">
+        <i class="mdui-icon material-icons">navigate_next</i>
+        <label>下一个</label>
+    </a>
+    <a onclick="mark_word(memorize_index)">
+        <i class="mdui-icon material-icons">star</i>
+        <label>收藏</label>
+    </a>
+    <a onclick="pass(memorize_index);next_word()">
+        <i class="mdui-icon material-icons">check</i>
+        <label>已记住</label>
+    </a>
 </div>
 </body>
 </html>
