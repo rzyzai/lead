@@ -11,7 +11,7 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/lead.js"></script>
     <script type="text/javascript">
-        window.onload = init_home;
+        window.onload = init_passed;
     </script>
 </head>
 <body>
@@ -21,9 +21,9 @@
             <i class="mdui-icon material-icons mdui-text-color-black-icon">arrow_back</i>
         </a>
         <ul class="mdui-list">
-            <a class="mdui-list-item mdui-ripple mdui-list-item-active">
+            <a href="/" class="mdui-list-item mdui-ripple">
                 <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">home</i>
-                <div class="mdui-list-item-content">主页</div>
+                <div class="mdui-list-item-content mdui-text-color-black-text">主页</div>
             </a>
             <a href="memorize.html" class="mdui-list-item mdui-ripple">
                 <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">import_contacts</i>
@@ -37,10 +37,11 @@
                 <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">bookmark</i>
                 <div class="mdui-list-item-content mdui-text-color-black-text">收藏</div>
             </a>
-            <a href="passed.html" class="mdui-list-item mdui-ripple">
+            <a class="mdui-list-item mdui-ripple mdui-list-item-active">
                 <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">list</i>
-                <div class="mdui-list-item-content mdui-text-color-black-text">已记住</div>
+                <div class="mdui-list-item-content">已记住</div>
             </a>
+
             <a href="about.html" class="mdui-list-item mdui-ripple">
                 <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">info_outline</i>
                 <div class="mdui-list-item-content mdui-text-color-black-text">关于</div>
@@ -59,19 +60,54 @@
     </a>
     <span class="mdui-typo-title mdui-text-color-white" onclick="window.location='/'">Lead</span>
     <div class="mdui-toolbar-spacer"></div>
+    <form class="search-bar" id="search-form">
+        <button class="submit mdui-btn mdui-btn-icon mdui-text-color-white-icon" type="submit">
+            <i class="mdui-icon material-icons mdui-text-color-white-icon search-icon">search</i>
+        </button>
+        <input placeholder="搜索" type="text" id="search-value">
+    </form>
+    <script>
+        var search = document.getElementById("search-form");
+        search.onsubmit = function (event) {
+            var search_word = document.getElementById("search-value").value;
+            $.ajax({
+                type: 'GET',
+                url: "api/search",
+                data:
+                    {
+                        word: search_word
+                    },
+                success: function (result) {
+                    if (result["status"] == "success")
+                    {
+                        window.sessionStorage.setItem("search_result", JSON.stringify(result));
+                        window.location.href = "search.html";
+                    }
+                    else
+                        mdui.snackbar(result["message"]);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    console.log(XMLHttpRequest.status);
+                    console.log(XMLHttpRequest.readyState);
+                    console.log(textStatus);
+                }
+            });
+            event.preventDefault();
+        }
+    </script>
 </div>
 <div class="mdui-container-fluid">
-    <div class="message mdui-text-center">
-        <i class="mdui-icon material-icons mdui-p-t-4" style="font-size:4rem">multiline_chart</i>
-        <h2 >当前计划</h2>
-        <p>计划记忆 <span id="planned_word_count">n</span>个，已记忆 <span id="finished_word_count">n</span>个</p>
-        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="window.location='/memorize.html'">开始记忆</button>
-        <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text" onclick="window.location='/quiz.html'">检测</button>
+    <div class="explanation" id="passed-words">
     </div>
-    <div class="progressbar">
-    <div class="mdui-progress">
-        <div class="mdui-progress-determinate" id="progress_bar"></div>
-    </div>
+    <div class="item mdui-text-center">
+        <p>单词/短语：已记住<span id="passed_word_count">n</span>个, 共<span id="word_count">n</span>个</p></p>
+        <div class="progressbar">
+            <div class="mdui-progress">
+                <div class="mdui-progress-determinate" id="progress_bar"></div>
+            </div>
+        </div>
+        <button class="mdui-btn mdui-btn-raised mdui-color-red mdui-text-color-white-text"
+                onclick="mdui.confirm('确认清除所有记录吗？清除的记录将无法恢复。', '清除记录', clear_records, function(e){e.close();}, {confirmText: '确认', cancelText: '取消'})()">清除所有记录</button>
     </div>
 </div>
 </body>

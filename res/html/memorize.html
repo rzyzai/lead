@@ -11,7 +11,9 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/lead.js"></script>
     <script type="text/javascript">
-        window.onload = next_word;
+        window.onload = function () {
+            next_word(false);
+        };
     </script>
 </head>
 <body class="mdui-bottom-nav-fixed">
@@ -26,17 +28,23 @@
                 <div class="mdui-list-item-content mdui-text-color-black-text">主页</div>
             </a>
             <a class="mdui-list-item mdui-ripple mdui-list-item-active">
-                <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">show_chart</i>
+                <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">import_contacts</i>
                 <div class="mdui-list-item-content">记忆</div>
+            </a>
+            <a href="quiz.html" class="mdui-list-item mdui-ripple">
+                <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">spellcheck</i>
+                <div class="mdui-list-item-content mdui-text-color-black-text">检测</div>
             </a>
             <a href="marked.html" class="mdui-list-item mdui-ripple">
                 <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">bookmark</i>
                 <div class="mdui-list-item-content mdui-text-color-black-text">收藏</div>
             </a>
-            <a href="quiz.html" class="mdui-list-item mdui-ripple">
-                <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">check</i>
-                <div class="mdui-list-item-content mdui-text-color-black-text">检测</div>
+
+            <a href="passed.html" class="mdui-list-item mdui-ripple">
+                <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">list</i>
+                <div class="mdui-list-item-content mdui-text-color-black-text">已记住</div>
             </a>
+
             <a href="about.html" class="mdui-list-item mdui-ripple">
                 <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">info_outline</i>
                 <div class="mdui-list-item-content mdui-text-color-black-text">关于</div>
@@ -53,7 +61,7 @@
     <a class="mdui-btn mdui-btn-icon" href="#" mdui-drawer="{target: '#left-drawer', overlay: true}">
         <i class="mdui-icon material-icons mdui-text-color-white-icon">menu</i>
     </a>
-    <span class="mdui-typo-title mdui-text-color-white">Lead</span>
+    <span class="mdui-typo-title mdui-text-color-white" onclick="window.location='/'">Lead</span>
     <div class="mdui-toolbar-spacer"></div>
     <form class="search-bar" id="search-form">
         <button class="submit mdui-btn mdui-btn-icon mdui-text-color-white-icon" type="submit">
@@ -96,7 +104,7 @@
         <i class="mdui-icon material-icons">navigate_before</i>
         <label>上一个</label>
     </a>
-    <a onclick="next_word()">
+    <a onclick="next_word(true)">
         <i class="mdui-icon material-icons">navigate_next</i>
         <label>下一个</label>
     </a>
@@ -104,7 +112,7 @@
         <i class="mdui-icon material-icons">star</i>
         <label>收藏</label>
     </a>
-    <a onclick="pass(memorize_index);next_word()">
+    <a onclick="pass(memorize_index);next_word(true)">
         <i class="mdui-icon material-icons">check</i>
         <label>已记住</label>
     </a>

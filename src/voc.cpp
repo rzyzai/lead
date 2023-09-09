@@ -399,6 +399,10 @@ namespace lead
       ret += "美 /" + detail["usa_ph"].get<std::string>() + "/  ";
     }
     
+    ret += "<button class=\"mdui-btn mdui-ripple\">\n"
+           "  <i class=\"mdui-icon material-icons\" onclick=\"speak(&quot;" + vocabulary[index].word
+           + "&quot;)\">play_arrow</i></button>";
+    
     // Usage
     if (detail.contains("usage"))
     {
@@ -502,11 +506,15 @@ namespace lead
         similiar.insert({i, d});
       }
     }
-    
+
     for (auto &r: similiar)
     {
       ret.emplace_back(WordRef{&vocabulary[r.first], r.first});
     }
+    
+    while(ret.size() < n)
+      ret.emplace_back(at(utils::randnum<size_t>(0, vocabulary.size())));
+    
     return ret;
   }
   

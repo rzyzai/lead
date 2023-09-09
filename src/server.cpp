@@ -49,9 +49,8 @@ namespace lead
       WordRef wr;
       if (req.has_param("word_index"))
         wr = user.get_word(std::stoi(req.get_param_value("word_index")));
-      else
-        wr = user.get_random_word();
       auto quiz = user.get_quiz(wr);
+      wr = user.vocabulary.at(quiz["indexes"][quiz["answer"]].get<int>());
       res.set_content(nlohmann::json{
           {"status", "success"},
           {"word",   wr.word->word},
@@ -62,25 +61,30 @@ namespace lead
     });
     svr.Get("/api/pass", [this](const httplib::Request &req, httplib::Response &res)
     {
-      user.word_record(std::stoi(req.get_param_value("word_index"))).points = 0;
+      user.word_record(std::stoi(req.get_param_value("word_index")))->points = 0;
       res.set_content(nlohmann::json{{"status", "success"}}.dump(), "application/json");
     });
+    svr.Get("/api/renew", [this](const httplib::Request &req, httplib::Response &res)
+    {
+      user.word_record(std::stoi(req.get_param_value("word_index")))->points = planned_review_times;
+      res.set_content(nlohmann::json{{"status", "success"}}.dump(), "application/json");
+    });
+    
     svr.Get("/api/quiz_passed", [this](const httplib::Request &req, httplib::Response &res)
     {
-      auto &p = user.word_record(std::stoi(req.get_param_value("word_index"))).points;
+      auto &p = user.word_record(std::stoi(req.get_param_value("word_index")))->points;
       if (p != 0) --p;
       res.set_content(nlohmann::json{{"status", "success"}}.dump(), "application/json");
     });
     svr.Get("/api/quiz_failed", [this](const httplib::Request &req, httplib::Response &res)
     {
-      auto &p = user.word_record(std::stoi(req.get_param_value("word_index"))).points;
-      p += 3;
+      user.word_record(std::stoi(req.get_param_value("word_index")))->points += 10;
       res.set_content(nlohmann::json{{"status", "success"}}.dump(), "application/json");
     });
     svr.Get("/api/quiz_prompt", [this](const httplib::Request &req, httplib::Response &res)
     {
       size_t index = std::stoi(req.get_param_value("word_index"));
-      auto &p = user.word_record(index).points;
+      auto &p = user.word_record(index)->points;
       ++p;
       auto a = std::stoi(req.get_param_value("A_index"));
       auto b = std::stoi(req.get_param_value("B_index"));
@@ -98,9 +102,14 @@ namespace lead
       res.set_content(user.search(req.get_param_value("word")).dump(), "application/json");
     });
   
-    svr.Get("/api/get_record", [this](const httplib::Request &req, httplib::Response &res)
+    svr.Get("/api/get_marked", [this](const httplib::Request &req, httplib::Response &res)
     {
-      res.set_content(user.get_record().dump(), "application/json");
+      res.set_content(user.get_marked().dump(), "application/json");
+    });
+  
+    svr.Get("/api/get_passed", [this](const httplib::Request &req, httplib::Response &res)
+    {
+      res.set_content(user.get_passed().dump(), "application/json");
     });
   
     svr.Get("/api/get_plan", [this](const httplib::Request &req, httplib::Response &res)
@@ -138,16 +147,63 @@ namespace lead
       }
     });
   
+    svr.Get("/api/clear_records", [this](const httplib::Request &req, httplib::Response &res)
+    {
+      user.clear_records();
+      user.write_records();
+      res.set_content(nlohmann::json{{"status", "success"}}.dump(), "application/json");
+    });
+  
+    svr.Get("/api/clear_marks", [this](const httplib::Request &req, httplib::Response &res)
+    {
+      user.clear_marks();
+      user.write_records();
+      res.set_content(nlohmann::json{{"status", "success"}}.dump(), "application/json");
+    });
+  
+    svr.Get("/api/prev_memorize_word", [this](const httplib::Request &req, httplib::Response &res)
+    {
+      WordRef wr = user.prev_memorize_word();
+      if(wr.is_valid())
+      {
+        res.set_content(nlohmann::json{
+            {"status",     "success"},
+            {"word",       wr.word->word},
+            {"meaning",    wr.word->meaning},
+            {"content",    user.get_explanation(wr.index)},
+            {"word_index", wr.index}
+        }.dump(), "application/json");
+      }
+      else
+      {
+        res.set_content(nlohmann::json{
+            {"status",     "failed"},
+            {"message",  "没有上一个了"}
+        }.dump(), "application/json");
+      }
+    });
+  
+  
     svr.Get("/api/memorize_word", [this](const httplib::Request &req, httplib::Response &res)
     {
-      WordRef wr = user.memorize_word();
-      user.write_records();
+      WordRef wr;
+      if(req.has_param("next") && req.get_param_value("next") == "true")
+      {
+        if(auto &p = user.word_record(user.curr_memorize_word().index)->points; p != 0)
+          --p;
+        wr = user.get_memorize_word();
+        user.write_records();
+      }
+      else
+      {
+        wr = user.curr_memorize_word();
+      }
       res.set_content(nlohmann::json{
-          {"status", "success"},
-          {"word",   wr.word->word},
-          {"meaning",   wr.word->meaning},
-          {"content",   user.get_explanation(wr.index)},
-          {"word_index",  wr.index}
+          {"status",     "success"},
+          {"word",       wr.word->word},
+          {"meaning",    wr.word->meaning},
+          {"content",    user.get_explanation(wr.index)},
+          {"word_index", wr.index}
       }.dump(), "application/json");
     });
     

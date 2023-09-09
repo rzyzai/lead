@@ -6,8 +6,6 @@ let quiz_prompt_data = null;
 let quiz_prompted = false;
 let quiz_prompt_panel_isopen = [false, false, false, false];
 
-let memorize_data_list = [];
-let memorize_data_list_pos = 0;
 let memorize_word = "";
 let memorize_index = 0;
 let memorize_meaning = "";
@@ -28,6 +26,65 @@ function init_home()
                     $("#planned_word_count").html(result["planned_word_count"]);
                 }
                 $("#progress_bar").attr('style', 'width:' + (result["finished_word_count"] / result["planned_word_count"]) * 100 + '%;');
+            }
+            else
+            {
+                mdui.snackbar(result["message"]);
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            console.log(XMLHttpRequest.status);
+            console.log(XMLHttpRequest.readyState);
+            console.log(textStatus);
+        }
+    });
+}
+function init_marked()
+{
+    $.ajax({
+        type: 'GET',
+        url: "api/get_marked",
+        success: function (result) {
+            if (result["status"] == "success") {
+                var content = '<div class="mdui-panel" mdui-panel>';
+                for (let i = result["marked_words"].length - 1; i >= 0;i--) {
+                    content += marked_explanation_panel(result["marked_words"][i]);
+                }
+                content += '</div>'
+                $("#marked-words").html(content);
+                mdui.mutation();
+            }
+            else
+            {
+                mdui.snackbar(result["message"]);
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            console.log(XMLHttpRequest.status);
+            console.log(XMLHttpRequest.readyState);
+            console.log(textStatus);
+        }
+    });
+}
+
+function init_passed()
+{
+    $.ajax({
+        type: 'GET',
+        url: "api/get_passed",
+        success: function (result) {
+            if (result["status"] == "success") {
+                $("#passed_word_count").html(result["passed_word_count"]);
+                $("#word_count").html(result["word_count"]);
+                $("#progress_bar").attr('style', 'width:' + (result["passed_word_count"] / result["word_count"]) * 100 + '%;')
+
+                var content = '<div class="mdui-panel" mdui-panel>';
+                for (let i = result["passed_words"].length - 1; i >= 0;i--) {
+                    content += passed_explanation_panel(result["passed_words"][i]);
+                }
+                content += '</div>'
+                $("#passed-words").html(content);
+                mdui.mutation();
             }
             else
             {
@@ -74,49 +131,55 @@ function save_quiz_prompt_panel_status()
     quiz_prompt_panel_isopen[3] = panels[3].classList.length > 1;
 }
 
-function update_memorize_data()
+function update_memorize_data(result)
 {
-    memorize_word = memorize_data_list[memorize_data_list_pos]["word"];
-    memorize_index = memorize_data_list[memorize_data_list_pos]["word_index"];
-    memorize_meaning = memorize_data_list[memorize_data_list_pos]["meaning"];
+    memorize_word = result["word"];
+    memorize_index = result["word_index"];
+    memorize_meaning = result["meaning"];
     var content = '<div class="mdui-panel" mdui-panel>'
-        + get_explanation_panel(memorize_word, memorize_meaning,
-            memorize_data_list[memorize_data_list_pos]["content"]) + '</div>'
+        + get_explanation_panel(memorize_word, memorize_meaning, result["content"]) + '</div>'
     $("#explanation").html(content);
 }
 
 function prev_word(){
-    if (memorize_data_list_pos == 0) {
-        mdui.snackbar("没有上一个了");
-    } else {
-        memorize_data_list_pos--;
-        update_memorize_data();
-    }
+    $.ajax({
+        type: 'GET',
+        url: "api/prev_memorize_word",
+        success: function (result) {
+            if(result["status"] == "success")
+                update_memorize_data(result);
+            else
+                mdui.snackbar(result["message"]);
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            console.log(XMLHttpRequest.status);
+            console.log(XMLHttpRequest.readyState);
+            console.log(textStatus);
+        }
+    });
 }
 
-function next_word(){
-    if(memorize_data_list.length != 0)
-        memorize_data_list_pos++;
-    if (memorize_data_list_pos >= memorize_data_list.length)
-    {
-        $.ajax({
-            type: 'GET',
-            url: "api/memorize_word",
-            success: function (result) {
-                memorize_data_list.push(result)
-                update_memorize_data();
+function next_word(next) {
+    next = typeof next !== 'undefined' ? next : false;
+    $.ajax({
+        type: 'GET',
+        url: "api/memorize_word",
+        data:
+            {
+                next: next
             },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                console.log(XMLHttpRequest.status);
-                console.log(XMLHttpRequest.readyState);
-                console.log(textStatus);
-            }
-        });
-    }
-    else
-    {
-        update_memorize_data();
-    }
+        success: function (result) {
+            if (result["status"] == "success")
+                update_memorize_data(result);
+            else
+                mdui.snackbar(result["message"]);
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            console.log(XMLHttpRequest.status);
+            console.log(XMLHttpRequest.readyState);
+            console.log(textStatus);
+        }
+    });
 }
 
 function mark_word(word_index)
@@ -308,13 +371,28 @@ function search_explanation_panel(words, pos) {
 }
 
 
-function record_explanation_panel(word) {
+function marked_explanation_panel(word) {
     return get_explanation_panel(word["word"],
         word["meaning"],
         word["explanation"],
         '<button class=\"mdui-btn mdui-ripple\" onclick=\"unmark_word('
         + word["word_index"] + ');$(this).parent().parent().parent().fadeTo(\'normal\', 0.01, function(){$(this).slideUp(\'normal\', function() {$(this).remove();});});;\">' +
         '<i class="mdui-icon material-icons">delete</i>取消收藏</button>', false);
+}
+
+function passed_explanation_panel(word) {
+    var actions = '<button class=\"mdui-btn mdui-ripple\" onclick=\"renew('
+        + word["word_index"] + ');$(this).parent().parent().parent().' +
+        'fadeTo(\'normal\', 0.01, function(){$(this).slideUp(\'normal\', function() {$(this).remove();});});' +
+        'var cnt = parseInt($(\'#passed_word_count\')[0].innerText) - 1;\n' +
+        'var width = (cnt / parseInt($(\'#word_count\')[0].innerText)) * 100 + \'%\';' +
+        '$(\'#progress_bar\').attr(\'style\', \'width:\' + width);' +
+        '$(\'#passed_word_count\').html(cnt);\">' +
+        '<i class="mdui-icon material-icons">replay</i>重新背</button>';
+    return get_explanation_panel(word["word"],
+        word["meaning"],
+        word["explanation"],
+        actions, false);
 }
 
 
@@ -368,26 +446,64 @@ function pass(word_index) {
     });
 }
 
-function get_record()
+function renew(word_index) {
+    $.ajax({
+        type: 'GET',
+        url: "api/renew",
+        data:
+            {
+                word_index: word_index,
+            },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            console.log(XMLHttpRequest.status);
+            console.log(XMLHttpRequest.readyState);
+            console.log(textStatus);
+        }
+    });
+}
+
+function speak(word)
+{
+    var url = "https://api.oick.cn/txt/apiz.php?spd=5&text=" + encodeURI(word.replaceAll(' ', '-'));
+    var n = new Audio(url);
+    n.play();
+}
+
+function clear_records()
 {
     $.ajax({
         type: 'GET',
-        url: "api/get_record",
+        url: "api/clear_records",
         success: function (result) {
+            quiz_prompt_data = result;
             if (result["status"] == "success") {
-                var content = '<div class="mdui-panel" mdui-panel>';
-                for (let i = result["marked_words"].length - 1; i >= 0;i--) {
-                    content += record_explanation_panel(result["marked_words"][i]);
-                }
-                content += '</div>'
-                $("#marked-words").html(content)
-                $("#passed_word_count").html(result["passed_word_count"]);
-                $("#word_count").html(result["word_count"]);
-                $("#progress_bar").attr('style', 'width:' + (result["passed_word_count"] / result["word_count"]) * 100 + '%;')
-                mdui.mutation();
+                init_passed();
+                mdui.snackbar("已清除所有记录");
             }
-            else
-            {
+            else{
+                mdui.snackbar(result["message"]);
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            console.log(XMLHttpRequest.status);
+            console.log(XMLHttpRequest.readyState);
+            console.log(textStatus);
+        }
+    });
+}
+
+function clear_marks()
+{
+    $.ajax({
+        type: 'GET',
+        url: "api/clear_marks",
+        success: function (result) {
+            quiz_prompt_data = result;
+            if (result["status"] == "success") {
+                init_marked();
+                mdui.snackbar("已清除所有收藏");
+            }
+            else{
                 mdui.snackbar(result["message"]);
             }
         },

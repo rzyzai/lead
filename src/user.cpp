@@ -60,13 +60,27 @@ namespace lead
       else
         word_records = record["record"].get<std::vector<WordRecord>>();
       marked_words = record["marked_words"].get<std::vector<size_t>>();
+      plan_pos = record["plan_pos"].get<size_t>();
     }
     catch(...)
     {
       std::cerr << "Exception occurred when parsing 'record.json'. Ignored '" << record_path << "'." << std::endl;
       word_records.insert(word_records.end(), vocabulary.size(), {});
+      plan_pos = 0;
     }
     record_file.close();
+  }
+  
+  void User::clear_records()
+  {
+    word_records.clear();
+    word_records.insert(word_records.end(), vocabulary.size(), {});
+    plan_pos = 0;
+  }
+  
+  void User::clear_marks()
+  {
+    marked_words.clear();
   }
   
   WordRef User::get_word(size_t w) const
@@ -76,20 +90,12 @@ namespace lead
   
   WordRef User::get_random_word() const
   {
-    std::vector<size_t> candidate;
-    for (size_t i = 0; i < word_records.size(); ++i)
-    {
-      if (word_records[i].points != 0)
-        candidate.emplace_back(i);
-    }
-    if (candidate.empty()) return {};
-    size_t index = candidate[utils::randnum<size_t>(0, candidate.size())];
-    return vocabulary.at(index);
+    return vocabulary.at(utils::randnum<size_t>(0, vocabulary.size()));
   }
   
-  WordRecord &User::word_record(size_t w)
+  WordRecord* User::word_record(size_t w)
   {
-    return word_records[w];
+    return &word_records[w];
   }
   
   std::string User::get_explanation(size_t index) const
@@ -97,18 +103,48 @@ namespace lead
     return vocabulary.get_explanation(index);
   }
   
-  WordRef User::memorize_word()
+  
+  WordRef User::curr_memorize_word() const
   {
-    return get_random_word();
+    return vocabulary.at(plan_pos);
+  }
+  
+  WordRef User::get_memorize_word()
+  {
+    ++plan_pos;
+    if(plan_pos >= vocabulary.size()) plan_pos = 0;
+    while(word_records[plan_pos].points == 0 && plan_pos < word_records.size()) ++plan_pos;
+    return vocabulary.at(plan_pos);
+  }
+  
+  WordRef User::prev_memorize_word()
+  {
+    if (plan_pos != 0)
+    {
+      --plan_pos;
+      while(word_records[plan_pos].points == 0 && plan_pos != 0) --plan_pos;
+      return vocabulary.at(plan_pos);
+    }
+    return {};
   }
   
   nlohmann::json User::get_quiz(WordRef wr) const
   {
-    auto words = vocabulary.get_similiar_words(wr, 3, [this](WordRef wr) -> bool
+    if(!wr.is_valid())
     {
-      if (word_records[wr.index].points == 0) return false;
-      return true;
-    });
+      std::vector<size_t> c;
+      for(size_t i = 0; i < word_records.size(); ++i)
+      {
+        if (word_records[i].points < planned_review_times && word_records[i].points > 0)
+          c.emplace_back(i);
+      }
+      if(!c.empty())
+        wr = vocabulary.at(c[utils::randnum<size_t>(0, c.size())]);
+      else
+        wr = get_random_word();
+    }
+    
+    auto words = vocabulary.get_similiar_words(wr, 3, [](WordRef wr) -> bool{return true;});
     std::vector<std::string> opt{"A", "B", "C", "D"};
     std::random_device rd;
     std::mt19937 g(rd());
@@ -198,42 +234,62 @@ namespace lead
     return std::find(marked_words.begin(), marked_words.end(), index) != marked_words.end();
   }
   
-  nlohmann::json User::get_record() const
+  nlohmann::json User::get_marked() const
   {
-    size_t passed = 0;
-    for (size_t i = 0; i < word_records.size(); ++i)
-    {
-      if (word_records[i].points == 0)
-        ++passed;
-    }
-  
     std::vector<nlohmann::json> ret_marked_words;
     for (auto &r: marked_words)
     {
       WordRef word = vocabulary.at(r);
       ret_marked_words.emplace_back(nlohmann::json{{"word",        word.word->word},
-                                                   {"word_index", word.index},
+                                                   {"word_index",  word.index},
                                                    {"meaning",     word.word->meaning},
                                                    {"explanation", get_explanation(r)}});
     }
     
     return {{"status",            "success"},
-            {"passed_word_count", passed},
-            {"word_count",        word_records.size()},
             {"marked_words", ret_marked_words}};
+  }
+  
+  nlohmann::json User::get_passed() const
+  {
+    std::vector<nlohmann::json> ret_passed_words;
+    for (size_t i = 0; i < word_records.size(); ++i)
+    {
+      if (word_records[i].points == 0)
+      {
+        auto word = vocabulary.at(i);
+        ret_passed_words.emplace_back(nlohmann::json{{"word",        word.word->word},
+                                                     {"word_index",  word.index},
+                                                     {"meaning",     word.word->meaning},
+                                                     {"explanation", get_explanation(i)}});
+      }
+    }
+    
+    return {{"status",            "success"},
+            {"passed_word_count", ret_passed_words.size()},
+            {"word_count",        vocabulary.size()},
+            {"passed_words",      ret_passed_words}};
   }
   
   nlohmann::json User::get_plan() const
   {
+    size_t passed = 0;
+    for (size_t i = 0; i < vocabulary.size(); ++i)
+    {
+      if (word_records[i].points == 0)
+        ++passed;
+    }
     return {{"status",              "success"},
-            {"finished_word_count", 0},
-            {"planned_word_count",  10}};
+            {"finished_word_count", passed},
+            {"planned_word_count",  vocabulary.size()}};
   }
   
   void User::write_records()
   {
     std::fstream record_file(record_path, std::ios::out | std::ios::trunc);
-    record_file << nlohmann::json{{"record", word_records}, {"marked_words", marked_words}}.dump();
+    record_file << nlohmann::json{{"record", word_records},
+                                  {"marked_words", marked_words},
+                                  {"plan_pos", plan_pos}}.dump();
     record_file.close();
   }
 }
