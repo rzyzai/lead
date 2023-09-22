@@ -11,7 +11,10 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/lead.js"></script>
     <script type="text/javascript">
-        window.onload = init_home;
+        window.onload = function () {
+            init_toolbar();
+            init_home();
+        };
     </script>
 </head>
 <body>
@@ -59,8 +62,26 @@
     </a>
     <span class="mdui-typo-title mdui-text-color-white" onclick="window.location='/'">Lead</span>
     <div class="mdui-toolbar-spacer"></div>
+
+    <button class="mdui-btn mdui-ripple mdui-color-theme-accent mdui-btn-icon mdui-text-color-white-icon"
+            mdui-dialog="{target: '#searchDialog', history: false, modal: true}">
+        <i class="mdui-icon material-icons mdui-text-color-white-icon">search</i></button>
+    <div class="mdui-dialog dialog-interface" id="searchDialog">
+        <button class="mdui-btn mdui-btn-icon" mdui-dialog-close><i class="mdui-icon material-icons">close</i></button>
+        <div class="mdui-dialog-title mdui-color-blue-700">搜索</div>
+        <form id="search-form">
+            <div class="mdui-textfield mdui-textfield-floating-label">
+                <label class="mdui-textfield-label">单词或释义</label>
+                <input id="search-value" class="mdui-textfield-input" required />
+                <div class="mdui-textfield-error">输入不能为空</div>
+            </div>
+            <div class="actions mdui-float-right">
+                <button type="submit" class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white">搜索</button>
+            </div>
+        </form>
+    </div>
 </div>
-<div class="mdui-container-fluid">
+<div class="mdui-container">
     <div class="message mdui-text-center">
         <i class="mdui-icon material-icons mdui-p-t-4" style="font-size:4rem">multiline_chart</i>
         <h2 >当前计划</h2>

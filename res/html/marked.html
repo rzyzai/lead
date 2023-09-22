@@ -11,7 +11,10 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/lead.js"></script>
     <script type="text/javascript">
-        window.onload = init_marked;
+        window.onload = function () {
+            init_toolbar();
+            init_marked();
+        };
     </script>
 </head>
 <body>
@@ -59,46 +62,29 @@
     </a>
     <span class="mdui-typo-title mdui-text-color-white" onclick="window.location='/'">Lead</span>
     <div class="mdui-toolbar-spacer"></div>
-    <form class="search-bar" id="search-form">
-        <button class="submit mdui-btn mdui-btn-icon mdui-text-color-white-icon" type="submit">
-            <i class="mdui-icon material-icons mdui-text-color-white-icon search-icon">search</i>
-        </button>
-        <input placeholder="搜索" type="text" id="search-value">
-    </form>
-    <script>
-        var search = document.getElementById("search-form");
-        search.onsubmit = function (event) {
-            var search_word = document.getElementById("search-value").value;
-            $.ajax({
-                type: 'GET',
-                url: "api/search",
-                data:
-                    {
-                        word: search_word
-                    },
-                success: function (result) {
-                    if (result["status"] == "success")
-                    {
-                        window.sessionStorage.setItem("search_result", JSON.stringify(result));
-                        window.location.href = "search.html";
-                    }
-                    else
-                        mdui.snackbar(result["message"]);
-                },
-                error: function (XMLHttpRequest, textStatus, errorThrown) {
-                    console.log(XMLHttpRequest.status);
-                    console.log(XMLHttpRequest.readyState);
-                    console.log(textStatus);
-                }
-            });
-            event.preventDefault();
-        }
-    </script>
-</div>
-<div class="mdui-container-fluid">
-    <div class="explanation" id="marked-words">
+
+    <button class="mdui-btn mdui-ripple mdui-color-theme-accent mdui-btn-icon mdui-text-color-white-icon"
+            mdui-dialog="{target: '#searchDialog', history: false, modal: true}">
+        <i class="mdui-icon material-icons mdui-text-color-white-icon">search</i></button>
+    <div class="mdui-dialog dialog-interface" id="searchDialog">
+        <button class="mdui-btn mdui-btn-icon" mdui-dialog-close><i class="mdui-icon material-icons">close</i></button>
+        <div class="mdui-dialog-title mdui-color-blue-700">搜索</div>
+        <form id="search-form">
+            <div class="mdui-textfield mdui-textfield-floating-label">
+                <label class="mdui-textfield-label">单词或释义</label>
+                <input id="search-value" class="mdui-textfield-input" required />
+                <div class="mdui-textfield-error">输入不能为空</div>
+            </div>
+            <div class="actions mdui-float-right">
+                <button type="submit" class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white">搜索</button>
+            </div>
+        </form>
     </div>
-    <div class="item mdui-text-center">
+</div>
+<div class="mdui-container">
+    <div class="explanation mdui-p-t-2" id="marked-words">
+    </div>
+    <div class="item mdui-text-center mdui-p-t-2">
         <button class="mdui-btn mdui-btn-raised mdui-color-red mdui-text-color-white-text"
                 onclick="mdui.confirm('确认清除所有收藏吗？清除的收藏将无法恢复。', '清除收藏', clear_marks, function(e){e.close();}, {confirmText: '确认', cancelText: '取消'})()">清除所有收藏</button>
     </div>

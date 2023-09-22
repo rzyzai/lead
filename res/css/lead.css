@@ -12,7 +12,7 @@ body {
     font-family: "Google Sans";
 }
 
-.mdui-btn, .mdui-fab {
+.mdui-btn {
     position: relative;
     display: inline-block;
     box-sizing: border-box;
@@ -45,15 +45,15 @@ body {
     -webkit-user-drag: none
 }
 
-.mdui-btn:hover, .mdui-fab:hover {
+.mdui-btn:hover {
     background-color: rgba(0, 0, 0, .1)
 }
 
-.mdui-btn:not(.mdui-ripple):active, .mdui-fab:not(.mdui-ripple):active {
+.mdui-btn:not(.mdui-ripple):active {
     background-color: rgba(0, 0, 0, .165)
 }
 
-.mdui-btn:not(.mdui-ripple)[class*=mdui-color-]:active, .mdui-fab:not(.mdui-ripple)[class*=mdui-color-]:active {
+.mdui-btn:not(.mdui-ripple)[class*=mdui-color-]:active {
     opacity: .76
 }
 
@@ -171,75 +171,6 @@ input.mdui-btn[type=submit] {
     min-width: 32px
 }
 
-.dialog-interface {
-    max-width: 448px;
-    overflow-y: auto;
-}
-
-.dialog-interface > [mdui-dialog-close] {
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    display: block;
-    color: white;
-}
-
-.dialog-interface > .mdui-dialog-title {
-    margin-bottom: 24px;
-    padding: 146px 40px 28px;
-}
-
-.dialog-interface > form {
-    padding: 0 40px 62px;
-}
-
-.dialog-interface .actions {
-    margin-top: 24px;
-    display: flex;
-}
-
-.dialog-interface .actions > .divider {
-    flex: 1 1;
-}
-
-.dialog-interface .actions > .more-options {
-    margin-left: -16px;
-}
-
-@media (max-width: 599.9px) {
-    .dialog-interface {
-        position: fixed !important;
-        top: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
-        max-width: none !important;
-        height: 100% !important;
-        max-height: none !important;
-        margin: 0 !important;
-        border-radius: 0 !important;
-    }
-
-    .dialog-interface > [mdui-dialog-close] {
-        top: 10px;
-        left: 8px;
-    }
-
-    .dialog-interface > .mdui-dialog-title {
-        padding: 10px 16px 10px 52px;
-        line-height: 36px;
-    }
-
-    .dialog-interface > form {
-        padding: 0 24px 24px;
-    }
-
-    .dialog-interface .actions {
-        margin-top: 14px;
-    }
-}
-
 .copyright {
     box-sizing: border-box;
     width: 100%;
@@ -336,52 +267,6 @@ input.mdui-btn[type=submit] {
     text-decoration: underline
 }
 
-.search-bar {
-    display: flex;
-    align-items: center;
-    width: 30%;
-    max-width: 722px;
-    height: 46px;
-    margin-left: 30px;
-    background-color: #3B8AD9;
-    border-radius: 8px;
-    transition-duration: .18s;
-    transition-property: background-color, box-shadow
-}
-
-.search-bar.focus {
-    background-color: #fff;
-    box-shadow: 0 1px 1px 0 rgba(65, 69, 73, .3), 0 1px 3px 1px rgba(65, 69, 73, .15)
-}
-
-.search-bar input::placeholder {
-    color: #8DBBE9;
-}
-
-.search-bar input {
-    color: #FFFFFF;
-}
-
-.mdui-theme-layout-dark .search-bar {
-    background-color: #424242 !important
-}
-
-.mdui-theme-layout-dark .search-bar input {
-    color: #fff
-}
-
-.mdui-theme-layout-dark .search-bar .focus {
-    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, .6), 0 6px 10px 4px rgba(0, 0, 0, .3)
-}
-
-.search-bar input {
-    flex: 1;
-    height: 46px;
-    background-color: transparent;
-    border: none;
-    outline: none
-}
-
 .mdui-overlay {
     position: fixed;
     top: -5000px;
@@ -450,10 +335,8 @@ input.mdui-btn[type=submit] {
 
 .explanation
 {
-    padding-top: 16px;
-    padding-bottom: 16px;
-    padding-left: 8px;
-    padding-right: 8px;
+    padding-left: 16px;
+    padding-right: 16px;
     font-size: 16px;
 }
 
@@ -463,6 +346,7 @@ input.mdui-btn[type=submit] {
 
 .example
 {
+    font-family: 'Times New Roman';
     font-size: 16px;
 }
 
@@ -495,4 +379,88 @@ li::marker
 {
     padding-top: 8px;
     padding-bottom: 16px;
+}
+
+.dialog-interface {
+    max-width: 448px;
+    overflow-y: auto;
+}
+.dialog-interface > [mdui-dialog-close] {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    display: block;
+    color: white;
+}
+.dialog-interface > .mdui-dialog-title {
+    margin-bottom: 24px;
+    padding: 146px 40px 28px;
+}
+.dialog-interface > form {
+    padding: 0 40px 62px;
+}
+.dialog-interface .actions {
+    margin-top: 24px;
+    display: flex;
+}
+.dialog-interface .actions > .divider {
+    flex: 1 1;
+}
+.dialog-interface .actions > .more-options {
+    margin-left: -16px;
+}
+@media (max-width: 599.9px) {
+    .dialog-interface {
+        position: fixed!important;
+        top: 0!important;
+        right: 0!important;
+        bottom: 0!important;
+        left: 0!important;
+        width: 100%!important;
+        max-width: none!important;
+        height: 100%!important;
+        max-height: none!important;
+        margin: 0!important;
+        border-radius: 0!important;
+    }
+    .dialog-interface > [mdui-dialog-close] {
+        top: 10px;
+        left: 8px;
+    }
+    .dialog-interface > .mdui-dialog-title {
+        padding: 10px 16px 10px 52px;
+        line-height: 36px;
+    }
+    .dialog-interface > form {
+        padding: 0 24px 24px;
+    }
+    .dialog-interface .actions {
+        margin-top: 14px;
+    }
+}
+
+.locate-word
+{
+    position: fixed;
+    right: 16px;
+    bottom: 72px;
+}
+
+.swipeleft
+{
+    position: fixed;
+    right: 16px;
+    top: 50%;
+}
+
+.swiperight
+{
+    position: fixed;
+    left: 16px;
+    top: 50%;
+}
+
+#word-preview
+{
+    font-size: 20px;
 }

@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
              "icons/material-icons/LICENSE.txt", "icons/material-icons/MaterialIcons-Regular.ijmap",
              "icons/material-icons/MaterialIcons-Regular.woff", "icons/material-icons/MaterialIcons-Regular.woff2",
              "js/jquery.min.js", "js/lead.js", "js/mdui.esm.js", "js/mdui.esm.js.map", "js/mdui.js", "js/mdui.js.map",
-             "js/mdui.min.js", "js/mdui.min.js.map", "records/record.json", "voc/voc.json");
+             "js/mdui.min.js", "js/mdui.min.js.map", "js/hammer.min.js", "records/record.json", "voc/voc.json");
   lead::Server svr(argv[1], std::stoi(argv[2]), res);
   svr.run();
   return 0;

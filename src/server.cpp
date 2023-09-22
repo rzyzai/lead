@@ -53,9 +53,8 @@ namespace lead
       wr = user.vocabulary.at(quiz["indexes"][quiz["answer"]].get<int>());
       res.set_content(nlohmann::json{
           {"status", "success"},
-          {"word",   wr.word->word},
+          {"word",   wr},
           {"quiz",   quiz},
-          {"word_index",  wr.index}
       }.dump(), "application/json");
       user.write_records();
     });
@@ -112,6 +111,18 @@ namespace lead
       res.set_content(user.get_passed().dump(), "application/json");
     });
   
+    svr.Get("/api/get_explanation", [this](const httplib::Request &req, httplib::Response &res)
+    {
+      auto i = std::stoi(req.get_param_value("word_index"));
+      res.set_content(nlohmann::json{{"status", "success"}, {"explanation", user.get_explanation(i)}}.dump(), "application/json");
+    });
+  
+    svr.Get("/api/get_word", [this](const httplib::Request &req, httplib::Response &res)
+    {
+      auto i = std::stoi(req.get_param_value("word_index"));
+      res.set_content(nlohmann::json{{"status", "success"}, {"word", user.get_word(i).word->word}}.dump(), "application/json");
+    });
+    
     svr.Get("/api/get_plan", [this](const httplib::Request &req, httplib::Response &res)
     {
       res.set_content(user.get_plan().dump(), "application/json");
@@ -168,10 +179,8 @@ namespace lead
       {
         res.set_content(nlohmann::json{
             {"status",     "success"},
-            {"word",       wr.word->word},
-            {"meaning",    wr.word->meaning},
+            {"word",       wr},
             {"content",    user.get_explanation(wr.index)},
-            {"word_index", wr.index}
         }.dump(), "application/json");
       }
       else
@@ -179,6 +188,28 @@ namespace lead
         res.set_content(nlohmann::json{
             {"status",     "failed"},
             {"message",  "没有上一个了"}
+        }.dump(), "application/json");
+      }
+    });
+  
+    svr.Get("/api/set_memorize_word", [this](const httplib::Request &req, httplib::Response &res)
+    {
+      auto i = std::stoi(req.get_param_value("word_index"));
+      WordRef wr = user.set_memorize_word(i);
+      if(wr.is_valid())
+      {
+        user.write_records();
+        res.set_content(nlohmann::json{
+            {"status",     "success"},
+            {"word",       wr},
+            {"content",    user.get_explanation(wr.index)},
+        }.dump(), "application/json");
+      }
+      else
+      {
+        res.set_content(nlohmann::json{
+            {"status",     "failed"},
+            {"message",     "错误的 word_index"}
         }.dump(), "application/json");
       }
     });
@@ -192,6 +223,14 @@ namespace lead
         if(auto &p = user.word_record(user.curr_memorize_word().index)->points; p != 0)
           --p;
         wr = user.get_memorize_word();
+        if(!wr.is_valid())
+        {
+          res.set_content(nlohmann::json{
+              {"status",     "failed"},
+              {"message",    "没有下一个了"},
+          }.dump(), "application/json");
+          return;
+        }
         user.write_records();
       }
       else
@@ -200,10 +239,8 @@ namespace lead
       }
       res.set_content(nlohmann::json{
           {"status",     "success"},
-          {"word",       wr.word->word},
-          {"meaning",    wr.word->meaning},
+          {"word",       wr},
           {"content",    user.get_explanation(wr.index)},
-          {"word_index", wr.index}
       }.dump(), "application/json");
     });
     

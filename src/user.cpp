@@ -26,6 +26,7 @@
 #include <vector>
 #include <filesystem>
 #include <map>
+#include <thread>
 
 namespace lead
 {
@@ -97,12 +98,11 @@ namespace lead
   {
     return &word_records[w];
   }
-  
+
   std::string User::get_explanation(size_t index) const
   {
     return vocabulary.get_explanation(index);
   }
-  
   
   WordRef User::curr_memorize_word() const
   {
@@ -111,8 +111,8 @@ namespace lead
   
   WordRef User::get_memorize_word()
   {
+    if(plan_pos + 1 >= vocabulary.size()) return {};
     ++plan_pos;
-    if(plan_pos >= vocabulary.size()) plan_pos = 0;
     while(word_records[plan_pos].points == 0 && plan_pos < word_records.size()) ++plan_pos;
     return vocabulary.at(plan_pos);
   }
@@ -127,6 +127,16 @@ namespace lead
       return vocabulary.at(plan_pos);
     }
     return {};
+  }
+  
+  WordRef User::set_memorize_word(size_t index)
+  {
+    auto wr = vocabulary.at(index);
+    if(wr.is_valid())
+    {
+      plan_pos = index;
+    }
+    return wr;
   }
   
   nlohmann::json User::get_quiz(WordRef wr) const
@@ -186,10 +196,7 @@ namespace lead
     for (auto &r: wr)
     {
       WordRef word = vocabulary.at(r);
-      words.emplace_back(nlohmann::json{{"word", word.word->word},
-                                        {"word_index", r},
-                                        {"meaning", word.word->meaning},
-                                        {"explanation", get_explanation(r)},
+      words.emplace_back(nlohmann::json{{"word", word},
                                         {"is_marked", is_marked(r)}});
     }
     if (!wr.empty())
@@ -230,10 +237,7 @@ namespace lead
     for (auto &r: marked_words)
     {
       WordRef word = vocabulary.at(r);
-      ret_marked_words.emplace_back(nlohmann::json{{"word",        word.word->word},
-                                                   {"word_index",  word.index},
-                                                   {"meaning",     word.word->meaning},
-                                                   {"explanation", get_explanation(r)}});
+      ret_marked_words.emplace_back(nlohmann::json{{"word",        word}});
     }
     
     return {{"status",            "success"},
@@ -248,10 +252,7 @@ namespace lead
       if (word_records[i].points == 0)
       {
         auto word = vocabulary.at(i);
-        ret_passed_words.emplace_back(nlohmann::json{{"word",        word.word->word},
-                                                     {"word_index",  word.index},
-                                                     {"meaning",     word.word->meaning},
-                                                     {"explanation", get_explanation(i)}});
+        ret_passed_words.emplace_back(nlohmann::json{{"word",        word}});
       }
     }
     

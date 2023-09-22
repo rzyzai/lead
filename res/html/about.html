@@ -10,6 +10,11 @@
     <script src="js/mdui.min.js"></script>
     <script src="js/jquery.min.js"></script>
     <script src="js/lead.js"></script>
+    <script type="text/javascript">
+        window.onload = function () {
+            init_toolbar();
+        };
+    </script>
 </head>
 <body>
 <div class="mdui-toolbar mdui-color-blue-700 mdui-shadow-5">
@@ -56,8 +61,26 @@
     </a>
     <span class="mdui-typo-title mdui-text-color-white" onclick="window.location='/'">Lead</span>
     <div class="mdui-toolbar-spacer"></div>
+
+    <button class="mdui-btn mdui-ripple mdui-color-theme-accent mdui-btn-icon mdui-text-color-white-icon"
+            mdui-dialog="{target: '#searchDialog', history: false, modal: true}">
+        <i class="mdui-icon material-icons mdui-text-color-white-icon">search</i></button>
+    <div class="mdui-dialog dialog-interface" id="searchDialog">
+        <button class="mdui-btn mdui-btn-icon" mdui-dialog-close><i class="mdui-icon material-icons">close</i></button>
+        <div class="mdui-dialog-title mdui-color-blue-700">搜索</div>
+        <form id="search-form">
+            <div class="mdui-textfield mdui-textfield-floating-label">
+                <label class="mdui-textfield-label">单词或释义</label>
+                <input id="search-value" class="mdui-textfield-input" required />
+                <div class="mdui-textfield-error">输入不能为空</div>
+            </div>
+            <div class="actions mdui-float-right">
+                <button type="submit" class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white">搜索</button>
+            </div>
+        </form>
+    </div>
 </div>
-<div class="mdui-container-fluid mdui-text-center">
+<div class="mdui-container mdui-text-center">
     <div class="banner">
         <h1>Lead</h1>
         <div class="meta">一个简约的背单词网页</div>
@@ -76,9 +99,15 @@
         <span class="mdui-chip-icon mdui-color-indigo">
             <i class="mdui-icon material-icons">developer_mode</i>
         </span>
-            <span class="mdui-chip-title" onclick="window.location.href='https://rzyzai.tech'">日照一中AI社</span>
+            <span class="mdui-chip-title" onclick="window.location.href='https://github.com/caozhanhao'">Cao, Z.-H.</span>
         </div>
         <h3>测试</h3>
+        <div class="mdui-chip">
+        <span class="mdui-chip-icon mdui-color-blue">
+            <i class="mdui-icon material-icons">bug_report</i>
+        </span>
+            <span class="mdui-chip-title">Sun, Q.</span>
+        </div>
         <div class="mdui-chip">
         <span class="mdui-chip-icon mdui-color-blue">
             <i class="mdui-icon material-icons">bug_report</i>

@@ -25,6 +25,7 @@
 #include <tuple>
 #include <string>
 #include <vector>
+#include <deque>
 #include <set>
 #include <functional>
 
@@ -38,8 +39,9 @@ namespace lead
   
   void to_json(nlohmann::json &j, const lead::WordRef &p)
   {
-    j = nlohmann::json{{"word",  *p.word},
-                       {"index", p.index}};
+    j = nlohmann::json{{"word",  p.word->word},
+                       {"word_index", p.index},
+                       {"meaning", p.word->meaning}};
   }
   
   void VOC::load(const std::vector<Word> &word)
@@ -118,10 +120,12 @@ namespace lead
   
   void parse_note(const nlohmann::json &data, std::string &ret)
   {
+    ret += "<span class=\"notes\">注：" + data["note"].get<std::string>();
     // Examples
     try_parse_examples(data, ret);
     // Sentential Patterns
     try_parse_patterns(data, ret);
+    ret += "</span>";
   }
   
   void parse_discrimination(const nlohmann::json &data, std::string &ret)
@@ -339,22 +343,34 @@ namespace lead
   
   void try_parse_patterns(const nlohmann::json &data, std::string &ret)
   {
-    parse_list(data, ret, "ul", "patterns", parse_pattern);
+    if (data.contains("patterns"))
+    {
+      parse_list(data, ret, "ul", "patterns", parse_pattern);
+    }
   }
   
   void try_parse_notes(const nlohmann::json &data, std::string &ret)
   {
-    parse_list(data, ret, "ul", "notes", parse_note);
+    if (data.contains("notes"))
+    {
+      parse_list(data, ret, "ul", "notes", parse_note);
+    }
   }
   
   void try_parse_discriminations(const nlohmann::json &data, std::string &ret)
   {
-    parse_list(data, ret, "ul", "discriminations", parse_discrimination);
+    if (data.contains("discriminations"))
+    {
+      parse_list(data, ret, "ul", "discriminations", parse_discrimination);
+    }
   }
   
   void try_parse_collocations(const nlohmann::json &data, std::string &ret)
   {
-    parse_list(data, ret, "ul", "collocations", parse_collocation);
+    if (data.contains("collocations"))
+    {
+      parse_list(data, ret, "ul", "collocations", parse_collocation);
+    }
   }
   
   void try_parse_explanations(const nlohmann::json &data, std::string &ret)
@@ -388,6 +404,9 @@ namespace lead
     {
       ret += " ★";
     }
+    ret += "<button class=\"mdui-btn mdui-ripple\">\n"
+           "  <i class=\"mdui-icon material-icons\" onclick=\"speak(&quot;" + vocabulary[index].word
+           + "&quot;)\">play_arrow</i></button>";
     ret += "</h1>";
     // Pronunciation
     if (detail.contains("en_ph"))
@@ -398,10 +417,6 @@ namespace lead
     {
       ret += "美 /" + detail["usa_ph"].get<std::string>() + "/  ";
     }
-    
-    ret += "<button class=\"mdui-btn mdui-ripple\">\n"
-           "  <i class=\"mdui-icon material-icons\" onclick=\"speak(&quot;" + vocabulary[index].word
-           + "&quot;)\">play_arrow</i></button>";
     
     // Usage
     if (detail.contains("usage"))
@@ -523,37 +538,37 @@ namespace lead
     return {&vocabulary[w], w};
   }
   
-  std::vector<size_t> VOC::search(const std::string &w) const
+  bool contains(size_t search_pos, const std::string& str, size_t target_size)
   {
-    std::vector<size_t> ret;
-    bool is_word = true;
-    for (auto &r: w)
-    {
-      if (!std::isalpha(r))
-      {
-        is_word = false;
-      }
-    }
+    if (search_pos != 0
+        && std::isalpha(str[search_pos - 1]))
+      return false;
+    if (search_pos + str.size() < str.size()
+        && std::isalpha(str[search_pos + target_size]))
+      return false;
+    return true;
+  }
+  
+  std::deque<size_t> VOC::search(const std::string &w) const
+  {
+    std::deque<size_t> ret;
     for (size_t i = 0; i < vocabulary.size(); ++i)
     {
-      if (is_word)
+      if (auto search_pos = vocabulary[i].word.find(w); search_pos != std::string::npos)
       {
-        if (vocabulary[i].word == w)
-        {
-          ret.emplace_back(i);
-        }
+        if (!contains(search_pos, vocabulary[i].word, w.size()))
+          continue;
+        ret.emplace_front(i);
       }
-      else
+      else if (auto search_pos = vocabulary[i].meaning.find(w); search_pos != std::string::npos)
       {
-        if (vocabulary[i].meaning.find(w) != std::string::npos)
-        {
-          ret.emplace_back(i);
-        }
+        if (!contains(search_pos, vocabulary[i].word, w.size()))
+          continue;
+        ret.emplace_back(i);
       }
     }
     return ret;
   }
   
   size_t VOC::size() const { return vocabulary.size(); }
-  
 }

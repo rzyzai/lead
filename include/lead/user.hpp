@@ -62,9 +62,10 @@ namespace lead
     WordRef get_memorize_word();
     
     WordRef prev_memorize_word();
+  
+    WordRef set_memorize_word(size_t index);
     
     WordRef curr_memorize_word() const;
-    
     
     WordRecord *word_record(size_t w);
     
@@ -75,6 +76,7 @@ namespace lead
     nlohmann::json search(const std::string &word) const;
     
     void clear_records();
+    
     void clear_marks();
   
     int mark_word(size_t index);
