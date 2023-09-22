@@ -24,7 +24,6 @@
 #pragma once
 
 #include "voc.hpp"
-#include "leveldb/db.h"
 #include <iostream>
 #include <string>
 #include <vector>
