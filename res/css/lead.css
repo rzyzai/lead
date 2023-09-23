@@ -191,56 +191,55 @@ input.mdui-btn[type=submit] {
     color: hsla(0, 0%, 100%, .38)
 }
 
-.mdui-drawer {
+.drawer {
     display: flex;
     flex-direction: column;
-    background-color: #ffffff;
 }
 
-.mdui-drawer .mdui-list {
+.drawer .mdui-list {
     flex: 1;
     box-sizing: border-box
 }
 
-.mdui-drawer .mdui-list-item {
+.drawer .mdui-list-item {
     padding-left: 20px;
     border-radius: 0 50px 50px 0
 }
 
-.mdui-drawer .mdui-list-item-icon {
+.drawer .mdui-list-item-icon {
     transform: scale(.875)
 }
 
-.mdui-drawer .mdui-list-item-content {
+.drawer .mdui-list-item-content {
     font-weight: 400;
     font-size: 14px
 }
 
-.mdui-drawer .mdui-list-item-active {
+.drawer .mdui-list-item-active {
     color: #1a73e8;
     background-color: #e8f0fe
 }
 
-.mdui-theme-layout-dark .mdui-drawer .mdui-list-item-active {
+.mdui-theme-layout-dark .drawer .mdui-list-item-active {
     color: #fff;
     background-color: #424242
 }
 
-.mdui-drawer .mdui-list-item-active .mdui-list-item-icon {
+.drawer .mdui-list-item-active .mdui-list-item-icon {
     color: #1a73e8
 }
 
-.mdui-theme-layout-dark .mdui-drawer .mdui-list-item-active .mdui-list-item-icon {
+.mdui-theme-layout-dark .drawer .mdui-list-item-active .mdui-list-item-icon {
     color: #fff
 }
 
-.mdui-drawer .copyright {
+.drawer .copyright {
     box-sizing: border-box;
     width: 100%;
     padding: 20px 16px
 }
 
-.mdui-drawer .copyright p {
+.drawer .copyright p {
     margin: 0;
     overflow: hidden;
     color: rgba(0, 0, 0, .38);
@@ -250,20 +249,20 @@ input.mdui-btn[type=submit] {
     text-overflow: ellipsis
 }
 
-.mdui-theme-layout-dark .mdui-drawer .copyright p {
+.mdui-theme-layout-dark .drawer .copyright p {
     color: hsla(0, 0%, 100%, .38)
 }
 
-.mdui-drawer .copyright a {
+.drawer .copyright a {
     color: rgba(0, 0, 0, .52);
     text-decoration: none
 }
 
-.mdui-theme-layout-dark .mdui-drawer .copyright a {
+.mdui-theme-layout-dark .drawer .copyright a {
     color: hsla(0, 0%, 100%, .52)
 }
 
-.mdui-drawer .copyright a:hover {
+.drawer .copyright a:hover {
     text-decoration: underline
 }
 
@@ -397,7 +396,7 @@ li::marker
     padding: 146px 40px 28px;
 }
 .dialog-interface > form {
-    padding: 0 40px 62px;
+    padding: 0 40px 70px;
 }
 .dialog-interface .actions {
     margin-top: 24px;
@@ -464,3 +463,11 @@ li::marker
 {
     font-size: 20px;
 }
+
+#memorize-swipe
+{
+    position: fixed;
+    height: 100%;
+    width: 100%;
+}
+

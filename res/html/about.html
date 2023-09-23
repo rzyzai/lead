@@ -16,47 +16,10 @@
         };
     </script>
 </head>
-<body>
-<div class="mdui-toolbar mdui-color-blue-700 mdui-shadow-5">
-    <div class="mdui-drawer mdui-drawer-close" id="left-drawer">
-        <a class="mdui-btn mdui-btn-icon" href="#" mdui-drawer-close>
-            <i class="mdui-icon material-icons mdui-text-color-black-icon">arrow_back</i>
-        </a>
-        <ul class="mdui-list">
-            <a href="/" class="mdui-list-item mdui-ripple">
-                <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">home</i>
-                <div class="mdui-list-item-content mdui-text-color-black-text">主页</div>
-            </a>
-            <a href="memorize.html" class="mdui-list-item mdui-ripple">
-                <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">import_contacts</i>
-                <div class="mdui-list-item-content mdui-text-color-black-text">记忆</div>
-            </a>
-            <a href="quiz.html" class="mdui-list-item mdui-ripple">
-                <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">spellcheck</i>
-                <div class="mdui-list-item-content mdui-text-color-black-text">检测</div>
-            </a>
-            <a href="marked.html" class="mdui-list-item mdui-ripple">
-                <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">bookmark</i>
-                <div class="mdui-list-item-content mdui-text-color-black-text">收藏</div>
-            </a>
-            <a href="passed.html" class="mdui-list-item mdui-ripple">
-                <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">list</i>
-                <div class="mdui-list-item-content mdui-text-color-black-text">已记住</div>
-            </a>
-            <a class="mdui-list-item mdui-ripple mdui-list-item-active">
-                <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">info_outline</i>
-                <div class="mdui-list-item-content">关于</div>
-            </a>
-        </ul>
-        <div class="copyright">
-            <p>© 2023 <a href="https://rzyzai.tech" target="_blank">日照一中AI社</a></p>
-            <p>Powered by
-                <a href="https://github.com/rzyzai/lead" target="_blank">Lead</a>
-                & <a href="https://mdui.org" target="_blank">MDUI</a>
-            </p>
-        </div>
-    </div>
-    <a class="mdui-btn mdui-btn-icon" href="#" mdui-drawer="{target: '#left-drawer', overlay: true}">
+<body class="mdui-loaded mdui-drawer-body-left mdui-appbar-with-toolbar">
+<div class="mdui-appbar mdui-appbar-fixed">
+<div class="mdui-toolbar mdui-color-blue-700">
+    <a class="mdui-btn mdui-btn-icon" href="#" mdui-drawer="{target: '#left-drawer'}">
         <i class="mdui-icon material-icons mdui-text-color-white-icon">menu</i>
     </a>
     <span class="mdui-typo-title mdui-text-color-white" onclick="window.location='/'">Lead</span>
@@ -65,20 +28,56 @@
     <button class="mdui-btn mdui-ripple mdui-color-theme-accent mdui-btn-icon mdui-text-color-white-icon"
             mdui-dialog="{target: '#searchDialog', history: false, modal: true}">
         <i class="mdui-icon material-icons mdui-text-color-white-icon">search</i></button>
-    <div class="mdui-dialog dialog-interface" id="searchDialog">
-        <button class="mdui-btn mdui-btn-icon" mdui-dialog-close><i class="mdui-icon material-icons">close</i></button>
-        <div class="mdui-dialog-title mdui-color-blue-700">搜索</div>
-        <form id="search-form">
-            <div class="mdui-textfield mdui-textfield-floating-label">
-                <label class="mdui-textfield-label">单词或释义</label>
-                <input id="search-value" class="mdui-textfield-input" required />
-                <div class="mdui-textfield-error">输入不能为空</div>
-            </div>
-            <div class="actions mdui-float-right">
-                <button type="submit" class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white">搜索</button>
-            </div>
-        </form>
+</div>
+</div>
+<div class="drawer mdui-drawer" id="left-drawer">
+    <ul class="mdui-list">
+        <a href="/" class="mdui-list-item mdui-ripple">
+            <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">home</i>
+            <div class="mdui-list-item-content mdui-text-color-black-text">主页</div>
+        </a>
+        <a href="memorize.html" class="mdui-list-item mdui-ripple">
+            <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">import_contacts</i>
+            <div class="mdui-list-item-content mdui-text-color-black-text">记忆</div>
+        </a>
+        <a href="quiz.html" class="mdui-list-item mdui-ripple">
+            <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">spellcheck</i>
+            <div class="mdui-list-item-content mdui-text-color-black-text">检测</div>
+        </a>
+        <a href="marked.html" class="mdui-list-item mdui-ripple">
+            <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">bookmark</i>
+            <div class="mdui-list-item-content mdui-text-color-black-text">收藏</div>
+        </a>
+        <a href="passed.html" class="mdui-list-item mdui-ripple">
+            <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">list</i>
+            <div class="mdui-list-item-content mdui-text-color-black-text">已记住</div>
+        </a>
+        <a class="mdui-list-item mdui-ripple mdui-list-item-active">
+            <i class="mdui-list-item-icon mdui-icon material-icons mdui-text-color-black-icon">info_outline</i>
+            <div class="mdui-list-item-content">关于</div>
+        </a>
+    </ul>
+    <div class="copyright">
+        <p>© 2023 <a href="https://rzyzai.tech" target="_blank">日照一中AI社</a></p>
+        <p>Powered by
+            <a href="https://github.com/rzyzai/lead" target="_blank">Lead</a>
+            & <a href="https://mdui.org" target="_blank">MDUI</a>
+        </p>
     </div>
+</div>
+<div class="mdui-dialog dialog-interface" id="searchDialog">
+    <button class="mdui-btn mdui-btn-icon" mdui-dialog-close><i class="mdui-icon material-icons">close</i></button>
+    <div class="mdui-dialog-title mdui-color-blue-700">搜索</div>
+    <form id="search-form">
+        <div class="mdui-textfield mdui-textfield-floating-label">
+            <label class="mdui-textfield-label">单词或释义</label>
+            <input id="search-value" class="mdui-textfield-input" required />
+            <div class="mdui-textfield-error">输入不能为空</div>
+        </div>
+        <div class="actions mdui-float-right">
+            <button type="submit" class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white">搜索</button>
+        </div>
+    </form>
 </div>
 <div class="mdui-container mdui-text-center">
     <div class="banner">

@@ -30,7 +30,7 @@ function init_toolbar()
                     window.sessionStorage.setItem("search_result", JSON.stringify(result));
                     window.location.href = "search.html";
                 } else
-                    mdui.snackbar(result["message"]);
+                    mdui.snackbar(result["message"], {"position": "right-top"});
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
                 console.log(XMLHttpRequest.status);
@@ -59,7 +59,7 @@ function init_home()
             }
             else
             {
-                mdui.snackbar(result["message"]);
+                mdui.snackbar(result["message"], {"position": "right-top"});
             }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -73,22 +73,21 @@ function init_home()
 function init_memorize()
 {
     next_word(false);
-    var Element = document.getElementById('explanation');
+    var Element = document.getElementById('memorize-swipe');
     var mc = new Hammer(Element);
-
     mc.on("swiperight", function(ev) {
         prev_word();
         $(".mdui-bottom-nav-fixed").append(
             '<button class="mdui-fab mdui-ripple swiperight">' +
-            '<i class="mdui-icon material-icons">arrow_back</i></button>')
+            '<i class="mdui-icon material-icons">navigate_before</i></button>')
         $(".swiperight").fadeTo('normal', 0.01,
             function(){$(this).slideUp('normal', function() {$(this).remove();});});;
     });
     mc.on("swipeleft", function(ev) {
-        prev_word();
+        next_word(true);
         $(".mdui-bottom-nav-fixed").append(
             '<button class="mdui-fab mdui-ripple swipeleft">' +
-            '<i class="mdui-icon material-icons">arrow_forward</i></button>')
+            '<i class="mdui-icon material-icons">navigate_next</i></button>')
         $(".swipeleft").fadeTo('normal', 0.01,
             function(){$(this).slideUp('normal', function() {$(this).remove();});});;
     });
@@ -111,7 +110,7 @@ function init_marked()
             }
             else
             {
-                mdui.snackbar(result["message"]);
+                mdui.snackbar(result["message"], {"position": "right-top"});
             }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -143,7 +142,7 @@ function init_passed()
             }
             else
             {
-                mdui.snackbar(result["message"]);
+                mdui.snackbar(result["message"], {"position": "right-top"});
             }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -199,7 +198,7 @@ function init_explanation(word_index)
                 $("#explanation-" + word_index).html(result["explanation"]);
             }
             else{
-                mdui.snackbar(result["message"])
+                mdui.snackbar(result["message"], {"position": "right-top"})
             }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -225,6 +224,9 @@ function update_memorize_data(result)
     memorize_index = result["word"]["word_index"];
     memorize_meaning = result["word"]["meaning"];
     $("#explanation").html(result["content"]);
+    $('#word-preview').html(memorize_word);
+    $('#locate-value').attr('value', memorize_index)
+    mdui.updateSliders();
 }
 
 function set_memorize_word(word_index) {
@@ -239,7 +241,7 @@ function set_memorize_word(word_index) {
             if (result["status"] == "success")
                 update_memorize_data(result);
             else
-                mdui.snackbar(result["message"]);
+                mdui.snackbar(result["message"], {"position": "right-top"});
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             console.log(XMLHttpRequest.status);
@@ -258,7 +260,7 @@ function prev_word(){
             if(result["status"] == "success")
                 update_memorize_data(result);
             else
-                mdui.snackbar(result["message"]);
+                mdui.snackbar(result["message"], {"position": "right-top"});
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             console.log(XMLHttpRequest.status);
@@ -281,7 +283,7 @@ function next_word(next) {
             if (result["status"] == "success")
                 update_memorize_data(result);
             else
-                mdui.snackbar(result["message"]);
+                mdui.snackbar(result["message"], {"position": "right-top"});
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             console.log(XMLHttpRequest.status);
@@ -302,9 +304,9 @@ function mark_word(word_index)
         url: "api/mark_word",
         success: function (result) {
             if(result["status"] == "success")
-                mdui.snackbar("收藏成功");
+                mdui.snackbar("收藏成功", {"position": "right-top"});
             else
-                mdui.snackbar(result["message"]);
+                mdui.snackbar(result["message"], {"position": "right-top"});
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             console.log(XMLHttpRequest.status);
@@ -325,9 +327,9 @@ function unmark_word(word_index)
         url: "api/unmark_word",
         success: function (result) {
             if(result["status"] == "success")
-                mdui.snackbar("取消收藏成功");
+                mdui.snackbar("取消收藏成功", {"position": "right-top"});
             else
-                mdui.snackbar(result["message"]);
+                mdui.snackbar(result["message"], {"position": "right-top"});
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             console.log(XMLHttpRequest.status);
@@ -339,7 +341,7 @@ function unmark_word(word_index)
 
 function prev_quiz() {
     if (quiz_data_list.length == 1) {
-        mdui.snackbar("没有上一个了");
+        mdui.snackbar("没有上一个了", {"position": "right-top"});
     } else {
         quiz_data_list.pop();
         quiz_word = quiz_data_list[quiz_data_list.length - 1]["quiz_word"];
@@ -532,7 +534,7 @@ function quiz_prompt(opt) {
                     init_prompt()
                 }
                 else{
-                    mdui.snackbar(result["message"])
+                    mdui.snackbar(result["message"], {"position": "right-top"})
                 }
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -593,10 +595,10 @@ function clear_records()
             quiz_prompt_data = result;
             if (result["status"] == "success") {
                 init_passed();
-                mdui.snackbar("已清除所有记录");
+                mdui.snackbar("已清除所有记录", {"position": "right-top"});
             }
             else{
-                mdui.snackbar(result["message"]);
+                mdui.snackbar(result["message"], {"position": "right-top"});
             }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -616,10 +618,10 @@ function clear_marks()
             quiz_prompt_data = result;
             if (result["status"] == "success") {
                 init_marked();
-                mdui.snackbar("已清除所有收藏");
+                mdui.snackbar("已清除所有收藏", {"position": "right-top"});
             }
             else{
-                mdui.snackbar(result["message"]);
+                mdui.snackbar(result["message"], {"position": "right-top"});
             }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -646,7 +648,7 @@ function locate_word()
                 $("#word-preview").html(result["word"])
             }
             else{
-                mdui.snackbar(result["message"])
+                mdui.snackbar(result["message"], {"position": "right-top"})
             }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {

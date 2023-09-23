@@ -14,13 +14,15 @@
         window.onload = init_search_result;
     </script>
 </head>
-<body>
-<div class="mdui-toolbar mdui-color-blue-700 mdui-shadow-5">
+<body class="mdui-appbar-with-toolbar">
+<div class="mdui-appbar mdui-appbar-fixed">
+<div class="mdui-toolbar mdui-color-blue-700">
     <a class="mdui-btn mdui-btn-icon" href="javascript:history.back(-1)">
-        <i class="mdui-icon material-icons">arrow_back</i>
+        <i class="mdui-icon material-icons">navigate_before</i>
     </a>
     <span class="mdui-typo-title mdui-text-color-white" id="search-title"></span>
     <div class="mdui-toolbar-spacer"></div>
+</div>
 </div>
 <div class="explanation mdui-p-t-2" id="search-result">
 </div>
