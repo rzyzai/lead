@@ -125,6 +125,8 @@ function init_marked() {
                 content += '</div>'
                 $("#marked-words").html(content);
                 mdui.mutation();
+                $("#loading").remove();
+                $("#content").removeClass("mdui-hidden");
             } else {
                 mdui.snackbar(result["message"], {"position": "right-top"});
             }
@@ -150,6 +152,8 @@ function init_passed() {
                 content += '</div>'
                 $("#passed-words").html(content);
                 mdui.mutation();
+                $("#loading").remove();
+                $("#content").removeClass("mdui-hidden");
             } else {
                 mdui.snackbar(result["message"], {"position": "right-top"});
             }

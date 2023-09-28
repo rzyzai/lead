@@ -81,7 +81,12 @@
         </div>
     </ul>
 </div>
-<div class="mdui-container">
+<div class="loading mdui-p-t-3 mdui-p-l-3 mdui-p-r-3" id="loading">
+    <div class="mdui-progress">
+        <div class="mdui-progress-indeterminate"></div>
+    </div>
+</div>
+<div class="mdui-container mdui-hidden" id="content">
     <div class="explanation mdui-p-t-2" id="passed-words">
     </div>
     <div class="item mdui-text-center">
@@ -92,7 +97,9 @@
             </div>
         </div>
         <button class="mdui-btn mdui-btn-raised mdui-color-red mdui-text-color-white-text"
-                onclick="mdui.confirm('确认清除所有记录吗？清除的记录将无法恢复。', '清除记录', clear_records, function(e){e.close();}, {confirmText: '确认', cancelText: '取消'})()">清除所有记录</button>
+                onclick="mdui.confirm('确认清除所有记录吗？清除的记录将无法恢复。', '清除记录', clear_records, function(e){e.close();}, {confirmText: '确认', cancelText: '取消'})()">
+            清除所有记录
+        </button>
     </div>
 </div>
 </body>
