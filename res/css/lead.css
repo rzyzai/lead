@@ -196,14 +196,43 @@ input.mdui-btn[type=submit] {
     flex-direction: column;
 }
 
+.drawer-content{
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.drawer .account-image{
+    max-width: 72px;
+}
+
+.drawer .account-name{
+    font-size: 16px;
+    color: white;
+}
+
+.drawer .account-email{
+    font-size: 14px;
+    font-weight: lighter;
+    color: white;
+}
+
+.drawer .account-info
+{
+    padding-top: 16px;
+    background-color: #E4EBF4;
+    background-image: url("/drawer_background.jpg");
+    background-repeat: no-repeat;
+    background-size:100% 100%;
+    background-attachment: fixed;
+}
+
 .drawer .mdui-list {
     flex: 1;
     box-sizing: border-box
 }
 
 .drawer .mdui-list-item {
-    padding-left: 20px;
-    border-radius: 0 50px 50px 0
+    border-radius: 6px 6px 6px 6px
 }
 
 .drawer .mdui-list-item-icon {
@@ -231,39 +260,6 @@ input.mdui-btn[type=submit] {
 
 .mdui-theme-layout-dark .drawer .mdui-list-item-active .mdui-list-item-icon {
     color: #fff
-}
-
-.drawer .copyright {
-    box-sizing: border-box;
-    width: 100%;
-    padding: 20px 16px
-}
-
-.drawer .copyright p {
-    margin: 0;
-    overflow: hidden;
-    color: rgba(0, 0, 0, .38);
-    font-size: 13px;
-    line-height: 20px;
-    white-space: nowrap;
-    text-overflow: ellipsis
-}
-
-.mdui-theme-layout-dark .drawer .copyright p {
-    color: hsla(0, 0%, 100%, .38)
-}
-
-.drawer .copyright a {
-    color: rgba(0, 0, 0, .52);
-    text-decoration: none
-}
-
-.mdui-theme-layout-dark .drawer .copyright a {
-    color: hsla(0, 0%, 100%, .52)
-}
-
-.drawer .copyright a:hover {
-    text-decoration: underline
 }
 
 .mdui-overlay {
@@ -470,4 +466,3 @@ li::marker
     height: 100%;
     width: 100%;
 }
-

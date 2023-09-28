@@ -37,9 +37,8 @@ namespace lead
   void Server::run()
   {
     httplib::Server svr;
-    svr.set_mount_point("/", res_path / "index.html");
-    svr.set_mount_point("/favicon.ico", res_path / "icon" / "favicon.ico");
     svr.set_mount_point("/", res_path / "html");
+    svr.set_mount_point("/", res_path / "icons");
     svr.set_mount_point("/css", res_path / "css");
     svr.set_mount_point("/fonts", res_path / "fonts");
     svr.set_mount_point("/icons", res_path / "icons");
@@ -220,8 +219,6 @@ namespace lead
       WordRef wr;
       if(req.has_param("next") && req.get_param_value("next") == "true")
       {
-        if(auto &p = user.word_record(user.curr_memorize_word().index)->points; p != 0)
-          --p;
         wr = user.get_memorize_word();
         if(!wr.is_valid())
         {

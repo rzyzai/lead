@@ -1,4 +1,5 @@
 "use strict"
+let access_token = "";
 let quiz_data_list = [];
 let quiz_word = "";
 let quiz_word_index = 0;
@@ -11,10 +12,9 @@ let memorize_index = 0;
 let memorize_meaning = "";
 
 let search_data = null;
+let locate_select_dialog = null;
 
-
-function init_toolbar()
-{
+function init_toolbar_and_drawer() {
     var search = document.getElementById("search-form");
     search.onsubmit = function (event) {
         var search_word = document.getElementById("search-value").value;
@@ -26,29 +26,45 @@ function init_toolbar()
                     word: search_word
                 },
             success: function (result) {
+
                 if (result["status"] == "success") {
                     window.sessionStorage.setItem("search_result", JSON.stringify(result));
                     window.location.href = "search.html";
                 } else
-                    mdui.snackbar(result["message"], {"position": "right-top"});
+                    mdui.snackbar(result["message"]);
             },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                console.log(XMLHttpRequest.status);
-                console.log(XMLHttpRequest.readyState);
-                console.log(textStatus);
-            }
         });
         event.preventDefault();
     }
+
+
+    if(access_token != "")
+    {
+        $.ajax({
+            type: 'GET',
+            url: "api/get_account_info",
+            data:
+                {
+                    access_token: access_token
+                },
+            success: function (result) {
+                if (result["status"] == "success") {
+                    $("#account-name").html(result["username"]);
+                    $("#account-email").html(result["email"]);
+                } else
+                    mdui.snackbar(result["message"]);
+            },
+        });
+    }
 }
 
-function init_home()
-{
+function init_home() {
     $.ajax({
         type: 'GET',
         url: "api/get_plan",
         success: function (result) {
-            if(result["status"] == "success") {
+
+            if (result["status"] == "success") {
                 if (result["finished_word_count"] == result["planned_word_count"]) {
                     $("#message").html("<h3>今日计划已完成</h3>");
                 } else {
@@ -56,105 +72,93 @@ function init_home()
                     $("#planned_word_count").html(result["planned_word_count"]);
                 }
                 $("#progress_bar").attr('style', 'width:' + (result["finished_word_count"] / result["planned_word_count"]) * 100 + '%;');
-            }
-            else
-            {
+            } else {
                 mdui.snackbar(result["message"], {"position": "right-top"});
             }
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest.status);
-            console.log(XMLHttpRequest.readyState);
-            console.log(textStatus);
         }
     });
 }
 
-function init_memorize()
-{
+function init_memorize() {
     next_word(false);
     var Element = document.getElementById('memorize-swipe');
     var mc = new Hammer(Element);
-    mc.on("swiperight", function(ev) {
+    mc.on("swiperight", function (ev) {
         prev_word();
         $(".mdui-bottom-nav-fixed").append(
             '<button class="mdui-fab mdui-ripple swiperight">' +
             '<i class="mdui-icon material-icons">navigate_before</i></button>')
         $(".swiperight").fadeTo('normal', 0.01,
-            function(){$(this).slideUp('normal', function() {$(this).remove();});});;
+            function () {
+                $(this).slideUp('normal', function () {
+                    $(this).remove();
+                });
+            });
+        ;
     });
-    mc.on("swipeleft", function(ev) {
+    mc.on("swipeleft", function (ev) {
         next_word(true);
         $(".mdui-bottom-nav-fixed").append(
             '<button class="mdui-fab mdui-ripple swipeleft">' +
             '<i class="mdui-icon material-icons">navigate_next</i></button>')
         $(".swipeleft").fadeTo('normal', 0.01,
-            function(){$(this).slideUp('normal', function() {$(this).remove();});});;
+            function () {
+                $(this).slideUp('normal', function () {
+                    $(this).remove();
+                });
+            });
+        ;
     });
 }
 
-function init_marked()
-{
+function init_marked() {
     $.ajax({
         type: 'GET',
         url: "api/get_marked",
         success: function (result) {
+
             if (result["status"] == "success") {
                 var content = '<div class="mdui-panel" mdui-panel>';
-                for (let i = result["marked_words"].length - 1; i >= 0;i--) {
+                for (let i = result["marked_words"].length - 1; i >= 0; i--) {
                     content += marked_explanation_panel(result["marked_words"][i]);
                 }
                 content += '</div>'
                 $("#marked-words").html(content);
                 mdui.mutation();
-            }
-            else
-            {
+            } else {
                 mdui.snackbar(result["message"], {"position": "right-top"});
             }
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest.status);
-            console.log(XMLHttpRequest.readyState);
-            console.log(textStatus);
         }
     });
 }
 
-function init_passed()
-{
+function init_passed() {
     $.ajax({
         type: 'GET',
         url: "api/get_passed",
         success: function (result) {
+
             if (result["status"] == "success") {
                 $("#passed_word_count").html(result["passed_word_count"]);
                 $("#word_count").html(result["word_count"]);
                 $("#progress_bar").attr('style', 'width:' + (result["passed_word_count"] / result["word_count"]) * 100 + '%;')
 
                 var content = '<div class="mdui-panel" mdui-panel>';
-                for (let i = result["passed_words"].length - 1; i >= 0;i--) {
+                for (let i = result["passed_words"].length - 1; i >= 0; i--) {
                     content += passed_explanation_panel(result["passed_words"][i]);
                 }
                 content += '</div>'
                 $("#passed-words").html(content);
                 mdui.mutation();
-            }
-            else
-            {
+            } else {
                 mdui.snackbar(result["message"], {"position": "right-top"});
             }
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest.status);
-            console.log(XMLHttpRequest.readyState);
-            console.log(textStatus);
         }
     });
 }
 
 function init_search_result() {
-    if(search_data == null)
+    if (search_data == null)
         search_data = JSON.parse(window.sessionStorage.getItem("search_result"));
     else
         window.sessionStorage.setItem("search_result", search_data);
@@ -184,8 +188,7 @@ function sleep(delay) {
     }
 }
 
-function init_explanation(word_index)
-{
+function init_explanation(word_index) {
     $.ajax({
         type: 'GET',
         url: "api/get_explanation",
@@ -194,23 +197,17 @@ function init_explanation(word_index)
                 word_index: word_index,
             },
         success: function (result) {
+
             if (result["status"] == "success") {
                 $("#explanation-" + word_index).html(result["explanation"]);
-            }
-            else{
+            } else {
                 mdui.snackbar(result["message"], {"position": "right-top"})
             }
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest.status);
-            console.log(XMLHttpRequest.readyState);
-            console.log(textStatus);
         }
     });
 }
 
-function save_quiz_prompt_panel_status()
-{
+function save_quiz_prompt_panel_status() {
     var panels = document.getElementsByClassName("mdui-panel-item");
     quiz_prompt_panel_isopen[0] = panels[0].classList.length > 1;
     quiz_prompt_panel_isopen[1] = panels[1].classList.length > 1;
@@ -218,13 +215,13 @@ function save_quiz_prompt_panel_status()
     quiz_prompt_panel_isopen[3] = panels[3].classList.length > 1;
 }
 
-function update_memorize_data(result)
-{
+function update_memorize_data(result) {
     memorize_word = result["word"]["word"];
     memorize_index = result["word"]["word_index"];
     memorize_meaning = result["word"]["meaning"];
     $("#explanation").html(result["content"]);
-    $('#word-preview').html(memorize_word);
+    $("#search-locate-value").val("");
+    $("#search-locate-value").attr("placeholder", memorize_word);
     $('#locate-value').attr('value', memorize_index)
     mdui.updateSliders();
 }
@@ -238,34 +235,26 @@ function set_memorize_word(word_index) {
                 word_index: word_index
             },
         success: function (result) {
+
             if (result["status"] == "success")
                 update_memorize_data(result);
             else
                 mdui.snackbar(result["message"], {"position": "right-top"});
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest.status);
-            console.log(XMLHttpRequest.readyState);
-            console.log(textStatus);
         }
     });
 }
 
 
-function prev_word(){
+function prev_word() {
     $.ajax({
         type: 'GET',
         url: "api/prev_memorize_word",
         success: function (result) {
-            if(result["status"] == "success")
+
+            if (result["status"] == "success")
                 update_memorize_data(result);
             else
                 mdui.snackbar(result["message"], {"position": "right-top"});
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest.status);
-            console.log(XMLHttpRequest.readyState);
-            console.log(textStatus);
         }
     });
 }
@@ -280,21 +269,16 @@ function next_word(next) {
                 next: next
             },
         success: function (result) {
+
             if (result["status"] == "success")
                 update_memorize_data(result);
             else
                 mdui.snackbar(result["message"], {"position": "right-top"});
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest.status);
-            console.log(XMLHttpRequest.readyState);
-            console.log(textStatus);
         }
     });
 }
 
-function mark_word(word_index)
-{
+function mark_word(word_index) {
     $.ajax({
         type: 'GET',
         data:
@@ -303,21 +287,16 @@ function mark_word(word_index)
             },
         url: "api/mark_word",
         success: function (result) {
-            if(result["status"] == "success")
+
+            if (result["status"] == "success")
                 mdui.snackbar("收藏成功", {"position": "right-top"});
             else
                 mdui.snackbar(result["message"], {"position": "right-top"});
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest.status);
-            console.log(XMLHttpRequest.readyState);
-            console.log(textStatus);
         }
     });
 }
 
-function unmark_word(word_index)
-{
+function unmark_word(word_index) {
     $.ajax({
         type: 'GET',
         data:
@@ -326,15 +305,11 @@ function unmark_word(word_index)
             },
         url: "api/unmark_word",
         success: function (result) {
-            if(result["status"] == "success")
+
+            if (result["status"] == "success")
                 mdui.snackbar("取消收藏成功", {"position": "right-top"});
             else
                 mdui.snackbar(result["message"], {"position": "right-top"});
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest.status);
-            console.log(XMLHttpRequest.readyState);
-            console.log(textStatus);
         }
     });
 }
@@ -366,22 +341,18 @@ function apply_quiz(new_quiz) {
 }
 
 function next_quiz(word_index) {
-    word_index = typeof word_index !== 'undefined' ?  word_index : -1;
+    word_index = typeof word_index !== 'undefined' ? word_index : -1;
     $.ajax({
         type: 'GET',
         url: "api/get_quiz",
         data:
             (word_index == -1) ? ({}) : ({word_index: word_index}),
         success: function (result) {
+
             quiz_data_list.push(result)
             quiz_word = result["word"]["word"]
             quiz_word_index = result["word"]["word_index"]
             apply_quiz(quiz_data_list[quiz_data_list.length - 1]["quiz"])
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest.status);
-            console.log(XMLHttpRequest.readyState);
-            console.log(textStatus);
         }
     });
 }
@@ -396,11 +367,6 @@ function quiz_select(opt) {
                     {
                         word_index: quiz_word_index,
                     },
-                error: function (XMLHttpRequest, textStatus, errorThrown) {
-                    console.log(XMLHttpRequest.status);
-                    console.log(XMLHttpRequest.readyState);
-                    console.log(textStatus);
-                }
             });
         }
         next_quiz()
@@ -414,11 +380,6 @@ function quiz_select(opt) {
                     {
                         word_index: quiz_word_index,
                     },
-                error: function (XMLHttpRequest, textStatus, errorThrown) {
-                    console.log(XMLHttpRequest.status);
-                    console.log(XMLHttpRequest.readyState);
-                    console.log(textStatus);
-                }
             });
         }
         $("#" + opt).addClass("mdui-color-red");
@@ -430,7 +391,7 @@ function get_explanation_panel(title, summary, body, actions, open, open_actions
     open_actions = typeof open_actions !== 'undefined' ? open_actions : "";
     open = typeof open !== 'undefined' ? open : true;
     let ret = '';
-    if(open)
+    if (open)
         ret += '<div class="mdui-panel-item mdui-panel-item-open">';
     else
         ret += '<div class="mdui-panel-item" onclick="' + open_actions + '">';
@@ -446,8 +407,7 @@ function get_explanation_panel(title, summary, body, actions, open, open_actions
     return ret;
 }
 
-function prompt_explanation_panel(result, opt, open)
-{
+function prompt_explanation_panel(result, opt, open) {
     let actions = "";
     if (result[opt]["is_marked"]) {
         actions = '' +
@@ -529,19 +489,14 @@ function quiz_prompt(opt) {
                     word_index: quiz_word_index,
                 },
             success: function (result) {
+
                 quiz_prompt_data = result;
                 if (result["status"] == "success") {
                     init_prompt()
-                }
-                else{
+                } else {
                     mdui.snackbar(result["message"], {"position": "right-top"})
                 }
             },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                console.log(XMLHttpRequest.status);
-                console.log(XMLHttpRequest.readyState);
-                console.log(textStatus);
-            }
         });
         $("#" + quiz_data_list[quiz_data_list.length - 1]["quiz"]["answer"]).addClass("mdui-color-green");
     }
@@ -554,12 +509,7 @@ function pass(word_index) {
         data:
             {
                 word_index: word_index,
-            },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest.status);
-            console.log(XMLHttpRequest.readyState);
-            console.log(textStatus);
-        }
+            }
     });
 }
 
@@ -570,70 +520,51 @@ function renew(word_index) {
         data:
             {
                 word_index: word_index,
-            },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest.status);
-            console.log(XMLHttpRequest.readyState);
-            console.log(textStatus);
-        }
+            }
     });
 }
 
-function speak(word)
-{
+function speak(word) {
     var url = "https://api.oick.cn/txt/apiz.php?spd=5&text=" + encodeURI(word.replaceAll(' ', '-'));
     var n = new Audio(url);
     n.play();
 }
 
-function clear_records()
-{
+function clear_records() {
     $.ajax({
         type: 'GET',
         url: "api/clear_records",
         success: function (result) {
+
             quiz_prompt_data = result;
             if (result["status"] == "success") {
                 init_passed();
                 mdui.snackbar("已清除所有记录", {"position": "right-top"});
-            }
-            else{
+            } else {
                 mdui.snackbar(result["message"], {"position": "right-top"});
             }
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest.status);
-            console.log(XMLHttpRequest.readyState);
-            console.log(textStatus);
         }
     });
 }
 
-function clear_marks()
-{
+function clear_marks() {
     $.ajax({
         type: 'GET',
         url: "api/clear_marks",
         success: function (result) {
+
             quiz_prompt_data = result;
             if (result["status"] == "success") {
                 init_marked();
                 mdui.snackbar("已清除所有收藏", {"position": "right-top"});
-            }
-            else{
+            } else {
                 mdui.snackbar(result["message"], {"position": "right-top"});
             }
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest.status);
-            console.log(XMLHttpRequest.readyState);
-            console.log(textStatus);
         }
     });
 }
 
-function locate_word()
-{
+function locate_word() {
     var word_index = document.getElementById("locate-value").value;
     $.ajax({
         type: 'GET',
@@ -644,17 +575,69 @@ function locate_word()
                 word_index: word_index,
             },
         success: function (result) {
+
             if (result["status"] == "success") {
-                $("#word-preview").html(result["word"])
-            }
-            else{
+                $("#search-locate-value").val("");
+                $("#search-locate-value").attr("placeholder", result["word"]);
+                if ($("#search-locate-textfield").hasClass("mdui-textfield-invalid"))
+                    $("#search-locate-textfield").removeClass("mdui-textfield-invalid");
+            } else {
                 mdui.snackbar(result["message"], {"position": "right-top"})
             }
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest.status);
-            console.log(XMLHttpRequest.readyState);
-            console.log(textStatus);
         }
+    });
+}
+
+function locate_word_set() {
+    if ($("#search-locate-value").val() != "") {
+        $.ajax({
+            type: 'GET',
+            url: "api/search",
+            data:
+                {
+                    word: $("#search-locate-value").val()
+                },
+            success: function (result) {
+
+                if (result["status"] == "success") {
+                    var content = "<div class=\"mdui-dialog\"><div class=\"mdui-dialog-title\">选择</div><div class=\"mdui-dialog-content\"><div class=\"mdui-list\">";
+                    for (var word in result["words"])
+                        content += "<a class=\"mdui-list-item mdui-ripple\" onclick=\"set_memorize_word("
+                            + result["words"][word]["word"]["word_index"] + ");locate_select_dialog.close()\">"
+                            + result["words"][word]["word"]["word"] + " " + result["words"][word]["word"]["meaning"] + "</a>"
+                    content += '</div></div></div>'
+                    document.getElementById("locateDialog-close").click();
+                    locate_select_dialog = new mdui.Dialog(content, {"modal": true});
+                    locate_select_dialog.open();
+                } else {
+                    if (!$("#search-locate-textfield").hasClass("mdui-textfield-invalid"))
+                        $("#search-locate-textfield").addClass("mdui-textfield-invalid");
+                }
+            },
+        });
+    } else {
+        set_memorize_word(document.getElementById('locate-value').value);
+        document.getElementById("locateDialog-close").click();
+    }
+}
+
+function locate_verify() {
+    var word = $("#search-locate-value").val();
+    if (word == "") return;
+    $.ajax({
+        type: 'GET',
+        url: "api/search",
+        data:
+            {
+                word: word
+            },
+        success: function (result) {
+
+            if (result["status"] == "success") {
+                if ($("#search-locate-textfield").hasClass("mdui-textfield-invalid"))
+                    $("#search-locate-textfield").removeClass("mdui-textfield-invalid");
+            } else if (!$("#search-locate-textfield").hasClass("mdui-textfield-invalid"))
+                $("#search-locate-textfield").addClass("mdui-textfield-invalid");
+        },
     });
 }

@@ -25,7 +25,6 @@
 #include <tuple>
 #include <string>
 #include <vector>
-#include <deque>
 #include <set>
 #include <functional>
 
@@ -540,33 +539,40 @@ namespace lead
   
   bool contains(size_t search_pos, const std::string& str, size_t target_size)
   {
-    if (search_pos != 0
-        && std::isalpha(str[search_pos - 1]))
+    if (search_pos != 0 && str[search_pos - 1] != ' ')
       return false;
-    if (search_pos + str.size() < str.size()
-        && std::isalpha(str[search_pos + target_size]))
+    if (search_pos + target_size < str.size() && str[search_pos + target_size] != ' ')
       return false;
     return true;
   }
   
-  std::deque<size_t> VOC::search(const std::string &w) const
+  std::vector<size_t> VOC::search(const std::string &w) const
   {
-    std::deque<size_t> ret;
+    std::vector<size_t> ret;
     for (size_t i = 0; i < vocabulary.size(); ++i)
     {
       if (auto search_pos = vocabulary[i].word.find(w); search_pos != std::string::npos)
       {
         if (!contains(search_pos, vocabulary[i].word, w.size()))
           continue;
-        ret.emplace_front(i);
+        ret.emplace_back(i);
       }
       else if (auto search_pos = vocabulary[i].meaning.find(w); search_pos != std::string::npos)
       {
-        if (!contains(search_pos, vocabulary[i].word, w.size()))
+        if (!contains(search_pos, vocabulary[i].meaning, w.size()))
           continue;
         ret.emplace_back(i);
       }
     }
+    std::map<std::string, int> diff;
+    for(auto& r : ret)
+    {
+      auto word = at(r).word->word;
+      diff[word] = utils::get_edit_distance(word, w);
+    }
+    std::sort(ret.begin(), ret.end(),
+              [&diff, this](auto&&s1, auto&& s2)
+              {return diff[at(s1).word->word] < diff[at(s2).word->word];});
     return ret;
   }
   
