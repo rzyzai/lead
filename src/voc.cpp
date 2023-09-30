@@ -43,6 +43,11 @@ namespace lead
                        {"meaning", p.word->meaning}};
   }
   
+  VOC::VOC(const std::string &voc_path)
+  {
+    load(voc_path);
+  }
+  
   void VOC::load(const std::vector<Word> &word)
   {
     vocabulary = word;

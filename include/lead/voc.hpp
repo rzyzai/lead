@@ -67,6 +67,8 @@ namespace lead
   private:
     std::vector<Word> vocabulary;
   public:
+    VOC(const std::string &voc_path);
+    
     void load(const std::vector<Word> &word);
     
     void load(const std::string &voc_path);

@@ -11,7 +11,11 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/lead.js"></script>
     <script>
-        window.onload = init_search_result;
+        window.onload = function () {
+            without_appbar = true;
+            init_page();
+            init_search_result();
+        };
     </script>
 </head>
 <body class="mdui-appbar-with-toolbar">

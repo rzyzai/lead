@@ -12,7 +12,7 @@
     <script src="js/lead.js"></script>
     <script type="text/javascript">
         window.onload = function () {
-            init_toolbar_and_drawer();
+            init_page();
             init_marked();
         };
     </script>
@@ -20,29 +20,36 @@
 <body class="mdui-loaded mdui-drawer-body-left mdui-appbar-with-toolbar">
 <div class="mdui-appbar mdui-appbar-fixed">
     <div class="mdui-toolbar mdui-color-blue-700">
-        <a class="mdui-btn mdui-btn-icon" href="#" mdui-drawer="{target: '#left-drawer'}">
+        <a class="mdui-btn mdui-btn-icon toolbar-hidden-when-search" href="#" mdui-drawer="{target: '#left-drawer'}">
             <i class="mdui-icon material-icons mdui-text-color-white-icon">menu</i>
         </a>
-        <span class="mdui-typo-title mdui-text-color-white" onclick="window.location='/'">Lead</span>
+        <span class="mdui-typo-title mdui-text-color-white toolbar-hidden-when-search" onclick="window.location='/'">Lead</span>
         <div class="mdui-toolbar-spacer"></div>
-        <form id="search-form">
-            <div class="mdui-textfield mdui-textfield-expandable mdui-float-right">
-                <button class="mdui-textfield-icon mdui-btn mdui-btn-icon">
-                    <i class="mdui-icon material-icons">search</i>
-                </button>
-                <input id="search-value" class="mdui-textfield-input" style="color: white" required/>
-                <button class="mdui-textfield-close mdui-btn mdui-btn-icon">
-                    <i class="mdui-icon material-icons">close</i>
-                </button>
-            </div>
-        </form>
+        <button class="mdui-btn-icon mdui-btn mdui-ripple mdui-color-theme-accent toolbar-hidden-when-search"
+                mdui-dialog="{target: '#loginDialog', history: false, modal: true}">
+            <i class="mdui-icon material-icons">account_circle</i>
+        </button>
+        <div id="toolbar-search-container">
+            <form id="search-form">
+                <div class="mdui-textfield mdui-textfield-expandable mdui-float-right" id="toolbar-search">
+                    <button class="mdui-textfield-icon mdui-btn mdui-btn-icon">
+                        <i class="mdui-icon material-icons">search</i>
+                    </button>
+                    <input id="search-value" class="mdui-textfield-input" style="color: white" required/>
+                    <button class="mdui-textfield-close mdui-btn mdui-btn-icon">
+                        <i class="mdui-icon material-icons">close</i>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+</div>
 <div class="drawer mdui-drawer" id="left-drawer">
-    <div class="drawer-content account-info">
-        <img class="mdui-img-circle account-image" src="account.jpg"/>
-        <p class="account-name mdui-m-y-1" id="account-name">Guest</p>
-        <p class="account-email mdui-m-y-0 mdui-p-b-2" id="account-email">guest</p>
+    <div id="account-info" class="drawer-content account-info" mdui-dialog="{target: '#loginDialog', history: false, modal: true}">
+        <img id="account-picture" class="mdui-img-circle account-picture" src="account.jpg"/>
+        <p class="account-name mdui-m-t-1 mdui-m-b-0" id="account-name">未登录</p>
+        <p class="account-email mdui-m-y-0 mdui-p-b-3 mdui-hidden" id="account-email">邮箱</p>
     </div>
     <div class="mdui-divider"></div>
     <ul class="mdui-list">
@@ -74,6 +81,10 @@
         </div>
         <li class="mdui-subheader mdui-p-l-2">应用</li>
         <div class="drawer-content">
+            <a href="settings.html" class="mdui-list-item mdui-ripple">
+                <i class="mdui-list-item-icon mdui-icon material-icons">settings</i>
+                <div class="mdui-list-item-content mdui-text-color-black-text">设置</div>
+            </a>
             <a href="about.html" class="mdui-list-item mdui-ripple">
                 <i class="mdui-list-item-icon mdui-icon material-icons">info_outline</i>
                 <div class="mdui-list-item-content mdui-text-color-black-text">关于</div>
@@ -81,12 +92,82 @@
         </div>
     </ul>
 </div>
+<div class="mdui-dialog dialog-interface" id="loginDialog">
+    <button class="mdui-btn mdui-btn-icon" mdui-dialog-close id="login-dialog-close">
+        <i class="mdui-icon material-icons">navigate_before</i></button>
+    <div class="mdui-dialog-title mdui-color-blue-700">登录</div>
+    <form id="login-form">
+        <div class="mdui-textfield mdui-textfield-floating-label">
+            <i class="mdui-icon material-icons">account_circle</i>
+            <label class="mdui-textfield-label">用户名</label>
+            <input class="mdui-textfield-input" id="login-user-name" required/>
+            <div class="mdui-textfield-error">用户名不能为空</div>
+        </div>
+        <div class="mdui-textfield mdui-textfield-floating-label">
+            <i class="mdui-icon material-icons">lock</i>
+            <label class="mdui-textfield-label">密码</label>
+            <input class="mdui-textfield-input" type="password" id="login-password" required/>
+            <div class="mdui-textfield-error">密码不能为空</div>
+        </div>
+        <div class="actions">
+            <button class="mdui-btn mdui-ripple" type="button" mdui-dialog="{target: '#registerDialog', history: false, modal: true}"
+                    onclick="document.getElementById('login-dialog-close').click();">创建新账号</button>
+            <div class="divider"></div>
+            <button type="submit" class="mdui-btn mdui-btn-raised mdui-color-blue-700">登录</button>
+        </div>
+    </form>
+</div>
+<div class="mdui-dialog dialog-interface" id="registerDialog">
+    <button class="mdui-btn mdui-btn-icon" mdui-dialog-close id="register-dialog-close">
+        <i class="mdui-icon material-icons">navigate_before</i></button>
+    <div class="mdui-dialog-title mdui-color-blue-700">注册</div>
+    <form id="register-form">
+        <div class="mdui-textfield mdui-textfield-floating-label">
+            <i class="mdui-icon material-icons">account_circle</i>
+            <label class="mdui-textfield-label">用户名</label>
+            <input class="mdui-textfield-input" id="register-user-name" required/>
+            <div class="mdui-textfield-error">用户名不能为空</div>
+        </div>
+        <div class="mdui-textfield mdui-textfield-floating-label">
+            <i class="mdui-icon material-icons">email</i>
+            <label class="mdui-textfield-label">邮箱</label>
+            <input class="mdui-textfield-input" type="email" id="register-email" required/>
+            <div class="mdui-textfield-error">邮箱格式错误</div>
+        </div>
+        <div class="mdui-textfield mdui-textfield-floating-label">
+            <i class="mdui-icon material-icons">lock</i>
+            <label class="mdui-textfield-label">密码</label>
+            <input class="mdui-textfield-input" type="password" id="register-password"
+                   pattern="^.*(?=.{6,})(?=.*[a-z])(?=.*[A-Z]).*$" required/>
+            <div class="mdui-textfield-error">密码至少 6 位，且包含大小写字母</div>
+            <div class="mdui-textfield-helper">请输入至少 6 位，且包含大小写字母的密码</div>
+        </div>
+        <div class="actions">
+            <button class="mdui-btn mdui-ripple" type="button" mdui-dialog="{target: '#loginDialog', history: false, modal: true}"
+                    onclick="document.getElementById('register-dialog-close').click();">已有账号？</button>
+            <div class="divider"></div>
+            <button type="submit" class="mdui-btn mdui-btn-raised mdui-color-blue-700">注册</button>
+        </div>
+    </form>
+</div>
+<div class="mdui-dialog dialog-interface" id="uploadDialog">
+    <button class="mdui-btn mdui-btn-icon" mdui-dialog-close id="upload-dialog-close">
+        <i class="mdui-icon material-icons">navigate_before</i></button>
+    <div class="mdui-dialog-title mdui-color-blue-700">上传头像</div>
+    <form id="upload-form">
+        <input class="upload-btn" type="file" id="upload-pic" accept="image/png,image/gif,image/jpeg" required/>
+        <div class="actions">
+            <div class="divider"></div>
+            <button type="submit" class="mdui-btn mdui-btn-raised mdui-color-blue-700">上传</button>
+        </div>
+    </form>
+</div>
 <div class="loading mdui-p-t-3 mdui-p-l-3 mdui-p-r-3" id="loading">
     <div class="mdui-progress">
         <div class="mdui-progress-indeterminate"></div>
     </div>
 </div>
-<div class="mdui-container mdui-hidden" id="content">
+<div class="mdui-container-fluid mdui-hidden" id="content">
     <div class="explanation mdui-p-t-2" id="marked-words">
     </div>
     <div class="item mdui-text-center mdui-p-t-2">

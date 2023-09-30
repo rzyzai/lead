@@ -19,37 +19,21 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#ifndef LEAD_SERVER_HPP
-#define LEAD_SERVER_HPP
+#ifndef LEAD_META_HPP
+#define LEAD_META_HPP
 #pragma once
 
-#include "utils.hpp"
-#include "user.hpp"
-#include "cpp-httplib/httplib.h"
 #include "nlohmann/json.hpp"
 #include <string>
-#include <chrono>
-#include <vector>
-#include <filesystem>
 
 namespace lead
 {
-  class Server
+  struct Meta
   {
-  private:
-    std::filesystem::path res_path;
-    VOC vocabulary;
-    UserManager user_manager;
-    std::string listen_addr;
-    int listen_port;
-  public:
-    Server(const std::string addr, int port, const std::string &res_path_);
-    
-    void run();
-
-  private:
-    void auth_do(const httplib::Request &req, httplib::Response &res,
-                 const std::function<nlohmann::json(std::unique_ptr<UserRef>, const httplib::Request &)> &func);
+    std::string version;
+    int user_count;
   };
+  void to_json(nlohmann::json &j, const lead::Meta &p);
+  void from_json(const nlohmann::json &j, lead::Meta &p);
 }
 #endif

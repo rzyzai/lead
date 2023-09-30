@@ -24,19 +24,27 @@
 #pragma once
 
 #include "voc.hpp"
+#include "leveldb/db.h"
+#include "meta.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
 #include <filesystem>
 #include <map>
+#include <memory>
 
 namespace lead
 {
   constexpr size_t planned_review_times = 30;
+  const std::vector<std::string> settings_list
+      {
+          "memorize_autoplay"
+      };
   
   struct WordRecord
   {
     size_t points;
+    
     WordRecord() : points(planned_review_times) {}
   };
   
@@ -44,55 +52,99 @@ namespace lead
   
   void from_json(const nlohmann::json &j, lead::WordRecord &p);
   
-  class User
+  bool check_settings(const nlohmann::json &s);
+  
+  enum class UserManagerStatus
   {
+    success,
+    user_not_found,
+    user_already_exists,
+    incorrect_username_or_password,
+    db_error
+  };
+  
+  std::string to_string(UserManagerStatus s);
+  
+  class UserManager;
+  
+  class UserRef
+  {
+    friend UserManager;
+  public:
+    size_t userid;
+    std::string username;
+    std::string email;
+    std::string profile_picture;
   private:
+    std::string passwd;
     std::vector<WordRecord> word_records;
     std::vector<size_t> marked_words;
-    std::string record_path;
     size_t plan_pos;
+    nlohmann::json settings;
+    VOC *vocabulary;
+    leveldb::DB *user_db;
   public:
-    User(const std::string &voc_dir_path, const std::string &record_dir_path);
+    UserRef(size_t userid_, std::string username_, std::string email_, std::string passwd_, VOC *voc, leveldb::DB *db);
     
-    WordRef get_word(size_t w) const;
+    UserRef(const nlohmann::json &config, VOC *voc, leveldb::DB *db);
     
-    WordRef get_random_word() const;
-  
+    ~UserRef();
+    
     WordRef get_memorize_word();
     
     WordRef prev_memorize_word();
-  
+    
     WordRef set_memorize_word(size_t index);
     
     WordRef curr_memorize_word() const;
     
     WordRecord *word_record(size_t w);
     
-    std::string get_explanation(size_t index) const;
-    
     nlohmann::json get_quiz(WordRef wr) const;
-  
-    nlohmann::json search(const std::string &word) const;
     
-    void clear_records();
+    void clear_word_records();
     
     void clear_marks();
-  
+    
     int mark_word(size_t index);
-  
+    
     int unmark_word(size_t index);
     
     bool is_marked(size_t index) const;
-  
+    
     nlohmann::json get_marked() const;
     
     nlohmann::json get_passed() const;
     
     nlohmann::json get_plan() const;
+    
+    nlohmann::json get_settings() const;
+    
+    nlohmann::json update_settings(const nlohmann::json &settings_);
   
-    void write_records();
+    leveldb::Status write_records();
+  };
   
-    VOC vocabulary;
+  class UserManager
+  {
+  private:
+    leveldb::DB *db;
+  public:
+    Meta meta;
+    VOC* vocabulary;
+    std::string record_path;
+  public:
+    UserManager(const std::string &record_path, VOC* voc);
+    
+    ~UserManager();
+    
+    std::tuple<UserManagerStatus, std::unique_ptr<UserRef>>
+    create_user(const std::string &username, const std::string &email, const std::string &passwd);
+    
+    std::tuple<UserManagerStatus, std::unique_ptr<UserRef>>
+    get_user(const std::string &username, const std::string &passwd);
+  
+    void update_meta() const;
   };
 }
 #endif

@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023 caozhanhao
+// Copyright (c) 2023 rzyzai, and caozhanhao
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,37 +19,20 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#ifndef LEAD_SERVER_HPP
-#define LEAD_SERVER_HPP
-#pragma once
 
-#include "utils.hpp"
-#include "user.hpp"
-#include "cpp-httplib/httplib.h"
+#include "lead/meta.hpp"
 #include "nlohmann/json.hpp"
-#include <string>
-#include <chrono>
-#include <vector>
-#include <filesystem>
 
 namespace lead
 {
-  class Server
+  void to_json(nlohmann::json &j, const lead::Meta &p)
   {
-  private:
-    std::filesystem::path res_path;
-    VOC vocabulary;
-    UserManager user_manager;
-    std::string listen_addr;
-    int listen_port;
-  public:
-    Server(const std::string addr, int port, const std::string &res_path_);
-    
-    void run();
-
-  private:
-    void auth_do(const httplib::Request &req, httplib::Response &res,
-                 const std::function<nlohmann::json(std::unique_ptr<UserRef>, const httplib::Request &)> &func);
-  };
+    j = {{"version", p.version}, {"user_count", p.user_count}};
+  }
+  
+  void from_json(const nlohmann::json &j, lead::Meta &p)
+  {
+    j["version"].get_to(p.version);
+    j["user_count"].get_to(p.user_count);
+  }
 }
-#endif

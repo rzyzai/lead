@@ -13,7 +13,7 @@
     <script type="text/javascript">
         window.onload = function () {
             init_page();
-            init_passed();
+            init_settings();
         };
     </script>
 </head>
@@ -74,16 +74,16 @@
                 <i class="mdui-list-item-icon mdui-icon material-icons">bookmark</i>
                 <div class="mdui-list-item-content mdui-text-color-black-text">收藏</div>
             </a>
-            <a class="mdui-list-item mdui-ripple mdui-list-item-active">
+            <a href="passed.html" class="mdui-list-item mdui-ripple">
                 <i class="mdui-list-item-icon mdui-icon material-icons">list</i>
-                <div class="mdui-list-item-content">已记住</div>
+                <div class="mdui-list-item-content mdui-text-color-black-text">已记住</div>
             </a>
         </div>
         <li class="mdui-subheader mdui-p-l-2">应用</li>
         <div class="drawer-content">
-            <a href="settings.html" class="mdui-list-item mdui-ripple">
+            <a class="mdui-list-item mdui-ripple mdui-list-item-active">
                 <i class="mdui-list-item-icon mdui-icon material-icons">settings</i>
-                <div class="mdui-list-item-content mdui-text-color-black-text">设置</div>
+                <div class="mdui-list-item-content">设置</div>
             </a>
             <a href="about.html" class="mdui-list-item mdui-ripple">
                 <i class="mdui-list-item-icon mdui-icon material-icons">info_outline</i>
@@ -168,20 +168,15 @@
     </div>
 </div>
 <div class="mdui-container-fluid mdui-hidden" id="content">
-    <div class="explanation mdui-p-t-2" id="passed-words">
-    </div>
-    <div class="item mdui-text-center">
-        <p>单词/短语：已记住<span id="passed_word_count">n</span>个, 共<span id="word_count">n</span>个</p></p>
-        <div class="progressbar">
-            <div class="mdui-progress">
-                <div class="mdui-progress-determinate" id="progress_bar"></div>
-            </div>
-        </div>
-        <button class="mdui-btn mdui-btn-raised mdui-color-red mdui-text-color-white-text"
-                onclick="mdui.confirm('确认清除所有记录吗？清除的记录将无法恢复。', '清除记录', clear_word_records, function(e){e.close();}, {confirmText: '确认', cancelText: '取消'})()">
-            清除所有记录
-        </button>
-    </div>
+    <ul class="mdui-list">
+        <li class="mdui-list-item mdui-ripple">
+            <div class="mdui-list-item-content">记忆页面切换时自动朗读单词</div>
+            <label class="mdui-switch">
+                <input type="checkbox" class="setting" id="memorize_autoplay" onchange="update_settings()"/>
+                <i class="mdui-switch-icon"></i>
+            </label>
+        </li>
+    </ul>
 </div>
 </body>
 </html>
