@@ -509,10 +509,14 @@ function prev_quiz() {
 }
 
 function apply_quiz(new_quiz) {
-    $("#A").attr("class", "mdui-list-item", "mdui-ripple");
-    $("#B").attr("class", "mdui-list-item", "mdui-ripple");
-    $("#C").attr("class", "mdui-list-item", "mdui-ripple");
-    $("#D").attr("class", "mdui-list-item", "mdui-ripple");
+    $("#A").parent().removeClass("mdui-color-red");
+    $("#A").parent().removeClass("mdui-color-light-green");
+    $("#B").parent().removeClass("mdui-color-red");
+    $("#B").parent().removeClass("mdui-color-light-green");
+    $("#C").parent().removeClass("mdui-color-red");
+    $("#C").parent().removeClass("mdui-color-light-green");
+    $("#D").parent().removeClass("mdui-color-red");
+    $("#D").parent().removeClass("mdui-color-light-green");
     $("#explanation").html("");
     $("#question").html(new_quiz["question"]);
     $("#A").html("A. " + new_quiz["options"]["A"]);
