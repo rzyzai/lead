@@ -20,7 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #include "lead/server.hpp"
-#include <filesystem>
 int main(int argc, char* argv[])
 {
   if (argc != 4)
