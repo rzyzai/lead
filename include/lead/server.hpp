@@ -36,7 +36,7 @@ namespace lead
   class Server
   {
   private:
-    std::filesystem::path res_path;
+    std::string res_path;
     VOC vocabulary;
     UserManager user_manager;
     std::string listen_addr;

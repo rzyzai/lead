@@ -32,10 +32,10 @@ namespace lead
 {
   Server::Server(const std::string addr, int port, const std::string &res_path_)
       : listen_addr(addr), listen_port(port), res_path(res_path_),
-        vocabulary(res_path / "voc" "/" "voc.json"),
-      user_manager(res_path / "records", &vocabulary)
+        vocabulary(res_path + "/voc/voc.json"),
+      user_manager(res_path + "/records", &vocabulary)
   {
-    std::cout << "Loaded vocabulary at '" << res_path / "voc" << "'." << std::endl;
+    std::cout << "Loaded vocabulary at '" << res_path + "/voc" << "'." << std::endl;
   }
   
   void Server::auth_do(const httplib::Request &req, httplib::Response &res,
@@ -59,13 +59,13 @@ namespace lead
   void Server::run()
   {
     httplib::Server svr;
-    svr.set_mount_point("/", res_path / "html");
-    svr.set_mount_point("/", res_path / "icons");
-    svr.set_mount_point("/css", res_path / "css");
-    svr.set_mount_point("/fonts", res_path / "fonts");
-    svr.set_mount_point("/icons", res_path / "icons");
-    svr.set_mount_point("/js", res_path / "js");
-    svr.set_mount_point("/userpic", res_path / "records" / "userpic");
+    svr.set_mount_point("/", res_path + "/html");
+    svr.set_mount_point("/", res_path + "/icons");
+    svr.set_mount_point("/css", res_path + "/css");
+    svr.set_mount_point("/fonts", res_path + "/fonts");
+    svr.set_mount_point("/icons", res_path + "/icons");
+    svr.set_mount_point("/js", res_path + "/js");
+    svr.set_mount_point("/userpic", res_path + "/records/userpic");
     svr.Get("/api/register", [this](const httplib::Request &req, httplib::Response &res)
     {
       auto[status, ur] = user_manager.create_user(req.get_param_value("username"), req.get_param_value("email"), req.get_param_value("passwd"));
@@ -95,7 +95,7 @@ namespace lead
                   {"message", "The picture is too big."}};
         }
         auto file_name = "pic-" + std::to_string(ur->userid);
-        std::ofstream ofs(res_path / "records" / "userpic" / file_name, std::ios::binary);
+        std::ofstream ofs(res_path + "/records/userpic/" + file_name, std::ios::binary);
         ofs << req.body;
         ur->profile_picture = file_name;
         ofs.close();

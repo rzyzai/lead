@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
       return -1;
     }
   }
-  std::filesystem::path res(argv[3]);
+  std::string res(argv[3]);
   lead::Server svr(argv[1], std::stoi(argv[2]), res);
   svr.run();
   return 0;
