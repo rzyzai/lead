@@ -1,4 +1,6 @@
 "use strict"
+let current_page = "";
+
 let username = "__lead_guest__";
 let passwd = "__lead_guest__";
 let userinfo = null;
@@ -17,7 +19,6 @@ let memorize_meaning = "";
 let search_data = null;
 let locate_select_dialog = null;
 
-let without_appbar = false;
 let settings = null;
 let mutationObserver = null;
 function register(u_name, email, pwd) {
@@ -103,8 +104,20 @@ function update_account_info()
 }
 
 
-function init_page() {
-    if (!without_appbar) {
+function init_page(with_appbar) {
+    with_appbar = typeof with_appbar !== 'undefined' ? with_appbar : true;
+    if (with_appbar) {
+        $.ajax({
+            type: 'GET',
+            url: "fragment/appbar.html",
+            async: false,
+            success: function (result) {
+                $("#appbar-placeholder").html(result);
+                $("#page-" + current_page).addClass("mdui-list-item-active");
+                $("#page-" + current_page + " > div").removeClass("mdui-text-color-black-text");
+                mdui.mutation();
+            }
+        });
         var search_form = document.getElementById("search-form");
         search_form.onsubmit = function (event) {
             var search_word = document.getElementById("search-value").value;
@@ -127,7 +140,6 @@ function init_page() {
             });
             event.preventDefault();
         }
-
 
         var login_form = document.getElementById("login-form");
         login_form.onsubmit = function (event) {
@@ -194,139 +206,167 @@ function init_page() {
     });
 }
 
-function init_home() {
-    $.ajax({
-        type: 'GET',
-        url: "api/get_plan",
-        data: {
-            username: username,
-            passwd: passwd
-        },
-        success: function (result) {
-            if (result["status"] == "success") {
-                if (result["finished_word_count"] == result["planned_word_count"]) {
-                    $("#message").html("<h3>今日计划已完成</h3>");
-                } else {
-                    $("#finished_word_count").html(result["finished_word_count"]);
-                    $("#planned_word_count").html(result["planned_word_count"]);
+function init_content(page) {
+    switch (page) {
+        case "plan":
+            $.ajax({
+                type: 'GET',
+                url: "api/get_plan",
+                data: {
+                    username: username,
+                    passwd: passwd
+                },
+                success: function (result) {
+                    if (result["status"] == "success") {
+                        if (result["finished_word_count"] == result["planned_word_count"]) {
+                            $("#message").html("<h3>今日计划已完成</h3>");
+                        } else {
+                            $("#finished_word_count").html(result["finished_word_count"]);
+                            $("#planned_word_count").html(result["planned_word_count"]);
+                        }
+                        $("#progress_bar").attr('style', 'width:' + (result["finished_word_count"] / result["planned_word_count"]) * 100 + '%;');
+                    } else {
+                        mdui.snackbar(result["message"]);
+                    }
                 }
-                $("#progress_bar").attr('style', 'width:' + (result["finished_word_count"] / result["planned_word_count"]) * 100 + '%;');
-            } else {
-                mdui.snackbar(result["message"]);
-            }
-        }
-    });
-}
-
-function init_memorize() {
-    next_word(false);
-    var Element = document.getElementById('memorize-swipe');
-    var mc = new Hammer(Element);
-    mc.on("swiperight", function (ev) {
-        prev_word();
-        $(".mdui-bottom-nav-fixed").append(
-            '<button class="mdui-fab mdui-ripple swiperight">' +
-            '<i class="mdui-icon material-icons">navigate_before</i></button>')
-        $(".swiperight").fadeTo('normal', 0.01,
-            function () {
-                $(this).slideUp('normal', function () {
-                    $(this).remove();
-                });
             });
-        ;
-    });
-    mc.on("swipeleft", function (ev) {
-        next_word(true);
-        $(".mdui-bottom-nav-fixed").append(
-            '<button class="mdui-fab mdui-ripple swipeleft">' +
-            '<i class="mdui-icon material-icons">navigate_next</i></button>')
-        $(".swipeleft").fadeTo('normal', 0.01,
-            function () {
-                $(this).slideUp('normal', function () {
-                    $(this).remove();
-                });
+            break;
+        case "marked":
+            $.ajax({
+                type: 'GET',
+                url: "api/get_marked",
+                data:
+                    {
+                        username: username,
+                        passwd: passwd
+                    },
+                success: function (result) {
+                    if (result["status"] == "success") {
+                        var content = '<div class="mdui-panel" mdui-panel>';
+                        for (let i = result["marked_words"].length - 1; i >= 0; i--) {
+                            content += marked_explanation_panel(result["marked_words"][i]);
+                        }
+                        content += '</div>'
+                        $("#marked-words").html(content);
+                        mdui.mutation();
+                        $("#loading").remove();
+                        $("#marked-data").removeClass("mdui-hidden");
+                    } else {
+                        mdui.snackbar(result["message"]);
+                    }
+                }
             });
-        ;
-    });
-}
+            break;
+        case "memorize":
+            next_word(false);
+            var Element = document.getElementById('memorize-swipe');
+            var mc = new Hammer(Element);
+            mc.on("swiperight", function (ev) {
+                prev_word();
+                $(".mdui-bottom-nav-fixed").append(
+                    '<button class="mdui-fab mdui-ripple swiperight">' +
+                    '<i class="mdui-icon material-icons">navigate_before</i></button>')
+                $(".swiperight").fadeTo('normal', 0.01,
+                    function () {
+                        $(this).slideUp('normal', function () {
+                            $(this).remove();
+                        });
+                    });
+                ;
+            });
+            mc.on("swipeleft", function (ev) {
+                next_word(true);
+                $(".mdui-bottom-nav-fixed").append(
+                    '<button class="mdui-fab mdui-ripple swipeleft">' +
+                    '<i class="mdui-icon material-icons">navigate_next</i></button>')
+                $(".swipeleft").fadeTo('normal', 0.01,
+                    function () {
+                        $(this).slideUp('normal', function () {
+                            $(this).remove();
+                        });
+                    });
+                ;
+            });
+            break;
+        case "passed":
+            $.ajax({
+                type: 'GET',
+                url: "api/get_passed",
+                data: {
+                    username: username,
+                    passwd: passwd
+                },
+                success: function (result) {
+                    if (result["status"] == "success") {
+                        $("#passed_word_count").html(result["passed_word_count"]);
+                        $("#word_count").html(result["word_count"]);
+                        $("#progress_bar").attr('style', 'width:' + (result["passed_word_count"] / result["word_count"]) * 100 + '%;')
 
-function init_marked() {
-    $.ajax({
-        type: 'GET',
-        url: "api/get_marked",
-        data:
-            {
-                username: username,
-                passwd: passwd
-            },
-        success: function (result) {
-            if (result["status"] == "success") {
-                var content = '<div class="mdui-panel" mdui-panel>';
-                for (let i = result["marked_words"].length - 1; i >= 0; i--) {
-                    content += marked_explanation_panel(result["marked_words"][i]);
+                        var content = '<div class="mdui-panel" mdui-panel>';
+                        for (let i = result["passed_words"].length - 1; i >= 0; i--) {
+                            content += passed_explanation_panel(result["passed_words"][i]);
+                        }
+                        content += '</div>'
+                        $("#passed-words").html(content);
+                        mdui.mutation();
+                        $("#loading").remove();
+                        $("#passed-data").removeClass("mdui-hidden");
+                    } else {
+                        mdui.snackbar(result["message"]);
+                    }
                 }
-                content += '</div>'
-                $("#marked-words").html(content);
-                mdui.mutation();
-                $("#loading").remove();
-                $("#content").removeClass("mdui-hidden");
-            } else {
-                mdui.snackbar(result["message"]);
+            });
+            break;
+        case "quiz":
+            next_quiz(-1);
+            break;
+        case "search":
+            if (search_data == null)
+                search_data = JSON.parse(window.sessionStorage.getItem("search_result"));
+            else
+                window.sessionStorage.setItem("search_result", search_data);
+            var content = '<div class="mdui-panel" mdui-panel>';
+            for (var word in search_data["words"])
+                content += search_explanation_panel(search_data["words"], word);
+            content += '</div>'
+            $("#search-result").html(content);
+            $("#search-title").html(search_data["message"]);
+            mdui.mutation();
+            break;
+        case "settings":
+            for (var s in settings) {
+                document.getElementById(s).checked = settings[s];
             }
-        }
-    });
-}
-
-function init_passed() {
-    $.ajax({
-        type: 'GET',
-        url: "api/get_passed",
-        data: {
-            username: username,
-            passwd: passwd
-        },
-        success: function (result) {
-            if (result["status"] == "success") {
-                $("#passed_word_count").html(result["passed_word_count"]);
-                $("#word_count").html(result["word_count"]);
-                $("#progress_bar").attr('style', 'width:' + (result["passed_word_count"] / result["word_count"]) * 100 + '%;')
-
-                var content = '<div class="mdui-panel" mdui-panel>';
-                for (let i = result["passed_words"].length - 1; i >= 0; i--) {
-                    content += passed_explanation_panel(result["passed_words"][i]);
-                }
-                content += '</div>'
-                $("#passed-words").html(content);
-                mdui.mutation();
-                $("#loading").remove();
-                $("#content").removeClass("mdui-hidden");
-            } else {
-                mdui.snackbar(result["message"]);
-            }
-        }
-    });
-}
-
-function init_settings() {
-    for (var s in settings) {
-        document.getElementById(s).checked = settings[s];
+            $("#loading").remove();
+            $("#settings-data").removeClass("mdui-hidden");
+            break;
     }
-    $("#loading").remove();
-    $("#content").removeClass("mdui-hidden");
 }
 
-function init_search_result() {
-    if (search_data == null)
-        search_data = JSON.parse(window.sessionStorage.getItem("search_result"));
-    else
-        window.sessionStorage.setItem("search_result", search_data);
-    var content = '<div class="mdui-panel" mdui-panel>';
-    for (var word in search_data["words"])
-        content += search_explanation_panel(search_data["words"], word);
-    content += '</div>'
-    $("#search-result").html(content);
-    $("#search-title").html(search_data["message"]);
-    mdui.mutation();
+function load_body(page)
+{
+    if(current_page != "") {
+        $("#page-" + current_page).removeClass("mdui-list-item-active");
+        $("#page-" + current_page + " > div").addClass("mdui-text-color-black-text");
+    }
+    current_page = page;
+    $.ajax({
+        type: 'GET',
+        url: "fragment/" + page + ".html",
+        async: false,
+        success: function (result) {
+            $("#page-" + page).addClass("mdui-list-item-active");
+            $("#page-" + page + " > div").removeClass("mdui-text-color-black-text");
+            let doc = new DOMParser().parseFromString(result, 'text/html');
+            let bodyClassList = doc.querySelector('body').classList;
+            let content = doc.querySelector('#content');
+            document.getElementById('content').replaceWith(content);
+            document.getElementsByTagName('body')[0].classList = bodyClassList;
+            init_content(page);
+            if(window.innerWidth < 599)
+                document.getElementById('drawer-button')?.click();
+        }
+    });
 }
 
 function init_prompt() {

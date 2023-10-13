@@ -243,14 +243,14 @@ namespace lead
     {
       auto i = std::stoi(req.get_param_value("word_index"));
       res.set_content(nlohmann::json{{"status",      "success"},
-                                     {"explanation", vocabulary.get_explanation(i)}}, "application/json");
+                                     {"explanation", vocabulary.get_explanation(i)}}.dump(), "application/json");
     });
   
     svr.Get("/api/get_word", [this](const httplib::Request &req, httplib::Response &res)
     {
       auto i = std::stoi(req.get_param_value("word_index"));
       res.set_content(nlohmann::json{{"status", "success"},
-                                     {"word",   vocabulary.at(i).word->word}}, "application/json");
+                                     {"word",   vocabulary.at(i).word->word}}.dump(), "application/json");
     });
     
     svr.Get("/api/get_plan", [this](const httplib::Request &req, httplib::Response &res)

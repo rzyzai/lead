@@ -1,0 +1,24 @@
+<body class="mdui-loaded mdui-drawer-body-left mdui-appbar-with-toolbar">
+<div id="appbar-placeholder"></div>
+<div id="content">
+    <div class="mdui-container">
+        <div class="message mdui-text-center">
+            <i class="mdui-icon material-icons mdui-p-t-4" style="font-size:4rem">multiline_chart</i>
+            <h2>当前计划</h2>
+            <p class="mdui-p-b-3 mdui-p-t-2">计划记忆 <span id="planned_word_count">n</span>个，已记忆 <span
+                    id="finished_word_count">n</span>个</p>
+            <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text"
+                    onclick="window.location='/memorize.html'">开始记忆
+            </button>
+            <button class="mdui-btn mdui-btn-raised mdui-color-blue-700 mdui-text-color-white-text"
+                    onclick="window.location='/quiz.html'">检测
+            </button>
+        </div>
+        <div class="progressbar mdui-p-t-3">
+            <div class="mdui-progress">
+                <div class="mdui-progress-determinate" id="progress_bar"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>

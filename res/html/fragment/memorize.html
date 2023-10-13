@@ -1,0 +1,48 @@
+<body class="mdui-loaded mdui-drawer-body-left mdui-bottom-nav-fixed mdui-appbar-with-toolbar">
+<div id="appbar-placeholder"></div>
+<div id="content">
+    <div id="memorize-swipe">
+    </div>
+    <div class="mdui-container explanation" id="explanation">
+    </div>
+    <div class="mdui-dialog" id="locateDialog">
+        <div class="mdui-dialog-title">跳转至</div>
+        <div class="mdui-container mdui-text-center">
+            <div class="mdui-textfield" id="search-locate-textfield">
+                <input id="search-locate-value" class="mdui-textfield-input" type="text" placeholder="lead"
+                       style="text-align: center;" onchange="locate_verify()"/>
+                <div class="mdui-textfield-error">未找到该单词</div>
+            </div>
+            <label class="mdui-slider mdui-slider-discrete">
+                <input id="locate-value" type="range" step="1" min="0" max="12683" value="0" onchange="locate_word()"/>
+            </label>
+        </div>
+        <div class="mdui-dialog-actions">
+            <button class="mdui-btn mdui-ripple" id="locateDialog-close" mdui-dialog-close>取消</button>
+            <button class="mdui-btn mdui-ripple" onclick="locate_word_set();">确定</button>
+        </div>
+    </div>
+    <div class="mdui-bottom-nav mdui-color-white">
+        <a onclick="prev_word()">
+            <i class="mdui-icon material-icons">navigate_before</i>
+            <label>上一个</label>
+        </a>
+        <a onclick="next_word(true)">
+            <i class="mdui-icon material-icons">navigate_next</i>
+            <label>下一个</label>
+        </a>
+        <a onclick="mark_word(memorize_index)">
+            <i class="mdui-icon material-icons">star</i>
+            <label>收藏</label>
+        </a>
+        <a onclick="pass(memorize_index);next_word(true)">
+            <i class="mdui-icon material-icons">check</i>
+            <label>已记住</label>
+        </a>
+        <a mdui-dialog="{target: '#locateDialog'}">
+            <i class="mdui-icon material-icons">gps_fixed</i>
+            <label>跳转</label>
+        </a>
+    </div>
+</div>
+</body>

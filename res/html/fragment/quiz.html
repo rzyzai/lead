@@ -1,0 +1,41 @@
+﻿<body class="mdui-loaded mdui-drawer-body-left mdui-bottom-nav-fixed mdui-appbar-with-toolbar">
+<div id="appbar-placeholder"></div>
+<div id="content">
+    <div class="mdui-container-fluid mdui-p-t-3">
+        <div class="mdui-text-center">
+            <p>
+                <span id="question">question</span>
+            </p>
+        </div>
+        <ul class="mdui-list">
+            <li class="mdui-list-item mdui-ripple quiz-option" onclick="quiz_select('A')"><span id="A">A</span></li>
+            <div class="mdui-divider"></div>
+            <li class="mdui-list-item mdui-ripple quiz-option" onclick="quiz_select('B')"><span id="B">B</span></li>
+            <div class="mdui-divider"></div>
+            <li class="mdui-list-item mdui-ripple quiz-option" onclick="quiz_select('C')"><span id="C">C</span></li>
+            <div class="mdui-divider"></div>
+            <li class="mdui-list-item mdui-ripple quiz-option" onclick="quiz_select('D')"><span id="D">D</span></li>
+        </ul>
+        <div class="mdui-container-fluid explanation" id="explanation">
+        </div>
+    </div>
+    <div class="mdui-bottom-nav mdui-color-white">
+        <a onclick="prev_quiz()">
+            <i class="mdui-icon material-icons">navigate_before</i>
+            <label>上一个</label>
+        </a>
+        <a onclick="pass(quiz_word_index);next_quiz()">
+            <i class="mdui-icon material-icons">check</i>
+            <label>已记住</label>
+        </a>
+        <a onclick="mark_word(quiz_word_index)">
+            <i class="mdui-icon material-icons">star</i>
+            <label>收藏</label>
+        </a>
+        <a onclick="quiz_prompt()">
+            <i class="mdui-icon material-icons">school</i>
+            <label>查看解析</label>
+        </a>
+    </div>
+</div>
+</body>

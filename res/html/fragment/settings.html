@@ -1,0 +1,21 @@
+<body class="mdui-loaded mdui-drawer-body-left mdui-appbar-with-toolbar">
+<div id="appbar-placeholder"></div>
+<div id="content">
+    <div class="loading mdui-p-t-3 mdui-p-l-3 mdui-p-r-3" id="loading">
+        <div class="mdui-progress">
+            <div class="mdui-progress-indeterminate"></div>
+        </div>
+    </div>
+    <div class="mdui-container-fluid mdui-hidden" id="settings-data">
+        <ul class="mdui-list">
+            <li class="mdui-list-item mdui-ripple">
+                <div class="mdui-list-item-content">记忆页面切换时自动朗读单词</div>
+                <label class="mdui-switch">
+                    <input type="checkbox" class="setting" id="memorize_autoplay" onchange="update_settings()"/>
+                    <i class="mdui-switch-icon"></i>
+                </label>
+            </li>
+        </ul>
+    </div>
+</div>
+</body>
