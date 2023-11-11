@@ -13,7 +13,11 @@
     <script src="js/lead.js"></script>
     <script type="text/javascript">
         window.onload = function () {
-            load_body("plan")
+            var p = window.sessionStorage.getItem("page");
+            if (p != "")
+                load_body(p)
+            else
+                load_body("plan")
             init_page();
         };
     </script>

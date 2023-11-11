@@ -145,6 +145,8 @@ namespace lead
     get_user(const std::string &username, const std::string &passwd);
   
     void update_meta() const;
+  
+    nlohmann::json get_version() const;
   };
 }
 #endif

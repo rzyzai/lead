@@ -366,4 +366,13 @@ namespace lead
     meta_file << json.dump();
     meta_file.close();
   }
+  
+  nlohmann::json UserManager::get_version() const
+  {
+    std::ifstream meta(record_path + "/meta.json");
+    auto m = nlohmann::json::parse(meta);
+    return {{"status",   "success"},
+            {"version", m["version"]}
+    };
+  }
 }

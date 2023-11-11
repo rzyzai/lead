@@ -340,11 +340,21 @@ function init_content(page) {
             $("#loading").remove();
             $("#settings-data").removeClass("mdui-hidden");
             break;
+        case "about":
+            $.ajax({
+                type: 'GET',
+                url: "api/version",
+                success: function (result) {
+                    $("#version").html(result["version"]);
+                }
+            });
+            break;
     }
 }
 
 function load_body(page)
 {
+    window.sessionStorage.setItem("page", page);
     if(current_page != "") {
         $("#page-" + current_page).removeClass("mdui-list-item-active");
         $("#page-" + current_page + " > div").addClass("mdui-text-color-black-text");

@@ -260,6 +260,11 @@ namespace lead
       });
     });
   
+    svr.Get("/api/version", [this](const httplib::Request &req, httplib::Response &res)
+    {
+      res.set_content(user_manager.get_version().dump(), "application/json");
+    });
+  
     svr.Get("/api/get_settings", [this](const httplib::Request &req, httplib::Response &res)
     {
       auth_do(req, res, [](std::unique_ptr<UserRef> ur, const httplib::Request &req) -> nlohmann::json
