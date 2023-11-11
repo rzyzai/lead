@@ -771,7 +771,7 @@ function renew(word_index) {
 }
 
 function speak(word) {
-    var url = "https://api.oick.cn/txt/apiz.php?spd=5&text=" + encodeURI(word.replaceAll(' ', '-'));
+    var url = "http://dict.youdao.com/dictvoice?type=0&audio=" + encodeURI(word.replaceAll(' ', '-'));
     var n = new Audio(url);
     n.play();
 }
