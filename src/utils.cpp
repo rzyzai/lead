@@ -90,6 +90,7 @@ namespace lead::utils
           break;
         }
       }
+      fclose(fd);
       int t = info.totalram / 1024.0;
       status.used_memory = std::to_string((t - avimem) * 1.0 / 1024);
       status.total_memory = std::to_string(info.totalram * 1.0 / 1024 / 1024);
