@@ -21,6 +21,10 @@ let locate_select_dialog = null;
 
 let settings = null;
 let mutationObserver = null;
+let status_updater = null;
+let load_chart = null;
+let memory_chart = null;
+
 function register(u_name, email, pwd) {
     $.ajax({
         type: 'GET',
@@ -68,14 +72,13 @@ function login(u_name, pwd) {
     });
 }
 
-function upload_profile_picture(pic)
-{
+function upload_profile_picture(pic) {
     $.ajax({
         type: 'POST',
         url: "api/upload_profile_picture?username=" + username + "&passwd=" + passwd,
         dataType: "json",
         processData: false,
-        contentType : false,
+        contentType: false,
         data: pic,
         success: function (result) {
             if (result["status"] == "success") {
@@ -90,12 +93,11 @@ function upload_profile_picture(pic)
     });
 }
 
-function update_account_info()
-{
+function update_account_info() {
     $("#account-name").html(username);
     $("#account-email").html(userinfo["email"]);
     $("#account-email").removeClass("mdui-hidden");
-    if(userinfo["profile_picture"] != '')
+    if (userinfo["profile_picture"] != '')
         $("#account-picture").attr("src", "/userpic/" + userinfo["profile_picture"]);
     $("#account-info").removeAttr("mdui-dialog");
     $("#account-picture").attr("mdui-dialog", "{target: '#uploadDialog', history: false, modal: true}");
@@ -165,15 +167,15 @@ function init_page(with_appbar) {
             event.preventDefault();
         }
 
-        mutationObserver = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                    if ($("#toolbar-search").hasClass('mdui-textfield-expanded')) {
-                        $(".toolbar-hidden-when-search").addClass("search-bar-hidden");
-                        $("#toolbar-search-container").addClass("search-bar-container");
-                    } else {
-                        $(".toolbar-hidden-when-search").removeClass("search-bar-hidden");
-                        $("#toolbar-search-container").removeClass("search-bar-container");
-                    }
+        mutationObserver = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                if ($("#toolbar-search").hasClass('mdui-textfield-expanded')) {
+                    $(".toolbar-hidden-when-search").addClass("search-bar-hidden");
+                    $("#toolbar-search-container").addClass("search-bar-container");
+                } else {
+                    $(".toolbar-hidden-when-search").removeClass("search-bar-hidden");
+                    $("#toolbar-search-container").removeClass("search-bar-container");
+                }
             });
         });
         mutationObserver.observe($('#toolbar-search')[0], {
@@ -181,7 +183,7 @@ function init_page(with_appbar) {
         });
     }
     var user = JSON.parse(window.localStorage.getItem("user"));
-    if(!$.isEmptyObject(user) && user["username"] != "__lead_guest__") {
+    if (!$.isEmptyObject(user) && user["username"] != "__lead_guest__") {
         username = user["username"];
         passwd = user["passwd"];
         userinfo = JSON.parse(window.localStorage.getItem("userinfo"));
@@ -340,6 +342,155 @@ function init_content(page) {
             $("#loading").remove();
             $("#settings-data").removeClass("mdui-hidden");
             break;
+        case "serverinfo":
+            $.ajax({
+                type: 'GET',
+                url: "api/get_serverinfo",
+                success: function (result) {
+                    if (result["status"] == "success") {
+                        if (result["message"] != "")
+                            mdui.snackbar(result["message"]);
+                        $("#hostname").html("主机名： <strong>" + result["hostname"] + "</strong>");
+                        $("#system").html("系统： <strong>" + result["release"] + " " + result["machine"] + "</strong>");
+                        for (let i = result["network"].length - 1; i >= 0; i--) {
+                            var content =  '<div class="mdui-col mdui-ripple">' +
+                                '<div class="mdui-grid-tile">' +
+                                '<i class="mdui-list-item-icon mdui-icon material-icons mdui-p-r-4">settings_ethernet</i>';
+                            content += "<strong>" + result["network"][i]["name"] + "</strong><br><br>";
+                            content += "Mac地址: <em>" + result["network"][i]["mac"] + "</em><br><div class='mdui-p-t-1'></div>";
+                            content += "IPv4: <em>" + result["network"][i]["ipv4"] + "</em><br><div class='mdui-p-t-1'></div>";
+                            content += "IPv6: <em>" + result["network"][i]["ipv6"] + "</em></div></div>";
+                            $("#network").append(content);
+                        }
+                    } else {
+                        mdui.snackbar(result["message"]);
+                    }
+                }
+            });
+
+            const load_config = {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: '1',
+                        data: [],
+                        borderColor: 'rgb(25, 118, 210)',
+                        pointRadius : 0,
+                        cubicInterpolationMode: 'monotone',
+                        fill:
+                            {
+                                target: 'origin',
+                                above: 'rgb(25, 118, 210)'
+                            }
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins:
+                        {
+                            legend:
+                                {
+                                    display: false
+                                }
+                        },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            grid:
+                                {
+                                    lineWidth: 0,
+                                },
+                                ticks:
+                                    {display: false}
+                        },
+                        y: {
+                            type: 'linear',
+                            min: 0,
+                            grid:
+                                {
+                                    lineWidth: 0,
+                                }
+                        }
+                    }
+                }
+            };
+            const memory_config = JSON.parse(JSON.stringify(load_config));
+            memory_config.options.scales.y.max = 1;
+            var i = 0;
+            load_chart = new Chart(document.getElementById('load-chart'), load_config);
+            memory_chart = new Chart(document.getElementById('memory-chart'), memory_config);
+            Number.prototype.toFixed = function(d) {
+                var s = this + "";
+                if(!d) d = 0;
+                if(s.indexOf(".") == -1) s += ".";
+                s += new Array(d + 1).join("0");
+                if(new RegExp("^(-|\\+)?(\\d+(\\.\\d{0," + (d + 1) + "})?)\\d*$").test(s)) {
+                    var s = "0" + RegExp.$2,
+                        pm = RegExp.$1,
+                        a = RegExp.$3.length,
+                        b = true;
+                    if(a == d + 2) {
+                        a = s.match(/\d/g);
+                        if(parseInt(a[a.length - 1]) > 4) {
+                            for(var i = a.length - 2; i >= 0; i--) {
+                                a[i] = parseInt(a[i]) + 1;
+                                if(a[i] == 10) {
+                                    a[i] = 0;
+                                    b = i != 1;
+                                } else break;
+                            }
+                        }
+                        s = a.join("").replace(new RegExp("(\\d+)(\\d{" + d + "})\\d$"), "$1.$2");
+
+                    }
+                    if(b) s = s.substr(1);
+                    return(pm + s).replace(/\.$/, "");
+                }
+                return this + "";
+
+            };
+            status_updater = window.setInterval(function () {
+                    $.ajax({
+                        type: 'GET',
+                        url: "api/get_serverstatus",
+                        success: function (result) {
+                            if (result["status"] == "success") {
+                                var loads = result["load"].split(" ");
+                                $("#load").html("平均负载： <strong>"
+                                    + parseFloat(loads[0]).toFixed(2) + " "
+                                    + parseFloat(loads[1]).toFixed(2) + " "
+                                    + parseFloat(loads[2]).toFixed(2)
+                                    + "</strong>");
+                                $("#memory").html("内存占用： <strong>" +
+                                    "共" +  parseFloat(result["total_memory"]).toFixed(1)
+                                    + " Mib, " + parseFloat(result["used_memory"]).toFixed(1) + " Mib 可用"
+                                    + "</strong>");
+                                $("#time").html("系统时间： <strong>" + result["time"] + "</strong>");
+                                $("#running-time").html("运行时间： <strong>" + result["running_time"] + "</strong>");
+
+                                var a = result["load"].indexOf(' ');
+                                var l = result["load"].substring(0,a);
+                                var mem = result["used_memory"] / result["total_memory"];
+
+                                load_config.data.datasets[0].data.push({x: i, y: l});
+                                if(load_config.data.datasets[0].data.length > 100)
+                                    load_config.data.datasets[0].data.shift();
+
+                                memory_config.data.datasets[0].data.push({x: i, y: mem});
+                                if(memory_config.data.datasets[0].data.length > 100)
+                                    memory_config.data.datasets[0].data.shift();
+
+                                i += 1;
+                                load_chart.update('none');
+                                memory_chart.update('none');
+                            } else {
+                                mdui.snackbar(result["message"]);
+                            }
+                        }
+                    });
+                }
+                , 1000);
+            break;
         case "about":
             $.ajax({
                 type: 'GET',
@@ -352,10 +503,11 @@ function init_content(page) {
     }
 }
 
-function load_body(page)
-{
+function load_body(page) {
+    if (status_updater != null)
+        window.clearInterval(status_updater);
     window.sessionStorage.setItem("page", page);
-    if(current_page != "") {
+    if (current_page != "") {
         $("#page-" + current_page).removeClass("mdui-list-item-active");
         $("#page-" + current_page + " > div").addClass("mdui-text-color-black-text");
     }
@@ -373,7 +525,7 @@ function load_body(page)
             document.getElementById('content').replaceWith(content);
             document.getElementsByTagName('body')[0].classList = bodyClassList;
             init_content(page);
-            if(window.innerWidth < 599)
+            if (window.innerWidth < 599)
                 document.getElementById('drawer-button')?.click();
         }
     });
@@ -786,18 +938,18 @@ function speak(word) {
     n.play();
 }
 
-function clear_records() {
+function clear_word_records() {
     $.ajax({
         type: 'GET',
-        url: "api/clear_records",
-        data:{
+        url: "api/clear_word_records",
+        data: {
             username: username,
             passwd: passwd
         },
         success: function (result) {
             quiz_prompt_data = result;
             if (result["status"] == "success") {
-                init_passed();
+                init_content("passed");
                 mdui.snackbar("已清除所有记录");
             } else {
                 mdui.snackbar(result["message"]);
@@ -810,14 +962,14 @@ function clear_marks() {
     $.ajax({
         type: 'GET',
         url: "api/clear_marks",
-        data:{
+        data: {
             username: username,
             passwd: passwd
         },
         success: function (result) {
             quiz_prompt_data = result;
             if (result["status"] == "success") {
-                init_marked();
+                init_content("marked");
                 mdui.snackbar("已清除所有收藏");
             } else {
                 mdui.snackbar(result["message"]);
@@ -906,4 +1058,24 @@ function locate_verify() {
                 $("#search-locate-textfield").addClass("mdui-textfield-invalid");
         },
     });
+}
+
+function shutdown() {
+    mdui.prompt("请输入管理密码", "身份验证",
+        function (value) {
+            $.ajax({
+                type: 'GET',
+                url: "api/shutdown",
+                data:
+                    {
+                        passwd: value
+                    },
+                success: function (result) {
+                    if (result["status"] == "success")
+                        mdui.snackbar("服务器已关闭");
+                     else
+                        mdui.snackbar(result["message"]);
+                },
+            });
+        }, null, {confirmText: '确认', cancelText: '取消'});
 }

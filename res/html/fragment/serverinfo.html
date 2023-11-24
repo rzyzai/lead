@@ -1,0 +1,54 @@
+<body class="mdui-loaded mdui-drawer-body-left mdui-appbar-with-toolbar">
+<div id="appbar-placeholder"></div>
+<div id="content">
+    <div class="mdui-container-fluid" id="serverinfo-data">
+        <ul class="mdui-list mdui-p-t-3">
+            <li class="mdui-subheader">系统信息</li>
+            <li class="mdui-list-item mdui-ripple">
+                <i class="mdui-list-item-icon mdui-icon material-icons">computer</i>
+                <div class="mdui-list-item-content" id="hostname"></div>
+            </li>
+            <li class="mdui-list-item mdui-ripple">
+                <i class="mdui-list-item-icon mdui-icon material-icons">system_update</i>
+                <div class="mdui-list-item-content" id="system"></div>
+            </li>
+            <li class="mdui-subheader">时间</li>
+            <li class="mdui-list-item mdui-ripple">
+                <i class="mdui-list-item-icon mdui-icon material-icons">access_time</i>
+                <div class="mdui-list-item-content" id="time"></div>
+            </li>
+            <li class="mdui-list-item mdui-ripple">
+                <i class="mdui-list-item-icon mdui-icon material-icons">timer</i>
+                <div class="mdui-list-item-content" id="running-time"></div>
+            </li>
+            <li class="mdui-subheader">网络</li>
+            <div id="network"
+                 class="mdui-p-l-2 mdui-row-xs-1 mdui-row-sm-3 mdui-row-md-4 mdui-row-lg-5 mdui-row-xl-6 mdui-grid-list">
+            </div>
+            <li class="mdui-subheader">性能</li>
+            <div class="mdui-p-l-2 mdui-row-xs-1 mdui-row-sm-2 mdui-row-md-2 mdui-row-lg-2 mdui-row-xl-2 mdui-grid-list">
+                <div class="mdui-col mdui-ripple">
+                    <div class="mdui-grid-tile">
+                        <i class="mdui-list-item-icon mdui-icon material-icons mdui-p-r-4">data_usage</i>
+                            <span id="load"></span>
+                            <canvas id="load-chart" class="mdui-p-t-2" style="max-height: 256px"></canvas>
+                    </div>
+                </div>
+                <div class="mdui-col mdui-ripple">
+                    <div class="mdui-grid-tile">
+                        <i class="mdui-list-item-icon mdui-icon material-icons mdui-p-r-4">data_usage</i>
+                            <span id="memory"></span>
+                            <canvas id="memory-chart" class="mdui-p-t-2" style="max-height: 256px"></canvas>
+                    </div>
+                </div>
+            </div>
+        </ul>
+        <div class="item mdui-text-center mdui-p-t-2 mdui-p-b-2">
+            <button class="mdui-btn mdui-btn-raised mdui-color-red mdui-text-color-white-text"
+                    onclick="mdui.confirm('确认关闭服务器吗？', '关闭服务器', shutdown, function(e){e.close();}, {confirmText: '确认', cancelText: '取消'})">
+                关闭Lead服务器
+            </button>
+        </div>
+    </div>
+</div>
+</body>

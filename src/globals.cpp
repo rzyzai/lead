@@ -19,27 +19,11 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#include "lead/server.hpp"
+
 #include "lead/globals.hpp"
-#include <chrono>
-int main(int argc, char* argv[])
+
+namespace lead
 {
-  if (argc != 5)
-  {
-    std::cerr << "Usage: lead addr port resource_path admin_password" << std::endl;
-    return -1;
-  }
-  for (auto &r: std::string(argv[2]))
-  {
-    if (!std::isdigit(r))
-    {
-      std::cerr << "Invalid port." << std::endl;
-      std::cerr << "Usage: lead addr port resource_path" << std::endl;
-      return -1;
-    }
-  }
-  std::string res(argv[3]);
-  lead::Server svr(argv[1], std::stoi(argv[2]), res, argv[4]);
-  svr.run();
-  return 0;
+  std::chrono::steady_clock::time_point lead_start_time = std::chrono::steady_clock::now();
+  std::atomic<bool> lead_running = true;
 }

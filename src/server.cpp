@@ -22,18 +22,22 @@
 #include "lead/server.hpp"
 #include "lead/utils.hpp"
 #include "lead/user.hpp"
+#include "lead/globals.hpp"
+
 #include "cpp-httplib/httplib.h"
 #include "nlohmann/json.hpp"
+
 #include <string>
 #include <chrono>
 #include <vector>
 
 namespace lead
 {
-  Server::Server(const std::string addr, int port, const std::string &res_path_)
+  Server::Server(const std::string addr, int port, const std::string &res_path_, const std::string &passwd)
       : listen_addr(addr), listen_port(port), res_path(res_path_),
         vocabulary(res_path + "/voc/voc.json"),
-      user_manager(res_path + "/records", &vocabulary)
+      user_manager(res_path + "/records", &vocabulary),
+      admin_passwd(passwd)
   {
     std::cout << "Loaded vocabulary at '" << res_path + "/voc" << "'." << std::endl;
   }
@@ -265,6 +269,49 @@ namespace lead
       res.set_content(user_manager.get_version().dump(), "application/json");
     });
   
+    svr.Get("/api/shutdown", [this](const httplib::Request &req, httplib::Response &res)
+    {
+      if(req.has_param("passwd") && req.get_param_value("passwd") == admin_passwd)
+      {
+        lead_running = false;
+        res.set_content(nlohmann::json{{"status", "success"}}.dump(), "application/json");
+      }
+      else
+      {
+        res.set_content(nlohmann::json{{"status",  "failed"},
+                                       {"message", "密码错误"}}.dump(), "application/json");
+      }
+    });
+  
+    svr.Get("/api/get_serverstatus", [](const httplib::Request &req, httplib::Response &res)
+    {
+      auto status = utils::get_system_status();
+      res.set_content(nlohmann::json{
+          {"status", "success"},
+          {"load", status.load},
+          {"total_memory", status.total_memory},
+          {"used_memory", status.used_memory},
+          {"time", status.time},
+          {"running_time", status.running_time},
+          {"time_since_epoch", status.time_since_epoch}
+      }.dump(), "application/json");
+    });
+    
+    svr.Get("/api/get_serverinfo", [](const httplib::Request &req, httplib::Response &res)
+    {
+      auto [msg, info] = utils::get_system_info();
+      res.set_content(nlohmann::json{
+          {"status", "success"},
+          {"message", msg},
+          {"hostname", info.hostname},
+          {"sysname", info.sysname},
+          {"release", info.release},
+          {"version", info.version},
+          {"machine", info.machine},
+          {"network", info.network}
+        }.dump(), "application/json");
+    });
+  
     svr.Get("/api/get_settings", [this](const httplib::Request &req, httplib::Response &res)
     {
       auth_do(req, res, [](std::unique_ptr<UserRef> ur, const httplib::Request &req) -> nlohmann::json
@@ -440,6 +487,8 @@ namespace lead
                                 (int) ptm->tm_hour, (int) ptm->tm_min, (int) ptm->tm_sec);
                         std::cout << utils::green("^^^^^^^^^^") << date << utils::green("^^^^^^^^^^") << std::endl;
                       }
+                      if(!lead_running)
+                        std::exit(0);
                    });
     
     std::cout << "Server started at '" << listen_addr << ":" << listen_port << "'." << std::endl;

@@ -26,10 +26,48 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <chrono>
 #include <random>
+#include "nlohmann/json.hpp"
 
 namespace lead::utils
 {
+  struct NetCardInfo
+  {
+    std::string name;
+    std::string mac;
+    std::string ipv4;
+    std::string ipv6;
+  };
+  
+  void to_json(nlohmann::json &j, const NetCardInfo &p);
+  
+  struct SystemInfo
+  {
+    std::string hostname;
+    
+    std::string sysname;
+    std::string version;
+    std::string release;
+    std::string machine;
+    
+    std::vector<NetCardInfo> network;
+  };
+  
+  struct SystemStatus
+  {
+    std::string load;
+    std::string time;
+    std::string running_time;
+    std::string time_since_epoch;
+  
+    std::string total_memory;
+    std::string used_memory;
+  };
+  
+  SystemStatus get_system_status();
+  std::tuple<std::string, SystemInfo> get_system_info();
+  
   template<typename T>
   T randnum(T a, T b)// [a, b)
   {

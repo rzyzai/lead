@@ -502,3 +502,7 @@ li::marker
     padding: 6px 25px;
     border-radius: 4px;
 }
+
+.mdui-grid-list {
+    font-size: 16px;
+}

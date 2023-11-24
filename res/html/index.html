@@ -9,12 +9,13 @@
     <link href="css/lead.css" rel="stylesheet"/>
     <script src="js/mdui.min.js"></script>
     <script src="js/hammer.min.js"></script>
+    <script src="js/chart.js"></script>
     <script src="js/jquery.min.js"></script>
     <script src="js/lead.js"></script>
     <script type="text/javascript">
         window.onload = function () {
             var p = window.sessionStorage.getItem("page");
-            if (p != "")
+            if (p != null)
                 load_body(p)
             else
                 load_body("plan")

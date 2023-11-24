@@ -41,8 +41,9 @@ namespace lead
     UserManager user_manager;
     std::string listen_addr;
     int listen_port;
+    std::string admin_passwd;
   public:
-    Server(const std::string addr, int port, const std::string &res_path_);
+    Server(const std::string addr, int port, const std::string &res_path_, const std::string& passwd);
     
     void run();
 
