@@ -22,6 +22,7 @@
 
 #include "lead/globals.hpp"
 #include "lead/utils.hpp"
+#include "nlohmann/json.hpp"
 #include <string>
 #include <sstream>
 #include <random>
@@ -33,30 +34,26 @@
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
 #include <sys/types.h>
-#include <ifaddrs.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
 #include <arpa/inet.h>
 #include <dirent.h>
-
-#define IPV6_ADDR_GLOBAL        0x0000U
-#define IPV6_ADDR_LOOPBACK      0x0010U
-#define IPV6_ADDR_LINKLOCAL     0x0020U
-#define IPV6_ADDR_SITELOCAL     0x0040U
-#define IPV6_ADDR_COMPATv4      0x0080U
+#include <curl/curl.h>
 
 namespace lead::utils
 {
+  std::string get_time()
+  {
+    std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    char buf[256];
+    strftime(buf, 256, "%a, %d %h %Y %H:%M:%S", localtime(&t));
+    return buf;
+  }
+  
   SystemStatus get_system_status()
   {
     SystemStatus status;
-    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    std::time_t tt = std::chrono::system_clock::to_time_t(now);
-    struct tm *tmNow = localtime(&tt);
-    char date[20] = {0};
-    sprintf(date, "%d-%02d-%02d %02d:%02d:%02d", (int) tmNow->tm_year + 1900, (int) tmNow->tm_mon + 1,
-            (int) tmNow->tm_mday, (int) tmNow->tm_hour, (int) tmNow->tm_min, (int) tmNow->tm_sec);
-    status.time = std::string{date};
+    status.time = get_time();
     auto n = std::chrono::steady_clock::now();
     double duration_second = std::chrono::duration<double>(n - lead_start_time).count();
     int hour = duration_second / 3600;

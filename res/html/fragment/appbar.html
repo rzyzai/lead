@@ -120,6 +120,12 @@
             <div class="mdui-textfield-error">邮箱格式错误</div>
         </div>
         <div class="mdui-textfield mdui-textfield-floating-label">
+            <i class="mdui-icon material-icons">code</i>
+            <label class="mdui-textfield-label">验证码</label>
+            <input class="mdui-textfield-input" id="verification-code" />
+            <div class="mdui-textfield-error">验证码不能为空</div>
+        </div>
+        <div class="mdui-textfield mdui-textfield-floating-label">
             <i class="mdui-icon material-icons">lock</i>
             <label class="mdui-textfield-label">密码</label>
             <input class="mdui-textfield-input" type="password" id="register-password"
@@ -130,6 +136,9 @@
         <div class="actions">
             <button class="mdui-btn mdui-ripple" type="button" mdui-dialog="{target: '#loginDialog', history: false, modal: true}"
                     onclick="document.getElementById('register-dialog-close').click();">已有账号？</button>
+            <div class="divider"></div>
+            <button type="button" id="verify-button" class="mdui-btn mdui-btn-raised mdui-color-blue-700"
+                    onclick='send_verification_code(document.getElementById("register-email").value)'>获取验证码</button>
             <div class="divider"></div>
             <button type="submit" class="mdui-btn mdui-btn-raised mdui-color-blue-700">注册</button>
         </div>

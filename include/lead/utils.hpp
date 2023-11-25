@@ -32,6 +32,8 @@
 
 namespace lead::utils
 {
+  std::string get_time();
+  
   struct NetCardInfo
   {
     std::string name;

@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023 rzyzai, and caozhanhao
+// Copyright (c) 2023 caozhanhao
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,16 +19,35 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#include "lead/server.hpp"
+#ifndef LEAD_EMAIL_HPP
+#define LEAD_EMAIL_HPP
+#pragma once
 
-int main(int argc, char* argv[])
+#include <string>
+
+namespace lead
 {
-  if (argc != 2)
+  struct email_upload_status {
+    size_t bytes_read;
+    const std::string * const payload_text;
+  };
+  struct Email
   {
-    std::cerr << "Usage: lead config_path" << std::endl;
-    return -1;
-  }
-  lead::Server svr(argv[1]);
-  svr.run();
-  return 0;
+    std::string from;
+    std::string to;
+    std::string subject;
+    std::string body;
+  };
+  class EmailSender
+  {
+  private:
+    std::string username;
+    std::string passwd;
+    std::string server;
+  public:
+    EmailSender() = default;
+    void init(const std::string &server_, const std::string &username_, const std::string &password);
+    int send(const Email &email) const;
+  };
 }
+#endif

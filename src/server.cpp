@@ -33,13 +33,25 @@
 
 namespace lead
 {
-  Server::Server(const std::string addr, int port, const std::string &res_path_, const std::string &passwd)
-      : listen_addr(addr), listen_port(port), res_path(res_path_),
-        vocabulary(res_path + "/voc/voc.json"),
-      user_manager(res_path + "/records", &vocabulary),
-      admin_passwd(passwd)
+  Server::Server(const std::string &config_path)
   {
-    std::cout << "Loaded vocabulary at '" << res_path + "/voc" << "'." << std::endl;
+    std::ifstream config_file(config_path);
+    nlohmann::json config = nlohmann::json::parse(config_file);
+    
+    config["resource_path"].get_to(res_path);
+    config["admin_password"].get_to(admin_passwd);
+    config["listen_address"].get_to(listen_addr);
+    config["listen_port"].get_to(listen_port);
+    
+    std::string smtp_server, smtp_username, smtp_password, smtp_email;
+    config["smtp_server"].get_to(smtp_server);
+    config["smtp_username"].get_to(smtp_username);
+    config["smtp_password"].get_to(smtp_password);
+    config["smtp_email"].get_to(smtp_email);
+    
+    vocabulary.load(res_path + "/voc/voc.json");
+    email_sender.init(smtp_server, smtp_username, smtp_password);
+    user_manager.init(res_path + "/records", &vocabulary, &email_sender, smtp_email);
   }
   
   void Server::auth_do(const httplib::Request &req, httplib::Response &res,
@@ -70,23 +82,40 @@ namespace lead
     svr.set_mount_point("/icons", res_path + "/icons");
     svr.set_mount_point("/js", res_path + "/js");
     svr.set_mount_point("/userpic", res_path + "/records/userpic");
+    svr.Get("/api/send_verification_code", [this](const httplib::Request &req, httplib::Response &res)
+    {
+      res.set_content(user_manager.send_verification_code(req.get_param_value("email")).dump(), "application/json");
+    });
     svr.Get("/api/register", [this](const httplib::Request &req, httplib::Response &res)
     {
-      auto[status, ur] = user_manager.create_user(req.get_param_value("username"), req.get_param_value("email"), req.get_param_value("passwd"));
-      if (status == UserManagerStatus::success)
+      if(user_manager.verify(req.get_param_value("email"), req.get_param_value("verification_code")))
       {
-        res.set_content(nlohmann::json{{"status",          "success"},
-                {"userid",          ur->userid},
-                {"username",        ur->username},
-                {"email",           ur->email},
-                {"profile_picture", ur->profile_picture}}.dump(), "application/json");
+        auto[status, ur] =
+        user_manager.create_user(req.get_param_value("username"),
+                                 req.get_param_value("email"),
+                                 req.get_param_value("passwd"));
+        if (status == UserManagerStatus::success)
+        {
+          res.set_content(nlohmann::json{{"status",          "success"},
+                                         {"userid",          ur->userid},
+                                         {"username",        ur->username},
+                                         {"email",           ur->email},
+                                         {"profile_picture", ur->profile_picture}}.dump(), "application/json");
+        }
+        else
+        {
+          res.set_content(nlohmann::json
+                              {
+                                  {"status",  "failed"},
+                                  {"message", to_string(status)}}.dump(), "application/json");
+        }
       }
       else
       {
         res.set_content(nlohmann::json
                             {
                                 {"status",  "failed"},
-                                {"message", to_string(status)}}.dump(), "application/json");
+                                {"message", "验证码错误"}}.dump(), "application/json");
       }
     });
     svr.Post("/api/upload_profile_picture", [this](const httplib::Request &req, httplib::Response &res)

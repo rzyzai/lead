@@ -20,11 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #include "lead/user.hpp"
+#include "lead/email.hpp"
 #include "lead/voc.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
 #include <thread>
+#include <curl/curl.h>
 
 namespace lead
 {
@@ -291,9 +293,12 @@ namespace lead
   
   }
   
-  UserManager::UserManager(const std::string &record_path_, VOC* voc)
-  : vocabulary(voc), record_path(record_path_)
+  void UserManager::init(const std::string &record_path_, VOC* voc, EmailSender* email_sender_, const std::string& email_)
   {
+    vocabulary = voc;
+    email_sender = email_sender_;
+    email = email_;
+    record_path = record_path_;
     leveldb::Options options;
     options.create_if_missing = true;
     leveldb::Status status = leveldb::DB::Open(options, record_path + "/userdb", &db);
@@ -374,5 +379,43 @@ namespace lead
     return {{"status",   "success"},
             {"version", m["version"]}
     };
+  }
+  
+  nlohmann::json UserManager::send_verification_code(const std::string& to_email)
+  {
+    auto now = std::chrono::steady_clock::now();
+    if(auto it = verification_codes.find(to_email); it != verification_codes.end())
+    {
+      double d = std::chrono::duration<double>(now - std::get<1>(it->second)).count();
+      if(d < 60)
+        return {{"status", "failed"}, {"message", "发送过于频繁，请于1分钟后再尝试。"}};
+    }
+    for(auto it = verification_codes.begin(); it != verification_codes.end();)
+    {
+      double duration_second =
+          std::chrono::duration<double>(now - std::get<1>(it->second)).count();
+      if (duration_second > 300)
+        it = verification_codes.erase(it);
+      else
+        ++it;
+    }
+    std::string code = std::to_string(utils::randnum<int>(100000, 1000000));
+    verification_codes[to_email] = {code, std::chrono::steady_clock::now()};
+    Email e;
+    e.from = email;
+    e.to = to_email;
+    e.subject = "Lead - 验证邮件";
+    e.body = "您的验证码是: " + code + " (5分钟内有效)";
+    auto ret = email_sender->send(e);
+    if(ret == CURLE_OK)
+      return {{"status", "success"}, {"message", "发送成功"}};
+    return {{"status", "failed"}, {"message", "发送失败"}};
+  }
+  
+  bool UserManager::verify(const std::string& email, const std::string& code)
+  {
+    if(auto it = verification_codes.find(email); it != verification_codes.end() && std::get<0>(it->second) == code)
+      return true;
+    return false;
   }
 }

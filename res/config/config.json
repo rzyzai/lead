@@ -1,0 +1,10 @@
+{
+  "listen_address": "0.0.0.0",
+  "listen_port": 8968,
+  "resource_path": "../res",
+  "admin_password": "admin",
+  "smtp_server": "",
+  "smtp_username": "",
+  "smtp_password": "",
+  "smtp_email": ""
+}

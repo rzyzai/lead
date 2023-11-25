@@ -24,6 +24,7 @@
 #pragma once
 
 #include "utils.hpp"
+#include "email.hpp"
 #include "user.hpp"
 #include "cpp-httplib/httplib.h"
 #include "nlohmann/json.hpp"
@@ -35,15 +36,16 @@ namespace lead
 {
   class Server
   {
-  private:
+  public:
     std::string res_path;
     VOC vocabulary;
+    EmailSender email_sender;
     UserManager user_manager;
     std::string listen_addr;
     int listen_port;
     std::string admin_passwd;
   public:
-    Server(const std::string addr, int port, const std::string &res_path_, const std::string& passwd);
+    Server(const std::string &config_path);
     
     void run();
 

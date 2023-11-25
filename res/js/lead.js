@@ -24,8 +24,39 @@ let mutationObserver = null;
 let status_updater = null;
 let load_chart = null;
 let memory_chart = null;
+let send_verification_code_time = 10;
 
-function register(u_name, email, pwd) {
+function send_verification_code(email) {
+    var reg = /^([a-zA-Z]|[0-9])(\w|\-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/;
+    if(email == null || email == "" || !reg.test(email))
+        mdui.snackbar("邮箱格式错误");
+    else
+    {
+        $.ajax({
+            type: 'GET',
+            url: "api/send_verification_code",
+            data:
+                {email: email},
+            success: function (result) {
+                mdui.snackbar(result["message"]);
+            },
+        });
+        $("#verification-code")[0].setAttribute("required","true");
+        var timer = setInterval(() => {
+            send_verification_code_time--;
+            $("#verify-button")[0].setAttribute("disabled","true");
+            $("#verify-button").html("重新获取验证码(" + send_verification_code_time + "s)");
+            if (send_verification_code_time === 0) {
+                clearInterval(timer);
+                $("#verify-button")[0].removeAttribute("disabled");
+                $("#verify-button").html('获取验证码');
+                send_verification_code_time = 10;
+            }
+        }, 800);
+    }
+}
+
+function register(u_name, email, pwd, verification_code) {
     $.ajax({
         type: 'GET',
         url: "api/register",
@@ -33,7 +64,8 @@ function register(u_name, email, pwd) {
             {
                 username: u_name,
                 email: email,
-                passwd: pwd
+                passwd: pwd,
+                verification_code: verification_code
             },
         success: function (result) {
             if (result["status"] == "success") {
@@ -156,7 +188,8 @@ function init_page(with_appbar) {
             var u_name = document.getElementById("register-user-name").value;
             var email = document.getElementById("register-email").value;
             var pwd = document.getElementById("register-password").value;
-            register(u_name, email, pwd);
+            var verification_code = document.getElementById("verification-code").value;
+            register(u_name, email, pwd, verification_code);
             event.preventDefault();
         }
 
@@ -351,7 +384,7 @@ function init_content(page) {
                         if (result["message"] != "")
                             mdui.snackbar(result["message"]);
                         $("#hostname").html("主机名： <strong>" + result["hostname"] + "</strong>");
-                        $("#system").html("系统： <strong>" + result["release"] + " " + result["machine"] + "</strong>");
+                        $("#system").html("系统： <strong>" + result["sysname"] + " " + result["release"] + " " + result["machine"] + "</strong>");
                         for (let i = result["network"].length - 1; i >= 0; i--) {
                             var content =  '<div class="mdui-col mdui-ripple">' +
                                 '<div class="mdui-grid-tile">' +
@@ -461,9 +494,10 @@ function init_content(page) {
                                     + parseFloat(loads[1]).toFixed(2) + " "
                                     + parseFloat(loads[2]).toFixed(2)
                                     + "</strong>");
-                                $("#memory").html("内存占用： <strong>" +
+                                $("#memory").html("内存： <strong>" +
                                     "共" +  parseFloat(result["total_memory"]).toFixed(1)
-                                    + " Mib, " + parseFloat(result["used_memory"]).toFixed(1) + " Mib 可用"
+                                    + " Mib, " + parseFloat(result["total_memory"] - result["used_memory"])
+                                        .toFixed(1) + " Mib 可用"
                                     + "</strong>");
                                 $("#time").html("系统时间： <strong>" + result["time"] + "</strong>");
                                 $("#running-time").html("运行时间： <strong>" + result["running_time"] + "</strong>");

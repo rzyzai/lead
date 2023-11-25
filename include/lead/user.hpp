@@ -24,6 +24,7 @@
 #pragma once
 
 #include "voc.hpp"
+#include "email.hpp"
 #include "leveldb/db.h"
 #include "meta.hpp"
 #include <iostream>
@@ -132,9 +133,14 @@ namespace lead
   public:
     Meta meta;
     VOC* vocabulary;
+    EmailSender* email_sender;
+    std::string email;
     std::string record_path;
+    std::map<std::string, std::tuple<std::string, std::chrono::steady_clock::time_point>>
+    verification_codes;
   public:
-    UserManager(const std::string &record_path, VOC* voc);
+    UserManager() = default;
+    void init(const std::string &record_path, VOC* voc, EmailSender* email_sender_, const std::string& email);
     
     ~UserManager();
     
@@ -147,6 +153,10 @@ namespace lead
     void update_meta() const;
   
     nlohmann::json get_version() const;
+    
+    nlohmann::json send_verification_code(const std::string& email);
+    
+    bool verify(const std::string& email, const std::string& code);
   };
 }
 #endif
