@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #include "lead/server.hpp"
+#include "lead/globals.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -28,7 +29,10 @@ int main(int argc, char* argv[])
     std::cerr << "Usage: lead config_path" << std::endl;
     return -1;
   }
-  lead::Server svr(argv[1]);
-  svr.run();
+  while(lead::lead_running)
+  {
+    lead::Server svr(argv[1]);
+    svr.run();
+  }
   return 0;
 }

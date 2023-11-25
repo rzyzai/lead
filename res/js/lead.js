@@ -5,6 +5,8 @@ let username = "__lead_guest__";
 let passwd = "__lead_guest__";
 let userinfo = null;
 
+let admin_password = "";
+
 let quiz_data_list = [];
 let quiz_word = "";
 let quiz_word_index = 0;
@@ -376,154 +378,201 @@ function init_content(page) {
             $("#settings-data").removeClass("mdui-hidden");
             break;
         case "serverinfo":
-            $.ajax({
-                type: 'GET',
-                url: "api/get_serverinfo",
-                success: function (result) {
-                    if (result["status"] == "success") {
-                        if (result["message"] != "")
-                            mdui.snackbar(result["message"]);
-                        $("#hostname").html("主机名： <strong>" + result["hostname"] + "</strong>");
-                        $("#system").html("系统： <strong>" + result["sysname"] + " " + result["release"] + " " + result["machine"] + "</strong>");
-                        for (let i = result["network"].length - 1; i >= 0; i--) {
-                            var content =  '<div class="mdui-col mdui-ripple">' +
-                                '<div class="mdui-grid-tile">' +
-                                '<i class="mdui-list-item-icon mdui-icon material-icons mdui-p-r-4">settings_ethernet</i>';
-                            content += "<strong>" + result["network"][i]["name"] + "</strong><br><br>";
-                            content += "Mac地址: <em>" + result["network"][i]["mac"] + "</em><br><div class='mdui-p-t-1'></div>";
-                            content += "IPv4: <em>" + result["network"][i]["ipv4"] + "</em><br><div class='mdui-p-t-1'></div>";
-                            content += "IPv6: <em>" + result["network"][i]["ipv6"] + "</em></div></div>";
-                            $("#network").append(content);
-                        }
-                    } else {
-                        mdui.snackbar(result["message"]);
-                    }
-                }
-            });
-
-            const load_config = {
-                type: 'line',
-                data: {
-                    datasets: [{
-                        label: '1',
-                        data: [],
-                        borderColor: 'rgb(25, 118, 210)',
-                        pointRadius : 0,
-                        cubicInterpolationMode: 'monotone',
-                        fill:
-                            {
-                                target: 'origin',
-                                above: 'rgb(25, 118, 210)'
-                            }
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins:
-                        {
-                            legend:
-                                {
-                                    display: false
-                                }
-                        },
-                    scales: {
-                        x: {
-                            type: 'linear',
-                            grid:
-                                {
-                                    lineWidth: 0,
-                                },
-                                ticks:
-                                    {display: false}
-                        },
-                        y: {
-                            type: 'linear',
-                            min: 0,
-                            grid:
-                                {
-                                    lineWidth: 0,
-                                }
-                        }
-                    }
-                }
-            };
-            const memory_config = JSON.parse(JSON.stringify(load_config));
-            memory_config.options.scales.y.max = 1;
-            var i = 0;
-            load_chart = new Chart(document.getElementById('load-chart'), load_config);
-            memory_chart = new Chart(document.getElementById('memory-chart'), memory_config);
-            Number.prototype.toFixed = function(d) {
-                var s = this + "";
-                if(!d) d = 0;
-                if(s.indexOf(".") == -1) s += ".";
-                s += new Array(d + 1).join("0");
-                if(new RegExp("^(-|\\+)?(\\d+(\\.\\d{0," + (d + 1) + "})?)\\d*$").test(s)) {
-                    var s = "0" + RegExp.$2,
-                        pm = RegExp.$1,
-                        a = RegExp.$3.length,
-                        b = true;
-                    if(a == d + 2) {
-                        a = s.match(/\d/g);
-                        if(parseInt(a[a.length - 1]) > 4) {
-                            for(var i = a.length - 2; i >= 0; i--) {
-                                a[i] = parseInt(a[i]) + 1;
-                                if(a[i] == 10) {
-                                    a[i] = 0;
-                                    b = i != 1;
-                                } else break;
-                            }
-                        }
-                        s = a.join("").replace(new RegExp("(\\d+)(\\d{" + d + "})\\d$"), "$1.$2");
-
-                    }
-                    if(b) s = s.substr(1);
-                    return(pm + s).replace(/\.$/, "");
-                }
-                return this + "";
-
-            };
-            status_updater = window.setInterval(function () {
+            mdui.prompt("请输入管理密码", "身份验证",
+                function (value) {
                     $.ajax({
                         type: 'GET',
-                        url: "api/get_serverstatus",
+                        url: "api/login_admin",
+                        data:
+                            {
+                                admin_password: value
+                            },
                         success: function (result) {
                             if (result["status"] == "success") {
-                                var loads = result["load"].split(" ");
-                                $("#load").html("平均负载： <strong>"
-                                    + parseFloat(loads[0]).toFixed(2) + " "
-                                    + parseFloat(loads[1]).toFixed(2) + " "
-                                    + parseFloat(loads[2]).toFixed(2)
-                                    + "</strong>");
-                                $("#memory").html("内存： <strong>" +
-                                    "共" +  parseFloat(result["total_memory"]).toFixed(1)
-                                    + " Mib, " + parseFloat(result["total_memory"] - result["used_memory"])
-                                        .toFixed(1) + " Mib 可用"
-                                    + "</strong>");
-                                $("#time").html("系统时间： <strong>" + result["time"] + "</strong>");
-                                $("#running-time").html("运行时间： <strong>" + result["running_time"] + "</strong>");
+                                mdui.snackbar("欢迎回来");
+                                admin_password = value;
+                                    $.ajax({
+                                        type: 'GET',
+                                        url: "api/get_serverinfo",
+                                        data:
+                                            {
+                                                admin_password: admin_password
+                                            },
+                                        success: function (result) {
+                                            if (result["status"] == "success") {
+                                                if (result["message"] != "")
+                                                    mdui.snackbar(result["message"]);
+                                                $("#hostname").html("主机名： <strong>" + result["hostname"] + "</strong>");
+                                                $("#system").html("系统： <strong>" + result["sysname"] + " " + result["release"] + " " + result["machine"] + "</strong>");
+                                                for (let i = result["network"].length - 1; i >= 0; i--) {
+                                                    var content = '<div class="mdui-col mdui-ripple">' +
+                                                        '<div class="mdui-grid-tile">' +
+                                                        '<i class="mdui-list-item-icon mdui-icon material-icons mdui-p-r-4">settings_ethernet</i>';
+                                                    content += "<strong>" + result["network"][i]["name"] + "</strong><br><br>";
+                                                    content += "Mac地址: <em>" + result["network"][i]["mac"] + "</em><br><div class='mdui-p-t-1'></div>";
+                                                    content += "IPv4: <em>" + result["network"][i]["ipv4"] + "</em><br><div class='mdui-p-t-1'></div>";
+                                                    content += "IPv6: <em>" + result["network"][i]["ipv6"] + "</em></div></div>";
+                                                    $("#network").append(content);
+                                                }
 
-                                var a = result["load"].indexOf(' ');
-                                var l = result["load"].substring(0,a);
-                                var mem = result["used_memory"] / result["total_memory"];
+                                                $("#listen-address").val(result["config"]["listen_address"]);
+                                                $("#listen-port").val(result["config"]["listen_port"]);
+                                                $("#resource-path").val(result["config"]["resource_path"]);
+                                                $("#admin-password").val(result["config"]["admin_password"]);
+                                                $("#smtp-server").val(result["config"]["smtp_server"]);
+                                                $("#smtp-username").val(result["config"]["smtp_username"]);
+                                                $("#smtp-password").val(result["config"]["smtp_password"]);
+                                                $("#smtp-email").val(result["config"]["smtp_email"]);
+                                                mdui.updateTextFields();
+                                            } else {
+                                                mdui.snackbar(result["message"]);
+                                            }
+                                        }
+                                    });
 
-                                load_config.data.datasets[0].data.push({x: i, y: l});
-                                if(load_config.data.datasets[0].data.length > 100)
-                                    load_config.data.datasets[0].data.shift();
+                                    const load_config = {
+                                        type: 'line',
+                                        data: {
+                                            datasets: [{
+                                                label: '1',
+                                                data: [],
+                                                borderColor: 'rgb(25, 118, 210)',
+                                                pointRadius: 0,
+                                                cubicInterpolationMode: 'monotone',
+                                                fill:
+                                                    {
+                                                        target: 'origin',
+                                                        above: 'rgb(25, 118, 210)'
+                                                    }
+                                            }]
+                                        },
+                                        options: {
+                                            responsive: true,
+                                            plugins:
+                                                {
+                                                    legend:
+                                                        {
+                                                            display: false
+                                                        }
+                                                },
+                                            scales: {
+                                                x: {
+                                                    type: 'linear',
+                                                    grid:
+                                                        {
+                                                            lineWidth: 0,
+                                                        },
+                                                    ticks:
+                                                        {display: false}
+                                                },
+                                                y: {
+                                                    type: 'linear',
+                                                    min: 0,
+                                                    grid:
+                                                        {
+                                                            lineWidth: 0,
+                                                        }
+                                                }
+                                            }
+                                        }
+                                    };
+                                    const memory_config = JSON.parse(JSON.stringify(load_config));
+                                    memory_config.options.scales.y.max = 1;
+                                    var i = 0;
+                                    load_chart = new Chart(document.getElementById('load-chart'), load_config);
+                                    memory_chart = new Chart(document.getElementById('memory-chart'), memory_config);
+                                    Number.prototype.toFixed = function (d) {
+                                        var s = this + "";
+                                        if (!d) d = 0;
+                                        if (s.indexOf(".") == -1) s += ".";
+                                        s += new Array(d + 1).join("0");
+                                        if (new RegExp("^(-|\\+)?(\\d+(\\.\\d{0," + (d + 1) + "})?)\\d*$").test(s)) {
+                                            var s = "0" + RegExp.$2,
+                                                pm = RegExp.$1,
+                                                a = RegExp.$3.length,
+                                                b = true;
+                                            if (a == d + 2) {
+                                                a = s.match(/\d/g);
+                                                if (parseInt(a[a.length - 1]) > 4) {
+                                                    for (var i = a.length - 2; i >= 0; i--) {
+                                                        a[i] = parseInt(a[i]) + 1;
+                                                        if (a[i] == 10) {
+                                                            a[i] = 0;
+                                                            b = i != 1;
+                                                        } else break;
+                                                    }
+                                                }
+                                                s = a.join("").replace(new RegExp("(\\d+)(\\d{" + d + "})\\d$"), "$1.$2");
 
-                                memory_config.data.datasets[0].data.push({x: i, y: mem});
-                                if(memory_config.data.datasets[0].data.length > 100)
-                                    memory_config.data.datasets[0].data.shift();
+                                            }
+                                            if (b) s = s.substr(1);
+                                            return (pm + s).replace(/\.$/, "");
+                                        }
+                                        return this + "";
 
-                                i += 1;
-                                load_chart.update('none');
-                                memory_chart.update('none');
-                            } else {
-                                mdui.snackbar(result["message"]);
+                                    };
+                                    status_updater = window.setInterval(function () {
+                                            $.ajax({
+                                                type: 'GET',
+                                                url: "api/get_serverstatus",
+                                                data:
+                                                    {
+                                                        admin_password: admin_password
+                                                    },
+                                                success: function (result) {
+                                                    if (result["status"] == "success") {
+                                                        var loads = result["load"].split(" ");
+                                                        $("#load").html("平均负载： <strong>"
+                                                            + parseFloat(loads[0]).toFixed(2) + " "
+                                                            + parseFloat(loads[1]).toFixed(2) + " "
+                                                            + parseFloat(loads[2]).toFixed(2)
+                                                            + "</strong>");
+                                                        $("#memory").html("内存： <strong>" +
+                                                            "共" + parseFloat(result["total_memory"]).toFixed(1)
+                                                            + " Mib, " + parseFloat(result["total_memory"] - result["used_memory"])
+                                                                .toFixed(1) + " Mib 可用"
+                                                            + "</strong>");
+                                                        $("#time").html("系统时间： <strong>" + result["time"] + "</strong>");
+                                                        $("#running-time").html("运行时间： <strong>" + result["running_time"] + "</strong>");
+
+                                                        var a = result["load"].indexOf(' ');
+                                                        var l = result["load"].substring(0, a);
+                                                        var mem = result["used_memory"] / result["total_memory"];
+
+                                                        load_config.data.datasets[0].data.push({x: i, y: l});
+                                                        if (load_config.data.datasets[0].data.length > 100)
+                                                            load_config.data.datasets[0].data.shift();
+                                                        load_config.options.scales.x.min = load_config.data.datasets[0].data[0].x;
+                                                        load_config.options.scales.x.max = i;
+
+                                                        memory_config.data.datasets[0].data.push({x: i, y: mem});
+                                                        if (memory_config.data.datasets[0].data.length > 100)
+                                                            memory_config.data.datasets[0].data.shift();
+                                                        memory_config.options.scales.x.min = memory_config.data.datasets[0].data[0].x;
+                                                        memory_config.options.scales.x.max = i;
+
+                                                        ++i;
+                                                        load_chart.update('none');
+                                                        memory_chart.update('none');
+                                                    } else {
+                                                        mdui.snackbar(result["message"]);
+                                                    }
+                                                }
+                                            });
+                                        }
+                                        , 2000);
+                                $("#loading").remove();
+                                $("#serverinfo-data").removeClass("mdui-hidden");
                             }
-                        }
+                            else
+                                mdui.snackbar(result["message"]);
+                        },
                     });
-                }
-                , 1000);
+                }, function ()
+                {
+                    mdui.snackbar("权限不足");
+                },
+                {confirmText: '确认', cancelText: '取消', history: false, modal: true});
             break;
         case "about":
             $.ajax({
@@ -628,7 +677,6 @@ function update_memorize_data(result) {
     memorize_meaning = result["word"]["meaning"];
     $("#explanation").html(result["content"]);
     $("#search-locate-value").val("");
-    $("#search-locate-value").attr("placeholder", memorize_word);
     $('#locate-value').attr('value', memorize_index)
     mdui.updateSliders();
 }
@@ -1023,7 +1071,6 @@ function locate_word() {
                 word_index: word_index
             },
         success: function (result) {
-
             if (result["status"] == "success") {
                 $("#search-locate-value").val("");
                 $("#search-locate-value").attr("placeholder", result["word"]);
@@ -1095,21 +1142,63 @@ function locate_verify() {
 }
 
 function shutdown() {
-    mdui.prompt("请输入管理密码", "身份验证",
-        function (value) {
-            $.ajax({
-                type: 'GET',
-                url: "api/shutdown",
-                data:
-                    {
-                        passwd: value
-                    },
-                success: function (result) {
-                    if (result["status"] == "success")
-                        mdui.snackbar("服务器已关闭");
-                     else
-                        mdui.snackbar(result["message"]);
-                },
-            });
-        }, null, {confirmText: '确认', cancelText: '取消'});
+    $.ajax({
+        type: 'GET',
+        url: "api/shutdown",
+        data:
+            {
+                admin_password: admin_password
+            },
+        success: function (result) {
+            if (result["status"] == "success")
+                mdui.snackbar("服务器已关闭");
+            else
+                mdui.snackbar(result["message"]);
+        },
+    });
+}
+
+function reboot() {
+    $.ajax({
+        type: 'GET',
+        url: "api/reboot",
+        data:
+            {
+                admin_password: admin_password
+            },
+        success: function (result) {
+            if (result["status"] == "success")
+                mdui.snackbar("服务器正在重启, 请稍等");
+            else
+                mdui.snackbar(result["message"]);
+        },
+    });
+}
+
+function update_config()
+{
+    $.ajax({
+        type: 'GET',
+        url: "api/update_config",
+        data:
+            {
+                admin_password: admin_password,
+                listen_address: document.getElementById("listen-address").value,
+                listen_port: document.getElementById("listen-port").value,
+                resource_path: document.getElementById("resource-path").value,
+                smtp_server: document.getElementById("smtp-server").value,
+                smtp_username: document.getElementById("smtp-username").value,
+                smtp_password: document.getElementById("smtp-password").value,
+                smtp_email: document.getElementById("smtp-email").value,
+                new_admin_password: document.getElementById("admin-password").value
+            },
+        success: function (result) {
+            if (result["status"] == "success") {
+                admin_password = document.getElementById("admin-password").value;
+                mdui.snackbar(result["message"]);
+            }
+            else
+                mdui.snackbar(result["message"]);
+        },
+    });
 }

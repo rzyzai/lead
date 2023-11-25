@@ -1,7 +1,12 @@
 <body class="mdui-loaded mdui-drawer-body-left mdui-appbar-with-toolbar">
 <div id="appbar-placeholder"></div>
 <div id="content">
-    <div class="mdui-container-fluid" id="serverinfo-data">
+    <div class="loading mdui-p-t-3 mdui-p-l-3 mdui-p-r-3" id="loading">
+        <div class="mdui-progress">
+            <div class="mdui-progress-indeterminate"></div>
+        </div>
+    </div>
+    <div class="mdui-container-fluid mdui-hidden" id="serverinfo-data">
         <ul class="mdui-list mdui-p-t-3">
             <li class="mdui-subheader">系统信息</li>
             <li class="mdui-list-item mdui-ripple">
@@ -42,8 +47,99 @@
                     </div>
                 </div>
             </div>
+            <li class="mdui-subheader">配置</li>
+            <li class="mdui-list-item mdui-ripple">
+                <i class="mdui-list-item-icon mdui-icon material-icons">http</i>
+                <div class="mdui-list-item-content">
+                    <div class="mdui-textfield mdui-textfield-floating-label">
+                        <label class="mdui-textfield-label">listen_address</label>
+                        <input class="mdui-textfield-input" type="text" id="listen-address"/>
+                        <div class="mdui-textfield-helper">服务器监听地址</div>
+                    </div>
+                </div>
+            </li>
+            <li class="mdui-list-item mdui-ripple">
+                <i class="mdui-list-item-icon mdui-icon material-icons">http</i>
+                <div class="mdui-list-item-content">
+                    <div class="mdui-textfield mdui-textfield-floating-label">
+                        <label class="mdui-textfield-label">listen_port</label>
+                        <input class="mdui-textfield-input" type="text" id="listen-port"/>
+                        <div class="mdui-textfield-helper">服务器监听端口</div>
+                    </div>
+                </div>
+            </li>
+            <li class="mdui-list-item mdui-ripple">
+                <i class="mdui-list-item-icon mdui-icon material-icons">folder</i>
+                <div class="mdui-list-item-content">
+                    <div class="mdui-textfield mdui-textfield-floating-label">
+                        <label class="mdui-textfield-label">resource_path</label>
+                        <input class="mdui-textfield-input" type="text" id="resource-path"/>
+                        <div class="mdui-textfield-helper">资源目录</div>
+                    </div>
+                </div>
+            </li>
+            <li class="mdui-list-item mdui-ripple">
+                <i class="mdui-list-item-icon mdui-icon material-icons">email</i>
+                <div class="mdui-list-item-content">
+                    <div class="mdui-textfield mdui-textfield-floating-label">
+                        <label class="mdui-textfield-label">smtp_server</label>
+                        <input class="mdui-textfield-input" type="text" id="smtp-server"/>
+                        <div class="mdui-textfield-helper">SMTP服务器</div>
+                    </div>
+                </div>
+            </li>
+            <li class="mdui-list-item mdui-ripple">
+                <i class="mdui-list-item-icon mdui-icon material-icons">email</i>
+                <div class="mdui-list-item-content">
+                    <div class="mdui-textfield mdui-textfield-floating-label">
+                        <label class="mdui-textfield-label">smtp_username</label>
+                        <input class="mdui-textfield-input" type="text" id="smtp-username"/>
+                        <div class="mdui-textfield-helper">SMTP用户名</div>
+                    </div>
+                </div>
+            </li>
+            <li class="mdui-list-item mdui-ripple">
+                <i class="mdui-list-item-icon mdui-icon material-icons">email</i>
+                <div class="mdui-list-item-content">
+                    <div class="mdui-textfield mdui-textfield-floating-label">
+                        <label class="mdui-textfield-label">smtp_password</label>
+                        <input class="mdui-textfield-input" type="text" id="smtp-password"/>
+                        <div class="mdui-textfield-helper">SMTP密码</div>
+                    </div>
+                </div>
+            </li>
+            <li class="mdui-list-item mdui-ripple">
+                <i class="mdui-list-item-icon mdui-icon material-icons">email</i>
+                <div class="mdui-list-item-content">
+                    <div class="mdui-textfield mdui-textfield-floating-label">
+                        <label class="mdui-textfield-label">smtp_email</label>
+                        <input class="mdui-textfield-input" type="text" id="smtp-email"/>
+                        <div class="mdui-textfield-helper">SMTP邮箱</div>
+                    </div>
+                </div>
+            </li>
+            <li class="mdui-list-item mdui-ripple">
+                <i class="mdui-list-item-icon mdui-icon material-icons">lock</i>
+                <div class="mdui-list-item-content">
+                    <div class="mdui-textfield mdui-textfield-floating-label">
+                        <label class="mdui-textfield-label">admin_password</label>
+                        <input class="mdui-textfield-input" type="text" id="admin-password"/>
+                        <div class="mdui-textfield-helper">管理员密码</div>
+                    </div>
+                </div>
+            </li>
+            <div class="item mdui-text-center mdui-p-t-2 mdui-p-b-2">
+                <button class="mdui-btn mdui-btn-raised mdui-color-blue mdui-text-color-white-text"
+                        onclick="update_config()">
+                    保存配置
+                </button>
+            </div>
         </ul>
         <div class="item mdui-text-center mdui-p-t-2 mdui-p-b-2">
+            <button class="mdui-btn mdui-btn-raised mdui-color-red mdui-text-color-white-text"
+                    onclick="mdui.confirm('确认重启服务器吗？', '重启服务器', reboot, function(e){e.close();}, {confirmText: '确认', cancelText: '取消'})">
+                重启Lead服务器
+            </button>
             <button class="mdui-btn mdui-btn-raised mdui-color-red mdui-text-color-white-text"
                     onclick="mdui.confirm('确认关闭服务器吗？', '关闭服务器', shutdown, function(e){e.close();}, {confirmText: '确认', cancelText: '取消'})">
                 关闭Lead服务器

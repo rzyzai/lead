@@ -33,11 +33,13 @@
 
 namespace lead
 {
-  Server::Server(const std::string &config_path)
+  Server::Server(const std::string &config_path_)
   {
+    config_path = config_path_;
     std::ifstream config_file(config_path);
-    nlohmann::json config = nlohmann::json::parse(config_file);
-    
+    config = nlohmann::json::parse(config_file);
+    config_file.close();
+  
     config["resource_path"].get_to(res_path);
     config["admin_password"].get_to(admin_passwd);
     config["listen_address"].get_to(listen_addr);
@@ -69,6 +71,33 @@ namespace lead
                           {
                               {"status",  "failed"},
                               {"message", to_string(status)}}.dump(), "application/json");
+    }
+  }
+  
+  void Server::admin_do(const httplib::Request &req, httplib::Response &res,
+                       const std::function<nlohmann::json(const httplib::Request &)> &func)
+  {
+    if (req.has_param("admin_password") && req.get_param_value("admin_password") == admin_passwd)
+    {
+      auto res_json = func(req);
+      res.set_content(res_json.dump(), "application/json");
+    }
+    else
+    {
+      if (req.has_param("admin_password"))
+      {
+        res.set_content(nlohmann::json
+                            {
+                                {"status",  "failed"},
+                                {"message", "管理员密码错误"}}.dump(), "application/json");
+      }
+      else
+      {
+        res.set_content(nlohmann::json
+                            {
+                                {"status",  "failed"},
+                                {"message", "权限不足"}}.dump(), "application/json");
+      }
     }
   }
   
@@ -298,49 +327,149 @@ namespace lead
       res.set_content(user_manager.get_version().dump(), "application/json");
     });
   
-    svr.Get("/api/shutdown", [this](const httplib::Request &req, httplib::Response &res)
+    svr.Get("/api/shutdown", [this, &svr](const httplib::Request &req, httplib::Response &res)
     {
-      if(req.has_param("passwd") && req.get_param_value("passwd") == admin_passwd)
+      admin_do(req, res, [&svr](const httplib::Request &req) -> nlohmann::json
       {
         lead_running = false;
-        res.set_content(nlohmann::json{{"status", "success"}}.dump(), "application/json");
-      }
-      else
-      {
-        res.set_content(nlohmann::json{{"status",  "failed"},
-                                       {"message", "密码错误"}}.dump(), "application/json");
-      }
+        svr.stop();
+        return {{"status", "success"}};
+      });
     });
   
-    svr.Get("/api/get_serverstatus", [](const httplib::Request &req, httplib::Response &res)
+    svr.Get("/api/reboot", [this, &svr](const httplib::Request &req, httplib::Response &res)
     {
-      auto status = utils::get_system_status();
-      res.set_content(nlohmann::json{
-          {"status", "success"},
-          {"load", status.load},
-          {"total_memory", status.total_memory},
-          {"used_memory", status.used_memory},
-          {"time", status.time},
-          {"running_time", status.running_time},
-          {"time_since_epoch", status.time_since_epoch}
-      }.dump(), "application/json");
+      admin_do(req, res, [&svr](const httplib::Request &req) -> nlohmann::json
+      {
+        svr.stop();
+        return {{"status", "success"}};
+      });
     });
     
-    svr.Get("/api/get_serverinfo", [](const httplib::Request &req, httplib::Response &res)
+    svr.Get("/api/login_admin", [this](const httplib::Request &req, httplib::Response &res)
     {
-      auto [msg, info] = utils::get_system_info();
-      res.set_content(nlohmann::json{
-          {"status", "success"},
-          {"message", msg},
-          {"hostname", info.hostname},
-          {"sysname", info.sysname},
-          {"release", info.release},
-          {"version", info.version},
-          {"machine", info.machine},
-          {"network", info.network}
-        }.dump(), "application/json");
+      admin_do(req, res, [](const httplib::Request &req) -> nlohmann::json
+      {
+        auto status = utils::get_system_status();
+        return {{"status",           "success"}};
+      });
     });
   
+    svr.Get("/api/get_serverstatus", [this](const httplib::Request &req, httplib::Response &res)
+    {
+      admin_do(req, res, [](const httplib::Request &req) -> nlohmann::json
+      {
+        auto status = utils::get_system_status();
+        return {
+            {"status",           "success"},
+            {"load",             status.load},
+            {"total_memory",     status.total_memory},
+            {"used_memory",      status.used_memory},
+            {"time",             status.time},
+            {"running_time",     status.running_time},
+            {"time_since_epoch", status.time_since_epoch}
+        };
+      });
+    });
+  
+    svr.Get("/api/get_serverinfo", [this](const httplib::Request &req, httplib::Response &res)
+    {
+      admin_do(req, res, [this](const httplib::Request &req) -> nlohmann::json
+      {
+        auto[msg, info] = utils::get_system_info();
+        return {
+            {"status",   "success"},
+            {"message",  msg},
+            {"hostname", info.hostname},
+            {"sysname",  info.sysname},
+            {"release",  info.release},
+            {"version",  info.version},
+            {"machine",  info.machine},
+            {"network",  info.network},
+            {"config",
+             {
+                 {"listen_address", config["listen_address"].get<std::string>()},
+                 {"listen_port", config["listen_port"].get<int>()},
+                 {"resource_path", config["resource_path"].get<std::string>()},
+                 {"admin_password", config["admin_password"].get<std::string>()},
+                 {"smtp_server", config["smtp_server"].get<std::string>()},
+                 {"smtp_username", config["smtp_username"].get<std::string>()},
+                 {"smtp_password", config["smtp_password"].get<std::string>()},
+                 {"smtp_email", config["smtp_email"].get<std::string>()},
+                 
+            }}
+        };
+      });
+    });
+  
+    svr.Get("/api/update_config", [this](const httplib::Request &req, httplib::Response &res)
+    {
+      admin_do(req, res, [this](const httplib::Request &req) -> nlohmann::json
+      {
+        std::string message = "{";
+        if (req.has_param("listen_address") && config["listen_address"] != req.get_param_value("listen_address"))
+        {
+          config["listen_address"] = req.get_param_value("listen_address");
+          message += "listen_address, ";
+        }
+        if (req.has_param("listen_port")
+        && std::to_string(config["listen_port"].get<int>()) != req.get_param_value("listen_port"))
+        {
+          config["listen_port"] = std::stoi(req.get_param_value("listen_port"));
+          message += "listen_port, ";
+        }
+        if (req.has_param("resource_path") && config["resource_path"] != req.get_param_value("resource_path"))
+        {
+          config["resource_path"] = req.get_param_value("resource_path");
+          message += "resource_path, ";
+        }
+        if (req.has_param("new_admin_password") && config["admin_password"] != req.get_param_value("new_admin_password"))
+        {
+          admin_passwd = req.get_param_value("new_admin_password");
+          config["admin_password"] = req.get_param_value("new_admin_password");
+          message += "admin_password, ";
+        }
+        if (req.has_param("smtp_server") && config["smtp_server"] != req.get_param_value("smtp_server"))
+        {
+          config["smtp_server"] = req.get_param_value("smtp_server");
+          message += "smtp_server, ";
+        }
+        if (req.has_param("smtp_username") && config["smtp_username"] != req.get_param_value("smtp_username"))
+        {
+          config["smtp_username"] = req.get_param_value("smtp_username");
+          message += "smtp_username, ";
+        }
+        if (req.has_param("smtp_password") && config["smtp_password"] != req.get_param_value("smtp_password"))
+        {
+          config["smtp_password"] = req.get_param_value("smtp_password");
+          message += "smtp_password, ";
+        }
+        if (req.has_param("smtp_email") && config["smtp_email"] != req.get_param_value("smtp_email"))
+        {
+          config["smtp_email"] = req.get_param_value("smtp_email");
+          message += "smtp_email, ";
+        }
+        
+        std::ofstream config_file(config_path);
+        config_file << config.dump();
+        config_file.flush();
+        config_file.close();
+        
+        if(message != "{")
+        {
+          message.pop_back();
+          message.pop_back();
+          message += "} 已修改, 请重启服务器";
+        }
+        else
+        {
+          message = "配置没有改动";
+        }
+        return {{"status", "success"}, {"message", message}};
+      });
+    });
+    
+    
     svr.Get("/api/get_settings", [this](const httplib::Request &req, httplib::Response &res)
     {
       auth_do(req, res, [](std::unique_ptr<UserRef> ur, const httplib::Request &req) -> nlohmann::json
@@ -516,8 +645,6 @@ namespace lead
                                 (int) ptm->tm_hour, (int) ptm->tm_min, (int) ptm->tm_sec);
                         std::cout << utils::green("^^^^^^^^^^") << date << utils::green("^^^^^^^^^^") << std::endl;
                       }
-                      if(!lead_running)
-                        std::exit(0);
                    });
     
     std::cout << "Server started at '" << listen_addr << ":" << listen_port << "'." << std::endl;

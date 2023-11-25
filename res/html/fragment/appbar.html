@@ -4,7 +4,8 @@
            href="#" mdui-drawer="{target: '#left-drawer'}">
             <i class="mdui-icon material-icons mdui-text-color-white-icon">menu</i>
         </a>
-        <span class="mdui-typo-title mdui-text-color-white toolbar-hidden-when-search" onclick="window.location='/'">Lead</span>
+        <span class="mdui-typo-title mdui-text-color-white toolbar-hidden-when-search"
+              onclick="window.sessionStorage.setItem('page', 'plan');window.location='/'">Lead</span>
         <div class="mdui-toolbar-spacer"></div>
         <button class="mdui-btn-icon mdui-btn mdui-ripple mdui-color-theme-accent toolbar-hidden-when-search"
                 mdui-dialog="{target: '#loginDialog', history: false, modal: true}">
@@ -66,13 +67,13 @@
                 <i class="mdui-list-item-icon mdui-icon material-icons">settings</i>
                 <div class="mdui-list-item-content mdui-text-color-black-text">设置</div>
             </a>
-            <a onclick="load_body('serverinfo')" class="mdui-list-item mdui-ripple" id="page-serverinfo">
-                <i class="mdui-list-item-icon mdui-icon material-icons">data_usage</i>
-                <div class="mdui-list-item-content mdui-text-color-black-text">系统</div>
-            </a>
             <a onclick="load_body('about')" class="mdui-list-item mdui-ripple" id="page-about">
                 <i class="mdui-list-item-icon mdui-icon material-icons">info_outline</i>
                 <div class="mdui-list-item-content mdui-text-color-black-text">关于</div>
+            </a>
+            <a onclick="load_body('serverinfo')" class="mdui-list-item mdui-ripple" id="page-serverinfo">
+                <i class="mdui-list-item-icon mdui-icon material-icons">wb_cloudy</i>
+                <div class="mdui-list-item-content mdui-text-color-black-text">服务器</div>
             </a>
         </div>
     </ul>

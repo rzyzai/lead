@@ -37,6 +37,7 @@ namespace lead
   class Server
   {
   public:
+    std::string config_path;
     std::string res_path;
     VOC vocabulary;
     EmailSender email_sender;
@@ -44,14 +45,17 @@ namespace lead
     std::string listen_addr;
     int listen_port;
     std::string admin_passwd;
+    nlohmann::json config;
   public:
-    Server(const std::string &config_path);
+    Server(const std::string &config_path_);
     
     void run();
 
   private:
     void auth_do(const httplib::Request &req, httplib::Response &res,
                  const std::function<nlohmann::json(std::unique_ptr<UserRef>, const httplib::Request &)> &func);
+    void admin_do(const httplib::Request &req, httplib::Response &res,
+                          const std::function<nlohmann::json(const httplib::Request &)> &func);
   };
 }
 #endif
