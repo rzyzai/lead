@@ -23,6 +23,8 @@
 #include <string>
 #include <cstring>
 #include <curl/curl.h>
+#include "bundled/cppcodec/base64_default_url.hpp"
+
 #include "lead/email.hpp"
 #include "lead/utils.hpp"
 
@@ -34,6 +36,7 @@ namespace lead
     username = username_;
     passwd = password;
   }
+  
   static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
   {
     struct email_upload_status *upload_ctx = (struct email_upload_status *) userp;
@@ -52,14 +55,15 @@ namespace lead
     }
     return 0;
   }
-
+  
   int EmailSender::send(const Email &email) const
   {
     const std::string payload_text =
+        "content-type:text/plain;charset=utf-8\r\n"
         "Date: " + utils::get_time() + "\r\n"
-        "To: " + email.to + "\r\n"
-        + "From: " + email.from + "\r\n"
-        + "Subject: " + email.subject + "\r\n\r\n"
+        "To: =?UTF-8?B?" + cppcodec::base64_url::encode(email.to_name) + "?= <" + email.to_addr + ">\r\n"
+        "From: =?UTF-8?B?" + cppcodec::base64_url::encode(email.from_name) + "?= <" + email.from_addr + ">\r\n"
+        "Subject: =?UTF-8?B?" + cppcodec::base64_url::encode(email.subject) + "?=\r\n\r\n"
         + email.body + "\r\n";
     
     CURL *curl;
@@ -72,8 +76,8 @@ namespace lead
       curl_easy_setopt(curl, CURLOPT_USERNAME, username.c_str());
       curl_easy_setopt(curl, CURLOPT_PASSWORD, passwd.c_str());
       curl_easy_setopt(curl, CURLOPT_URL, server.c_str());
-      curl_easy_setopt(curl, CURLOPT_MAIL_FROM, email.from.c_str());
-      recipients = curl_slist_append(recipients, email.to.c_str());
+      curl_easy_setopt(curl, CURLOPT_MAIL_FROM, email.from_addr.c_str());
+      recipients = curl_slist_append(recipients, email.to_addr.c_str());
       curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
       curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
       curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);

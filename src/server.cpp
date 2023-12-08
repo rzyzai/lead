@@ -113,7 +113,8 @@ namespace lead
     svr.set_mount_point("/userpic", res_path + "/records/userpic");
     svr.Get("/api/send_verification_code", [this](const httplib::Request &req, httplib::Response &res)
     {
-      res.set_content(user_manager.send_verification_code(req.get_param_value("email")).dump(), "application/json");
+      res.set_content(user_manager.send_verification_code(req.get_param_value("email"),
+                                                          req.get_param_value("username")).dump(), "application/json");
     });
     svr.Get("/api/register", [this](const httplib::Request &req, httplib::Response &res)
     {

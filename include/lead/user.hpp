@@ -153,8 +153,8 @@ namespace lead
     void update_meta() const;
   
     nlohmann::json get_version() const;
-    
-    nlohmann::json send_verification_code(const std::string& email);
+  
+    nlohmann::json send_verification_code(const std::string &to_email, const std::string & username);
     
     bool verify(const std::string& email, const std::string& code);
   };

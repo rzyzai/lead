@@ -26,19 +26,24 @@ let mutationObserver = null;
 let status_updater = null;
 let load_chart = null;
 let memory_chart = null;
-let send_verification_code_time = 10;
+let send_verification_code_time = 30;
 
-function send_verification_code(email) {
+function send_verification_code(email, username) {
     var reg = /^([a-zA-Z]|[0-9])(\w|\-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/;
     if(email == null || email == "" || !reg.test(email))
         mdui.snackbar("邮箱格式错误");
+    else if(username == null || username == "")
+        mdui.snackbar("请输入用户名");
     else
     {
         $.ajax({
             type: 'GET',
             url: "api/send_verification_code",
             data:
-                {email: email},
+                {
+                    email: email,
+                    username: username
+                },
             success: function (result) {
                 mdui.snackbar(result["message"]);
             },
@@ -52,7 +57,7 @@ function send_verification_code(email) {
                 clearInterval(timer);
                 $("#verify-button")[0].removeAttribute("disabled");
                 $("#verify-button").html('获取验证码');
-                send_verification_code_time = 10;
+                send_verification_code_time = 30;
             }
         }, 800);
     }

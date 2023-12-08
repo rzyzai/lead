@@ -33,8 +33,10 @@ namespace lead
   };
   struct Email
   {
-    std::string from;
-    std::string to;
+    std::string from_addr;
+    std::string from_name;
+    std::string to_addr;
+    std::string to_name;
     std::string subject;
     std::string body;
   };

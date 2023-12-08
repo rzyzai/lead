@@ -64,10 +64,11 @@ namespace lead
     return "Unknown";
   }
   
-  UserRef::UserRef(size_t userid_, std::string username_, std::string email_, std::string passwd_, VOC* voc, leveldb::DB* db)
-  : userid(userid_), username(std::move(username_)), email(std::move(email_)), passwd(std::move(passwd_)),
-  vocabulary(voc), user_db(db),
-    word_records(voc->size()), plan_pos(0)
+  UserRef::UserRef(size_t userid_, std::string username_, std::string email_, std::string passwd_, VOC *voc,
+                   leveldb::DB *db)
+      : userid(userid_), username(std::move(username_)), email(std::move(email_)), passwd(std::move(passwd_)),
+        vocabulary(voc), user_db(db),
+        word_records(voc->size()), plan_pos(0)
   {
     std::map<std::string, bool> settings_;
     for (auto &r: settings_list)
@@ -76,7 +77,7 @@ namespace lead
   }
   
   UserRef::UserRef(const nlohmann::json &config, VOC *voc, leveldb::DB *db)
-  : vocabulary(voc), user_db(db)
+      : vocabulary(voc), user_db(db)
   {
     word_records = config["record"].get<std::vector<WordRecord>>();
     marked_words = config["marked_words"].get<std::vector<size_t>>();
@@ -91,7 +92,7 @@ namespace lead
       throw std::runtime_error("Invalid settings.");
   }
   
-  UserRef::~UserRef() {write_records();}
+  UserRef::~UserRef() { write_records(); }
   
   void UserRef::clear_word_records()
   {
@@ -290,10 +291,11 @@ namespace lead
                             {"marked_words",    marked_words},
                             {"plan_pos",        plan_pos},
                             {"settings",        settings}}.dump());
-  
+    
   }
   
-  void UserManager::init(const std::string &record_path_, VOC* voc, EmailSender* email_sender_, const std::string& email_)
+  void
+  UserManager::init(const std::string &record_path_, VOC *voc, EmailSender *email_sender_, const std::string &email_)
   {
     vocabulary = voc;
     email_sender = email_sender_;
@@ -303,7 +305,7 @@ namespace lead
     options.create_if_missing = true;
     leveldb::Status status = leveldb::DB::Open(options, record_path + "/userdb", &db);
     assert(status.ok());
-    auto ur = std::make_unique<UserRef>(0, "__lead_guest__", "lead@rzyzai.tech",  "__lead_guest__", vocabulary, db);
+    auto ur = std::make_unique<UserRef>(0, "__lead_guest__", "lead@rzyzai.tech", "__lead_guest__", vocabulary, db);
     assert(ur->write_records().ok());
     std::ifstream meta_file(record_path + "/meta.json");
     nlohmann::json::parse(meta_file).get_to(meta);
@@ -319,9 +321,9 @@ namespace lead
   {
     std::string value;
     leveldb::Status s = db->Get(leveldb::ReadOptions(), username, &value);
-    if(s.ok())
+    if (s.ok())
       return {UserManagerStatus::user_already_exists, nullptr};
-    if(s.IsNotFound())
+    if (s.IsNotFound())
     {
       auto ur = std::make_unique<UserRef>(meta.user_count, username, email, passwd, vocabulary, db);
       if (ur->write_records().ok())
@@ -376,21 +378,22 @@ namespace lead
   {
     std::ifstream meta(record_path + "/meta.json");
     auto m = nlohmann::json::parse(meta);
-    return {{"status",   "success"},
+    return {{"status",  "success"},
             {"version", m["version"]}
     };
   }
   
-  nlohmann::json UserManager::send_verification_code(const std::string& to_email)
+  nlohmann::json UserManager::send_verification_code(const std::string &to_email, const std::string & username)
   {
     auto now = std::chrono::steady_clock::now();
-    if(auto it = verification_codes.find(to_email); it != verification_codes.end())
+    if (auto it = verification_codes.find(to_email); it != verification_codes.end())
     {
       double d = std::chrono::duration<double>(now - std::get<1>(it->second)).count();
-      if(d < 60)
-        return {{"status", "failed"}, {"message", "发送过于频繁，请于1分钟后再尝试。"}};
+      if (d < 30)
+        return {{"status",  "failed"},
+                {"message", "发送过于频繁，请于30s后再尝试。"}};
     }
-    for(auto it = verification_codes.begin(); it != verification_codes.end();)
+    for (auto it = verification_codes.begin(); it != verification_codes.end();)
     {
       double duration_second =
           std::chrono::duration<double>(now - std::get<1>(it->second)).count();
@@ -402,20 +405,29 @@ namespace lead
     std::string code = std::to_string(utils::randnum<int>(100000, 1000000));
     verification_codes[to_email] = {code, std::chrono::steady_clock::now()};
     Email e;
-    e.from = email;
-    e.to = to_email;
+    e.from_addr = email;
+    e.from_name = "Lead";
+    e.to_addr = to_email;
+    e.to_name = username;
     e.subject = "Lead - 验证邮件";
-    e.body = "您的验证码是: " + code + " (5分钟内有效)";
+    e.body = "尊敬的" + username + ":\n您的验证码是: " + code + " (5分钟内有效)";
     auto ret = email_sender->send(e);
-    if(ret == CURLE_OK)
-      return {{"status", "success"}, {"message", "发送成功"}};
-    return {{"status", "failed"}, {"message", "发送失败"}};
+    if (ret == CURLE_OK)
+      return {{"status",  "success"},
+              {"message", "发送成功"}};
+    return {{"status",  "failed"},
+            {"message", "发送失败"}};
   }
   
-  bool UserManager::verify(const std::string& email, const std::string& code)
+  bool UserManager::verify(const std::string &email, const std::string &code)
   {
-    if(auto it = verification_codes.find(email); it != verification_codes.end() && std::get<0>(it->second) == code)
-      return true;
+    if (auto it = verification_codes.find(email); it != verification_codes.end() && std::get<0>(it->second) == code)
+    {
+      double duration_second =
+          std::chrono::duration<double>(std::chrono::steady_clock::now() - std::get<1>(it->second)).count();
+      if (duration_second <= 300)
+        return true;
+    }
     return false;
   }
 }

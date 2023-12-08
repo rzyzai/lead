@@ -54,12 +54,13 @@ namespace lead
     nlohmann::json voc = nlohmann::json::parse(voc_file);
     for (auto &r: voc)
     {
-      vocabulary.emplace_back(
-          Word{
-              .word = r["word"].get<std::string>(),
-              .meaning = r["meaning"].get<std::string>(),
-              .detail = r["detail"]
-          });
+      Word w;
+      w.word = r["word"].get<std::string>();
+      for(auto& j : r["group"])
+        w.meaning += j["meaning"].get<std::string>() + ";";
+      w.meaning.pop_back();
+      w.group = r["group"];
+      vocabulary.emplace_back(w);
     }
     voc_file.close();
 // explanation generation test
@@ -258,6 +259,11 @@ namespace lead
     {
       ret += " " + data["ph"].get<std::string>();
     }
+  
+    if (data.contains("desc"))
+    {
+      ret += " " + data["desc"].get<std::string>();
+    }
     
     if (data.contains("usage"))
     {
@@ -390,102 +396,106 @@ namespace lead
   std::string VOC::get_explanation(size_t index) const
   {
     std::string ret;
-    auto &detail = vocabulary[index].detail;
     // Word
-    ret += "<h1>" + vocabulary[index].word;
-    // part of speech
-    if (detail.contains("pos"))
+    ret += "<h1>" + vocabulary[index].word + "</h1>";
+    for (auto &r: vocabulary[index].group)
     {
-      ret += "<i>  " + detail["pos"].get<std::string>() + "</i>";
-    }
-    // vital
-    if (detail["vital"].get<bool>())
-    {
-      ret += " ★";
-    }
-    ret += "<button class=\"mdui-btn mdui-ripple\">\n"
-           "  <i class=\"mdui-icon material-icons\" onclick=\"speak(&quot;" + vocabulary[index].word
-           + "&quot;)\">play_arrow</i></button>";
-    ret += "</h1>";
-    // Pronunciation
-    if (detail.contains("en_ph"))
-    {
-      ret += "英 /" + detail["en_ph"].get<std::string>() + "/  ";
-    }
-    if (detail.contains("usa_ph"))
-    {
-      ret += "美 /" + detail["usa_ph"].get<std::string>() + "/  ";
-    }
-    
-    // Usage
-    if (detail.contains("usage"))
-    {
-      ret += "<br/>" + detail["usage"].get<std::string>();
-    }
-    
-    // Explanations
-    if (detail.contains("explanations"))
-    {
-      ret += "<h3>释义</h3>";
-      ret += "<ol class=\"mdui-list\">";
-      for (auto &r: detail["explanations"])
+      auto &detail = r["detail"];
+      ret += "<h2>";
+      // part of speech
+      if (detail.contains("pos"))
       {
-        ret += "<li><span class=\"meaning\"><strong>";
-        parse_explanation(r, ret, "</strong>");
-        ret += "</span></li>";
+        ret += "<i>  " + detail["pos"].get<std::string>() + "</i>";
       }
-      ret += "</ol>";
-    }
-    
-    // Collocations
-    if (detail.contains("collocations"))
-    {
-      ret += "<h3>固定搭配</h3>";
-      ret += "<ul class=\"mdui-list\">";
-      for (auto &r: detail["collocations"])
+      // vital
+      if (detail["vital"].get<bool>())
       {
-        ret += "<li>";
-        parse_collocation(r, ret);
-        ret += "</li>";
+        ret += " ★";
       }
-      ret += "</ul>";
-    }
-    
-    // Derivatives
-    if (detail.contains("derivatives"))
-    {
-      ret += "<h3>派生词汇</h3>";
-      ret += "<ul class=\"mdui-list\">";
-      for (auto &r: detail["derivatives"])
+      ret += "<button class=\"mdui-btn mdui-ripple\">\n"
+             "  <i class=\"mdui-icon material-icons\" onclick=\"speak(&quot;" + vocabulary[index].word
+             + "&quot;)\">play_arrow</i></button>";
+      ret += "</h2>";
+      // Pronunciation
+      if (detail.contains("en_ph"))
       {
-        ret += "<li>";
-        parse_derivative(r, ret);
-        ret += "</li>";
+        ret += "英 /" + detail["en_ph"].get<std::string>() + "/  ";
       }
-      ret += "</ul>";
-    }
-    
-    // Quizzes
-    if (detail.contains("quizzes"))
-    {
-      ret += "<h3>题目解析</h3>";
-      ret += "<ol class=\"mdui-list\">";
-      for (auto &r: detail["quizzes"])
+      if (detail.contains("usa_ph"))
       {
-        ret += "<li><span class=\"explanation_quiz\">";
-        parse_quiz_question(r, ret);
-        ret += "</span></li>";
+        ret += "美 /" + detail["usa_ph"].get<std::string>() + "/  ";
       }
-      ret += "</ol>";
-      ret += "<h4>答案</h4>";
-      ret += "<ol class=\"mdui-list\">";
-      for (auto &r: detail["quizzes"])
+  
+      // Usage
+      if (detail.contains("usage"))
       {
-        ret += "<li><span class=\"explanation_quiz\">";
-        parse_quiz_answer(r, ret);
-        ret += "</span></li>";
+        ret += "<br/>" + detail["usage"].get<std::string>();
       }
-      ret += "</ol>";
+  
+      // Explanations
+      if (detail.contains("explanations"))
+      {
+        ret += "<h3>释义</h3>";
+        ret += "<ol class=\"mdui-list\">";
+        for (auto &r: detail["explanations"])
+        {
+          ret += "<li><span class=\"meaning\"><strong>";
+          parse_explanation(r, ret, "</strong>");
+          ret += "</span></li>";
+        }
+        ret += "</ol>";
+      }
+  
+      // Collocations
+      if (detail.contains("collocations"))
+      {
+        ret += "<h3>固定搭配</h3>";
+        ret += "<ul class=\"mdui-list\">";
+        for (auto &r: detail["collocations"])
+        {
+          ret += "<li>";
+          parse_collocation(r, ret);
+          ret += "</li>";
+        }
+        ret += "</ul>";
+      }
+  
+      // Derivatives
+      if (detail.contains("derivatives"))
+      {
+        ret += "<h3>派生词汇</h3>";
+        ret += "<ul class=\"mdui-list\">";
+        for (auto &r: detail["derivatives"])
+        {
+          ret += "<li>";
+          parse_derivative(r, ret);
+          ret += "</li>";
+        }
+        ret += "</ul>";
+      }
+  
+      // Quizzes
+      if (detail.contains("quizzes"))
+      {
+        ret += "<h3>题目解析</h3>";
+        ret += "<ol class=\"mdui-list\">";
+        for (auto &r: detail["quizzes"])
+        {
+          ret += "<li><span class=\"explanation_quiz\">";
+          parse_quiz_question(r, ret);
+          ret += "</span></li>";
+        }
+        ret += "</ol>";
+        ret += "<h4>答案</h4>";
+        ret += "<ol class=\"mdui-list\">";
+        for (auto &r: detail["quizzes"])
+        {
+          ret += "<li><span class=\"explanation_quiz\">";
+          parse_quiz_answer(r, ret);
+          ret += "</span></li>";
+        }
+        ret += "</ol>";
+      }
     }
     return "<div class=\"mdui-typo\">" + ret + "</div>";
   }
@@ -534,7 +544,9 @@ namespace lead
   
   WordRef VOC::at(size_t w) const
   {
-    return {&vocabulary[w], w};
+    if(w < vocabulary.size())
+      return {&vocabulary[w], w};
+    return {};
   }
   
   bool contains(size_t search_pos, const std::string& str, size_t target_size)
@@ -549,26 +561,26 @@ namespace lead
   std::vector<size_t> VOC::search(const std::string &w) const
   {
     std::vector<size_t> ret;
+    std::map<std::string, int> diff;
     for (size_t i = 0; i < vocabulary.size(); ++i)
     {
-      if (auto search_pos = vocabulary[i].word.find(w); search_pos != std::string::npos)
-      {
-        if (!contains(search_pos, vocabulary[i].word, w.size()))
-          continue;
+      if (w == vocabulary[i].word)
         ret.emplace_back(i);
-      }
-      else if (auto search_pos = vocabulary[i].meaning.find(w); search_pos != std::string::npos)
+      else if (auto search_pos = vocabulary[i].meaning.find(w); search_pos != std::string::npos
+                                                                &&
+                                                                contains(search_pos, vocabulary[i].meaning, w.size()))
+        ret.emplace_back(i);
+      else if (auto d = utils::get_edit_distance(vocabulary[i].word, w); d < w.size() / 2)
       {
-        if (!contains(search_pos, vocabulary[i].meaning, w.size()))
-          continue;
+        diff[vocabulary[i].word] = d;
         ret.emplace_back(i);
       }
     }
-    std::map<std::string, int> diff;
     for(auto& r : ret)
     {
       auto word = at(r).word->word;
-      diff[word] = utils::get_edit_distance(word, w);
+      if(diff.find(word) == diff.end())
+        diff[word] = utils::get_edit_distance(word, w);
     }
     std::sort(ret.begin(), ret.end(),
               [&diff, this](auto&&s1, auto&& s2)

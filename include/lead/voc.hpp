@@ -39,7 +39,7 @@ namespace lead
   {
     std::string word;
     std::string meaning;
-    nlohmann::json detail;
+    nlohmann::json group;
   };
   
   void to_json(nlohmann::json &j, const lead::Word &p);
