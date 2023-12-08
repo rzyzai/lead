@@ -60,16 +60,17 @@ namespace lead::utils
     int min = (duration_second - hour * 3600) / 60;
     int sec = duration_second - hour * 3600 - min * 60;
     status.running_time = std::to_string(hour) + ":" + std::to_string(min) + ":" + std::to_string(sec);
-  
+    
     status.time_since_epoch = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>
                                                  (std::chrono::system_clock::now().time_since_epoch()).count());
-  
+    
     struct sysinfo info;
     if (sysinfo(&info) == 0)
     {
       FILE *fd;
       fd = fopen("/proc/meminfo", "r");
-      if (fd == NULL) {
+      if (fd == NULL)
+      {
         perror("open /proc/meminfo failed\n");
         exit(0);
       }
@@ -78,11 +79,14 @@ namespace lead::utils
       char *line = NULL;
       int index = 0;
       int avimem = 0;
-      while ((read = getline(&line, &bytes_read, fd)) != -1) {
-        if (++index <= 2) {
+      while ((read = getline(&line, &bytes_read, fd)) != -1)
+      {
+        if (++index <= 2)
+        {
           continue;
         }
-        if (strstr(line, "MemAvailable") != NULL) {
+        if (strstr(line, "MemAvailable") != NULL)
+        {
           sscanf(line, "%*s%d%*s", &avimem);
           break;
         }
@@ -91,7 +95,7 @@ namespace lead::utils
       int t = info.totalram / 1024.0;
       status.used_memory = std::to_string((t - avimem) * 1.0 / 1024);
       status.total_memory = std::to_string(info.totalram * 1.0 / 1024 / 1024);
-  
+      
       struct sysinfo sysinf;
       memset(&sysinf, 0, sizeof sysinf);
       if (!sysinfo(&sysinf))
@@ -107,7 +111,7 @@ namespace lead::utils
   }
 
 // https://blog.csdn.net/W1107101310/article/details/109708783
-  void parse_inet6(const char *ifname, NetCardInfo& info)
+  void parse_inet6(const char *ifname, NetCardInfo &info)
   {
     FILE *f;
     int ret, scope, prefix;
@@ -157,7 +161,7 @@ namespace lead::utils
     fclose(f);
   }
   
-  void parse_ioctl(const char *ifname, NetCardInfo& info)
+  void parse_ioctl(const char *ifname, NetCardInfo &info)
   {
     int sock;
     struct ifreq ifr;
@@ -166,37 +170,42 @@ namespace lead::utils
     size_t ifnamelen;
     
     ifnamelen = strlen(ifname);
-    if (ifnamelen >= sizeof(ifr.ifr_name)) {
-      return ;
+    if (ifnamelen >= sizeof(ifr.ifr_name))
+    {
+      return;
     }
     memcpy(ifr.ifr_name, ifname, ifnamelen);
     ifr.ifr_name[ifnamelen] = '\0';
     
     sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
-    if (sock < 0) {
+    if (sock < 0)
+    {
       return;
     }
     
-    if (ioctl(sock, SIOCGIFHWADDR, &ifr) != -1) {
+    if (ioctl(sock, SIOCGIFHWADDR, &ifr) != -1)
+    {
       char m[32];
       sprintf(m, "%02x:%02x:%02x:%02x:%02x:%02x",
-             (unsigned char)ifr.ifr_hwaddr.sa_data[0],
-             (unsigned char)ifr.ifr_hwaddr.sa_data[1],
-             (unsigned char)ifr.ifr_hwaddr.sa_data[2],
-             (unsigned char)ifr.ifr_hwaddr.sa_data[3],
-             (unsigned char)ifr.ifr_hwaddr.sa_data[4],
-             (unsigned char)ifr.ifr_hwaddr.sa_data[5]);
+              (unsigned char) ifr.ifr_hwaddr.sa_data[0],
+              (unsigned char) ifr.ifr_hwaddr.sa_data[1],
+              (unsigned char) ifr.ifr_hwaddr.sa_data[2],
+              (unsigned char) ifr.ifr_hwaddr.sa_data[3],
+              (unsigned char) ifr.ifr_hwaddr.sa_data[4],
+              (unsigned char) ifr.ifr_hwaddr.sa_data[5]);
       info.mac = m;
     }
     
-    if (ioctl(sock, SIOCGIFADDR, &ifr) == -1) {
+    if (ioctl(sock, SIOCGIFADDR, &ifr) == -1)
+    {
       close(sock);
       return;
     }
     
-    ipaddr = (struct sockaddr_in *)&ifr.ifr_addr;
-    if (inet_ntop(AF_INET, &ipaddr->sin_addr, address, sizeof(address)) != NULL) {
-     info.ipv4 = address;
+    ipaddr = (struct sockaddr_in *) &ifr.ifr_addr;
+    if (inet_ntop(AF_INET, &ipaddr->sin_addr, address, sizeof(address)) != NULL)
+    {
+      info.ipv4 = address;
     }
     close(sock);
   }
@@ -206,16 +215,18 @@ namespace lead::utils
     std::string message;
     SystemInfo info;
     char hostbuffer[256];
-    if(int ret = gethostname(hostbuffer, sizeof(hostbuffer)); ret == -1)
+    if (int ret = gethostname(hostbuffer, sizeof(hostbuffer)); ret == -1)
     {
       info.hostname = "-";
       message += strerror(errno);
     }
     else
+    {
       info.hostname = hostbuffer;
-  
+    }
+    
     struct utsname unamebuffer;
-    if(int ret = uname(&unamebuffer); ret < 0)
+    if (int ret = uname(&unamebuffer); ret < 0)
     {
       info.sysname = "-";
       info.version = "-";
@@ -230,22 +241,26 @@ namespace lead::utils
       info.release = unamebuffer.release;
       info.machine = unamebuffer.machine;
     }
-  
+    
     DIR *d;
     struct dirent *de;
     d = opendir("/sys/class/net/");
     if (d == NULL) return {message, info};
-  
-    while (NULL != (de = readdir(d))) {
-      if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0) {
+    
+    while (NULL != (de = readdir(d)))
+    {
+      if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0)
+      {
         continue;
       }
       NetCardInfo i;
       i.name = de->d_name;
       parse_ioctl(de->d_name, i);
       parse_inet6(de->d_name, i);
-      if(!i.mac.empty() || !i.ipv4.empty() || !i.ipv6.empty())
+      if (!i.mac.empty() || !i.ipv4.empty() || !i.ipv6.empty())
+      {
         info.network.emplace_back(i);
+      }
     }
     closedir(d);
     return {message, info};
@@ -253,7 +268,10 @@ namespace lead::utils
   
   void to_json(nlohmann::json &j, const NetCardInfo &p)
   {
-    j = {{"name", p.name}, {"mac", p.mac}, {"ipv4", p.ipv4}, {"ipv6", p.ipv6}};
+    j = {{"name", p.name},
+         {"mac",  p.mac},
+         {"ipv4", p.ipv4},
+         {"ipv6", p.ipv6}};
   }
   
   std::string get_string_from_file(const std::string &path)

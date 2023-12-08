@@ -33,7 +33,9 @@ namespace lead
     std::string version;
     int user_count;
   };
+  
   void to_json(nlohmann::json &j, const lead::Meta &p);
+  
   void from_json(const nlohmann::json &j, lead::Meta &p);
 }
 #endif

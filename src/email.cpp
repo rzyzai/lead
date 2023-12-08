@@ -48,7 +48,9 @@ namespace lead
     {
       size_t len = strlen(data);
       if (room < len)
+      {
         len = room;
+      }
       memcpy(ptr, data, len);
       upload_ctx->bytes_read += len;
       return len;
@@ -61,8 +63,10 @@ namespace lead
     const std::string payload_text =
         "content-type:text/plain;charset=utf-8\r\n"
         "Date: " + utils::get_time() + "\r\n"
-        "To: =?UTF-8?B?" + cppcodec::base64_url::encode(email.to_name) + "?= <" + email.to_addr + ">\r\n"
-        "From: =?UTF-8?B?" + cppcodec::base64_url::encode(email.from_name) + "?= <" + email.from_addr + ">\r\n"
+                                       "To: =?UTF-8?B?" + cppcodec::base64_url::encode(email.to_name) + "?= <" +
+        email.to_addr + ">\r\n"
+                        "From: =?UTF-8?B?" + cppcodec::base64_url::encode(email.from_name) + "?= <" + email.from_addr +
+        ">\r\n"
         "Subject: =?UTF-8?B?" + cppcodec::base64_url::encode(email.subject) + "?=\r\n\r\n"
         + email.body + "\r\n";
     
@@ -85,8 +89,10 @@ namespace lead
       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
       res = curl_easy_perform(curl);
       if (res != CURLE_OK)
+      {
         fprintf(stderr, "curl_easy_perform() failed: %s\n",
                 curl_easy_strerror(res));
+      }
       curl_slist_free_all(recipients);
       curl_easy_cleanup(curl);
     }

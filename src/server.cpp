@@ -39,7 +39,7 @@ namespace lead
     std::ifstream config_file(config_path);
     config = nlohmann::json::parse(config_file);
     config_file.close();
-  
+    
     config["resource_path"].get_to(res_path);
     config["admin_password"].get_to(admin_passwd);
     config["listen_address"].get_to(listen_addr);
@@ -75,7 +75,7 @@ namespace lead
   }
   
   void Server::admin_do(const httplib::Request &req, httplib::Response &res,
-                       const std::function<nlohmann::json(const httplib::Request &)> &func)
+                        const std::function<nlohmann::json(const httplib::Request &)> &func)
   {
     if (req.has_param("admin_password") && req.get_param_value("admin_password") == admin_passwd)
     {
@@ -118,7 +118,7 @@ namespace lead
     });
     svr.Get("/api/register", [this](const httplib::Request &req, httplib::Response &res)
     {
-      if(user_manager.verify(req.get_param_value("email"), req.get_param_value("verification_code")))
+      if (user_manager.verify(req.get_param_value("email"), req.get_param_value("verification_code")))
       {
         auto[status, ur] =
         user_manager.create_user(req.get_param_value("username"),
@@ -162,7 +162,8 @@ namespace lead
         ofs << req.body;
         ur->profile_picture = file_name;
         ofs.close();
-        return {{"status", "success"}, {"profile_picture", file_name}};
+        return {{"status",          "success"},
+                {"profile_picture", file_name}};
       });
     });
     svr.Get("/api/login", [this](const httplib::Request &req, httplib::Response &res)
@@ -193,7 +194,9 @@ namespace lead
       {
         WordRef wr;
         if (req.has_param("word_index"))
+        {
           wr = vocabulary.at(std::stoi(req.get_param_value("word_index")));
+        }
         auto quiz = ur->get_quiz(wr);
         wr = vocabulary.at(quiz["indexes"][quiz["answer"]].get<int>());
         return {
@@ -216,7 +219,7 @@ namespace lead
       auth_do(req, res, [](std::unique_ptr<UserRef> ur, const httplib::Request &req) -> nlohmann::json
       {
         ur->word_record(std::stoi(req.get_param_value("word_index")))->points = planned_review_times;
-        return{{"status", "success"}};
+        return {{"status", "success"}};
       });
     });
     
@@ -250,13 +253,13 @@ namespace lead
         auto d = std::stoi(req.get_param_value("D_index"));
         return {{"status", "success"},
                 {"A",      {{"is_marked", ur->is_marked(a)},
-                            {"explanation", vocabulary.get_explanation(a)}}},
+                               {"explanation", vocabulary.get_explanation(a)}}},
                 {"B",      {{"is_marked", ur->is_marked(b)},
-                            {"explanation", vocabulary.get_explanation(b)}}},
+                               {"explanation", vocabulary.get_explanation(b)}}},
                 {"C",      {{"is_marked", ur->is_marked(c)},
-                            {"explanation", vocabulary.get_explanation(c)}}},
+                               {"explanation", vocabulary.get_explanation(c)}}},
                 {"D",      {{"is_marked", ur->is_marked(d)},
-                            {"explanation", vocabulary.get_explanation(d)}}}
+                               {"explanation", vocabulary.get_explanation(d)}}}
         };
       });
     });
@@ -284,7 +287,7 @@ namespace lead
                 {"message", "没有找到" + word}};
       });
     });
-  
+    
     svr.Get("/api/get_marked", [this](const httplib::Request &req, httplib::Response &res)
     {
       auth_do(req, res, [](std::unique_ptr<UserRef> ur, const httplib::Request &req) -> nlohmann::json
@@ -292,7 +295,7 @@ namespace lead
         return ur->get_marked();
       });
     });
-  
+    
     svr.Get("/api/get_passed", [this](const httplib::Request &req, httplib::Response &res)
     {
       auth_do(req, res, [](std::unique_ptr<UserRef> ur, const httplib::Request &req) -> nlohmann::json
@@ -300,14 +303,14 @@ namespace lead
         return ur->get_passed();
       });
     });
-  
+    
     svr.Get("/api/get_explanation", [this](const httplib::Request &req, httplib::Response &res)
     {
       auto i = std::stoi(req.get_param_value("word_index"));
       res.set_content(nlohmann::json{{"status",      "success"},
                                      {"explanation", vocabulary.get_explanation(i)}}.dump(), "application/json");
     });
-  
+    
     svr.Get("/api/get_word", [this](const httplib::Request &req, httplib::Response &res)
     {
       auto i = std::stoi(req.get_param_value("word_index"));
@@ -322,12 +325,12 @@ namespace lead
         return ur->get_plan();
       });
     });
-  
+    
     svr.Get("/api/version", [this](const httplib::Request &req, httplib::Response &res)
     {
       res.set_content(user_manager.get_version().dump(), "application/json");
     });
-  
+    
     svr.Get("/api/shutdown", [this, &svr](const httplib::Request &req, httplib::Response &res)
     {
       admin_do(req, res, [&svr](const httplib::Request &req) -> nlohmann::json
@@ -337,7 +340,7 @@ namespace lead
         return {{"status", "success"}};
       });
     });
-  
+    
     svr.Get("/api/reboot", [this, &svr](const httplib::Request &req, httplib::Response &res)
     {
       admin_do(req, res, [&svr](const httplib::Request &req) -> nlohmann::json
@@ -352,10 +355,10 @@ namespace lead
       admin_do(req, res, [](const httplib::Request &req) -> nlohmann::json
       {
         auto status = utils::get_system_status();
-        return {{"status",           "success"}};
+        return {{"status", "success"}};
       });
     });
-  
+    
     svr.Get("/api/get_serverstatus", [this](const httplib::Request &req, httplib::Response &res)
     {
       admin_do(req, res, [](const httplib::Request &req) -> nlohmann::json
@@ -372,7 +375,7 @@ namespace lead
         };
       });
     });
-  
+    
     svr.Get("/api/get_serverinfo", [this](const httplib::Request &req, httplib::Response &res)
     {
       admin_do(req, res, [this](const httplib::Request &req) -> nlohmann::json
@@ -388,21 +391,21 @@ namespace lead
             {"machine",  info.machine},
             {"network",  info.network},
             {"config",
-             {
-                 {"listen_address", config["listen_address"].get<std::string>()},
-                 {"listen_port", config["listen_port"].get<int>()},
-                 {"resource_path", config["resource_path"].get<std::string>()},
-                 {"admin_password", config["admin_password"].get<std::string>()},
-                 {"smtp_server", config["smtp_server"].get<std::string>()},
-                 {"smtp_username", config["smtp_username"].get<std::string>()},
-                 {"smtp_password", config["smtp_password"].get<std::string>()},
-                 {"smtp_email", config["smtp_email"].get<std::string>()},
-                 
-            }}
+                         {
+                             {"listen_address", config["listen_address"].get<std::string>()},
+                             {"listen_port", config["listen_port"].get<int>()},
+                             {"resource_path", config["resource_path"].get<std::string>()},
+                             {"admin_password", config["admin_password"].get<std::string>()},
+                             {"smtp_server", config["smtp_server"].get<std::string>()},
+                             {"smtp_username", config["smtp_username"].get<std::string>()},
+                             {"smtp_password", config["smtp_password"].get<std::string>()},
+                             {"smtp_email", config["smtp_email"].get<std::string>()},
+              
+                         }}
         };
       });
     });
-  
+    
     svr.Get("/api/update_config", [this](const httplib::Request &req, httplib::Response &res)
     {
       admin_do(req, res, [this](const httplib::Request &req) -> nlohmann::json
@@ -414,7 +417,7 @@ namespace lead
           message += "listen_address, ";
         }
         if (req.has_param("listen_port")
-        && std::to_string(config["listen_port"].get<int>()) != req.get_param_value("listen_port"))
+            && std::to_string(config["listen_port"].get<int>()) != req.get_param_value("listen_port"))
         {
           config["listen_port"] = std::stoi(req.get_param_value("listen_port"));
           message += "listen_port, ";
@@ -424,7 +427,8 @@ namespace lead
           config["resource_path"] = req.get_param_value("resource_path");
           message += "resource_path, ";
         }
-        if (req.has_param("new_admin_password") && config["admin_password"] != req.get_param_value("new_admin_password"))
+        if (req.has_param("new_admin_password") &&
+            config["admin_password"] != req.get_param_value("new_admin_password"))
         {
           admin_passwd = req.get_param_value("new_admin_password");
           config["admin_password"] = req.get_param_value("new_admin_password");
@@ -456,7 +460,7 @@ namespace lead
         config_file.flush();
         config_file.close();
         
-        if(message != "{")
+        if (message != "{")
         {
           message.pop_back();
           message.pop_back();
@@ -466,7 +470,8 @@ namespace lead
         {
           message = "配置没有改动";
         }
-        return {{"status", "success"}, {"message", message}};
+        return {{"status",  "success"},
+                {"message", message}};
       });
     });
     
@@ -478,7 +483,7 @@ namespace lead
         return ur->get_settings();
       });
     });
-  
+    
     svr.Post("/api/update_settings", [this](const httplib::Request &req, httplib::Response &res)
     {
       auth_do(req, res, [](std::unique_ptr<UserRef> ur, const httplib::Request &req) -> nlohmann::json
@@ -492,25 +497,35 @@ namespace lead
       auth_do(req, res, [](std::unique_ptr<UserRef> ur, const httplib::Request &req) -> nlohmann::json
       {
         int ret = ur->mark_word(std::stoi(req.get_param_value("word_index")));
-        if(ret == 0)
+        if (ret == 0)
+        {
           return {{"status", "success"}};
+        }
         else
-          return {{"status", "failed"}, {"message", "已经收藏过了"}};
+        {
+          return {{"status",  "failed"},
+                  {"message", "已经收藏过了"}};
+        }
       });
     });
-  
+    
     svr.Get("/api/unmark_word", [this](const httplib::Request &req, httplib::Response &res)
     {
       auth_do(req, res, [](std::unique_ptr<UserRef> ur, const httplib::Request &req) -> nlohmann::json
       {
         int ret = ur->unmark_word(std::stoi(req.get_param_value("word_index")));
-        if(ret == 0)
+        if (ret == 0)
+        {
           return {{"status", "success"}};
+        }
         else
-          return {{"status", "failed"}, {"message", "没有收藏过该单词"}};
+        {
+          return {{"status",  "failed"},
+                  {"message", "没有收藏过该单词"}};
+        }
       });
     });
-  
+    
     svr.Get("/api/clear_word_records", [this](const httplib::Request &req, httplib::Response &res)
     {
       auth_do(req, res, [](std::unique_ptr<UserRef> ur, const httplib::Request &req) -> nlohmann::json
@@ -519,7 +534,7 @@ namespace lead
         return {{"status", "success"}};
       });
     });
-  
+    
     svr.Get("/api/clear_marks", [this](const httplib::Request &req, httplib::Response &res)
     {
       auth_do(req, res, [](std::unique_ptr<UserRef> ur, const httplib::Request &req) -> nlohmann::json
@@ -528,7 +543,7 @@ namespace lead
         return {{"status", "success"}};
       });
     });
-  
+    
     svr.Get("/api/prev_memorize_word", [this](const httplib::Request &req, httplib::Response &res)
     {
       auth_do(req, res, [this](std::unique_ptr<UserRef> ur, const httplib::Request &req) -> nlohmann::json
@@ -537,17 +552,17 @@ namespace lead
         if (wr.is_valid())
         {
           return {{"status",  "success"},
-              {"word",    wr},
-              {"content", vocabulary.get_explanation(wr.index)}};
+                  {"word",    wr},
+                  {"content", vocabulary.get_explanation(wr.index)}};
         }
         else
         {
           return {{"status",  "failed"},
-              {"message", "没有上一个了"}};
+                  {"message", "没有上一个了"}};
         }
       });
     });
-  
+    
     svr.Get("/api/set_memorize_word", [this](const httplib::Request &req, httplib::Response &res)
     {
       auth_do(req, res, [this](std::unique_ptr<UserRef> ur, const httplib::Request &req) -> nlohmann::json
@@ -557,18 +572,18 @@ namespace lead
         if (wr.is_valid())
         {
           return {{"status",  "success"},
-              {"word",    wr},
-              {"content", vocabulary.get_explanation(wr.index)}};
+                  {"word",    wr},
+                  {"content", vocabulary.get_explanation(wr.index)}};
         }
         else
         {
           return {{"status",  "failed"},
-              {"message", "错误的 word_index"}};
+                  {"message", "错误的 word_index"}};
         }
       });
     });
-  
-  
+    
+    
     svr.Get("/api/memorize_word", [this](const httplib::Request &req, httplib::Response &res)
     {
       auth_do(req, res, [this](std::unique_ptr<UserRef> ur, const httplib::Request &req) -> nlohmann::json
@@ -580,7 +595,7 @@ namespace lead
           if (!wr.is_valid())
           {
             return {{"status",  "failed"},
-                {"message", "没有下一个了"}};
+                    {"message", "没有下一个了"}};
           }
         }
         else
@@ -588,8 +603,8 @@ namespace lead
           wr = ur->curr_memorize_word();
         }
         return {{"status",  "success"},
-            {"word",    wr},
-            {"content", vocabulary.get_explanation(wr.index)}};
+                {"word",    wr},
+                {"content", vocabulary.get_explanation(wr.index)}};
       });
     });
     
@@ -625,27 +640,27 @@ namespace lead
                           });
     svr.set_logger([](const httplib::Request &req, const httplib::Response &res)
                    {
-                      if(utils::begin_with(req.path, "/api"))
-                      {
-                        std::cout << "Request:\n" << "  Method: " << req.method << "\n  Path: " << req.path
-                                  << "\n  Body: "
-                                  << req.body
-                                  << "\n  Params: \n";
-  
-                        for (auto &r: req.params)
-                        {
-                          std::cout << "    " << r.first << ": " << r.second << "\n";
-                        }
-  
-                        std::cout << "Response: \n" << "  Body: " << res.body << "\n";
-                        auto tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-                        struct tm *ptm = localtime(&tt);
-                        char date[60] = {0};
-                        sprintf(date, "%d-%02d-%02d %02d:%02d:%02d",
-                                (int) ptm->tm_year + 1900, (int) ptm->tm_mon + 1, (int) ptm->tm_mday,
-                                (int) ptm->tm_hour, (int) ptm->tm_min, (int) ptm->tm_sec);
-                        std::cout << utils::green("^^^^^^^^^^") << date << utils::green("^^^^^^^^^^") << std::endl;
-                      }
+                     if (utils::begin_with(req.path, "/api"))
+                     {
+                       std::cout << "Request:\n" << "  Method: " << req.method << "\n  Path: " << req.path
+                                 << "\n  Body: "
+                                 << req.body
+                                 << "\n  Params: \n";
+        
+                       for (auto &r: req.params)
+                       {
+                         std::cout << "    " << r.first << ": " << r.second << "\n";
+                       }
+        
+                       std::cout << "Response: \n" << "  Body: " << res.body << "\n";
+                       auto tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+                       struct tm *ptm = localtime(&tt);
+                       char date[60] = {0};
+                       sprintf(date, "%d-%02d-%02d %02d:%02d:%02d",
+                               (int) ptm->tm_year + 1900, (int) ptm->tm_mon + 1, (int) ptm->tm_mday,
+                               (int) ptm->tm_hour, (int) ptm->tm_min, (int) ptm->tm_sec);
+                       std::cout << utils::green("^^^^^^^^^^") << date << utils::green("^^^^^^^^^^") << std::endl;
+                     }
                    });
     
     std::cout << "Server started at '" << listen_addr << ":" << listen_port << "'." << std::endl;

@@ -22,14 +22,14 @@
 #include "lead/server.hpp"
 #include "lead/globals.hpp"
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
   if (argc != 2)
   {
     std::cerr << "Usage: lead config_path" << std::endl;
     return -1;
   }
-  while(lead::lead_running)
+  while (lead::lead_running)
   {
     lead::Server svr(argv[1]);
     svr.run();

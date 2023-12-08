@@ -27,7 +27,8 @@ namespace lead
 {
   void to_json(nlohmann::json &j, const lead::Meta &p)
   {
-    j = {{"version", p.version}, {"user_count", p.user_count}};
+    j = {{"version",    p.version},
+         {"user_count", p.user_count}};
   }
   
   void from_json(const nlohmann::json &j, lead::Meta &p)

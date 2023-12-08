@@ -68,6 +68,7 @@ namespace lead
     std::vector<Word> vocabulary;
   public:
     VOC() = default;
+    
     void load(const std::vector<Word> &word);
     
     void load(const std::string &voc_path);
@@ -77,7 +78,7 @@ namespace lead
     std::vector<WordRef> get_similiar_words(WordRef wr, size_t n, const std::function<bool(WordRef)> &selector) const;
     
     WordRef at(size_t w) const;
-  
+    
     std::vector<size_t> search(const std::string &w) const;
     
     size_t size() const;

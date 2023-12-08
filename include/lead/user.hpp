@@ -122,7 +122,7 @@ namespace lead
     nlohmann::json get_settings() const;
     
     nlohmann::json update_settings(const nlohmann::json &settings_);
-  
+    
     leveldb::Status write_records();
   };
   
@@ -132,15 +132,16 @@ namespace lead
     leveldb::DB *db;
   public:
     Meta meta;
-    VOC* vocabulary;
-    EmailSender* email_sender;
+    VOC *vocabulary;
+    EmailSender *email_sender;
     std::string email;
     std::string record_path;
     std::map<std::string, std::tuple<std::string, std::chrono::steady_clock::time_point>>
-    verification_codes;
+        verification_codes;
   public:
     UserManager() = default;
-    void init(const std::string &record_path, VOC* voc, EmailSender* email_sender_, const std::string& email);
+    
+    void init(const std::string &record_path, VOC *voc, EmailSender *email_sender_, const std::string &email);
     
     ~UserManager();
     
@@ -149,14 +150,14 @@ namespace lead
     
     std::tuple<UserManagerStatus, std::unique_ptr<UserRef>>
     get_user(const std::string &username, const std::string &passwd);
-  
-    void update_meta() const;
-  
-    nlohmann::json get_version() const;
-  
-    nlohmann::json send_verification_code(const std::string &to_email, const std::string & username);
     
-    bool verify(const std::string& email, const std::string& code);
+    void update_meta() const;
+    
+    nlohmann::json get_version() const;
+    
+    nlohmann::json send_verification_code(const std::string &to_email, const std::string &username);
+    
+    bool verify(const std::string &email, const std::string &code);
   };
 }
 #endif

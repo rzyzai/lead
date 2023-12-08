@@ -50,12 +50,13 @@ namespace lead
     Server(const std::string &config_path_);
     
     void run();
-
+  
   private:
     void auth_do(const httplib::Request &req, httplib::Response &res,
                  const std::function<nlohmann::json(std::unique_ptr<UserRef>, const httplib::Request &)> &func);
+    
     void admin_do(const httplib::Request &req, httplib::Response &res,
-                          const std::function<nlohmann::json(const httplib::Request &)> &func);
+                  const std::function<nlohmann::json(const httplib::Request &)> &func);
   };
 }
 #endif

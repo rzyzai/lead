@@ -72,7 +72,9 @@ namespace lead
   {
     std::map<std::string, bool> settings_;
     for (auto &r: settings_list)
+    {
       settings_[r] = false;
+    }
     settings = settings_;
   }
   
@@ -89,7 +91,9 @@ namespace lead
     passwd = config["passwd"].get<std::string>();
     settings = config["settings"];
     if (!check_settings(settings))
+    {
       throw std::runtime_error("Invalid settings.");
+    }
   }
   
   UserRef::~UserRef() { write_records(); }
@@ -149,7 +153,9 @@ namespace lead
   nlohmann::json UserRef::get_quiz(WordRef wr) const
   {
     if (!wr.is_valid())
+    {
       wr = vocabulary->at(utils::randnum<size_t>(0, vocabulary->size()));
+    }
     
     auto words = vocabulary->get_similiar_words(wr, 3, [](WordRef wr) -> bool { return true; });
     std::vector<std::string> opt{"A", "B", "C", "D"};
@@ -199,7 +205,9 @@ namespace lead
   int UserRef::mark_word(size_t index)
   {
     if (std::find(marked_words.begin(), marked_words.end(), index) != marked_words.end())
+    {
       return -1;
+    }
     marked_words.emplace_back(index);
     return 0;
   }
@@ -207,9 +215,13 @@ namespace lead
   int UserRef::unmark_word(size_t index)
   {
     if (auto it = std::find(marked_words.begin(), marked_words.end(), index); it != marked_words.end())
+    {
       marked_words.erase(it);
+    }
     else
+    {
       return -1;
+    }
     return 0;
   }
   
@@ -255,7 +267,9 @@ namespace lead
     for (size_t i = 0; i < vocabulary->size(); ++i)
     {
       if (word_records[i].points == 0)
+      {
         ++passed;
+      }
     }
     return {{"status",              "success"},
             {"finished_word_count", passed},
@@ -272,8 +286,10 @@ namespace lead
   nlohmann::json UserRef::update_settings(const nlohmann::json &settings_)
   {
     if (!check_settings(settings_))
+    {
       return {{"status",  "failed"},
               {"message", "Invalid settings"}};
+    }
     settings = settings_;
     return {{"status", "success"}};
   }
@@ -322,7 +338,9 @@ namespace lead
     std::string value;
     leveldb::Status s = db->Get(leveldb::ReadOptions(), username, &value);
     if (s.ok())
+    {
       return {UserManagerStatus::user_already_exists, nullptr};
+    }
     if (s.IsNotFound())
     {
       auto ur = std::make_unique<UserRef>(meta.user_count, username, email, passwd, vocabulary, db);
@@ -335,7 +353,9 @@ namespace lead
       return {UserManagerStatus::db_error, nullptr};
     }
     else
+    {
       return {UserManagerStatus::db_error, nullptr};
+    }
   }
   
   std::tuple<UserManagerStatus, std::unique_ptr<UserRef>>
@@ -383,24 +403,30 @@ namespace lead
     };
   }
   
-  nlohmann::json UserManager::send_verification_code(const std::string &to_email, const std::string & username)
+  nlohmann::json UserManager::send_verification_code(const std::string &to_email, const std::string &username)
   {
     auto now = std::chrono::steady_clock::now();
     if (auto it = verification_codes.find(to_email); it != verification_codes.end())
     {
       double d = std::chrono::duration<double>(now - std::get<1>(it->second)).count();
       if (d < 30)
+      {
         return {{"status",  "failed"},
                 {"message", "发送过于频繁，请于30s后再尝试。"}};
+      }
     }
     for (auto it = verification_codes.begin(); it != verification_codes.end();)
     {
       double duration_second =
           std::chrono::duration<double>(now - std::get<1>(it->second)).count();
       if (duration_second > 300)
+      {
         it = verification_codes.erase(it);
+      }
       else
+      {
         ++it;
+      }
     }
     std::string code = std::to_string(utils::randnum<int>(100000, 1000000));
     verification_codes[to_email] = {code, std::chrono::steady_clock::now()};
@@ -413,8 +439,10 @@ namespace lead
     e.body = "尊敬的" + username + ":\n您的验证码是: " + code + " (5分钟内有效)";
     auto ret = email_sender->send(e);
     if (ret == CURLE_OK)
+    {
       return {{"status",  "success"},
               {"message", "发送成功"}};
+    }
     return {{"status",  "failed"},
             {"message", "发送失败"}};
   }
@@ -426,7 +454,9 @@ namespace lead
       double duration_second =
           std::chrono::duration<double>(std::chrono::steady_clock::now() - std::get<1>(it->second)).count();
       if (duration_second <= 300)
+      {
         return true;
+      }
     }
     return false;
   }

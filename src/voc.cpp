@@ -38,9 +38,9 @@ namespace lead
   
   void to_json(nlohmann::json &j, const lead::WordRef &p)
   {
-    j = nlohmann::json{{"word",  p.word->word},
+    j = nlohmann::json{{"word",       p.word->word},
                        {"word_index", p.index},
-                       {"meaning", p.word->meaning}};
+                       {"meaning",    p.word->meaning}};
   }
   
   void VOC::load(const std::vector<Word> &word)
@@ -56,8 +56,10 @@ namespace lead
     {
       Word w;
       w.word = r["word"].get<std::string>();
-      for(auto& j : r["group"])
+      for (auto &j: r["group"])
+      {
         w.meaning += j["meaning"].get<std::string>() + ";";
+      }
       w.meaning.pop_back();
       w.group = r["group"];
       vocabulary.emplace_back(w);
@@ -259,7 +261,7 @@ namespace lead
     {
       ret += " " + data["ph"].get<std::string>();
     }
-  
+    
     if (data.contains("desc"))
     {
       ret += " " + data["desc"].get<std::string>();
@@ -425,13 +427,13 @@ namespace lead
       {
         ret += "美 /" + detail["usa_ph"].get<std::string>() + "/  ";
       }
-  
+      
       // Usage
       if (detail.contains("usage"))
       {
         ret += "<br/>" + detail["usage"].get<std::string>();
       }
-  
+      
       // Explanations
       if (detail.contains("explanations"))
       {
@@ -445,7 +447,7 @@ namespace lead
         }
         ret += "</ol>";
       }
-  
+      
       // Collocations
       if (detail.contains("collocations"))
       {
@@ -459,7 +461,7 @@ namespace lead
         }
         ret += "</ul>";
       }
-  
+      
       // Derivatives
       if (detail.contains("derivatives"))
       {
@@ -473,7 +475,7 @@ namespace lead
         }
         ret += "</ul>";
       }
-  
+      
       // Quizzes
       if (detail.contains("quizzes"))
       {
@@ -530,31 +532,39 @@ namespace lead
         similiar.insert({i, d});
       }
     }
-
+    
     for (auto &r: similiar)
     {
       ret.emplace_back(WordRef{&vocabulary[r.first], r.first});
     }
     
-    while(ret.size() < n)
+    while (ret.size() < n)
+    {
       ret.emplace_back(at(utils::randnum<size_t>(0, vocabulary.size())));
+    }
     
     return ret;
   }
   
   WordRef VOC::at(size_t w) const
   {
-    if(w < vocabulary.size())
+    if (w < vocabulary.size())
+    {
       return {&vocabulary[w], w};
+    }
     return {};
   }
   
-  bool contains(size_t search_pos, const std::string& str, size_t target_size)
+  bool contains(size_t search_pos, const std::string &str, size_t target_size)
   {
     if (search_pos != 0 && str[search_pos - 1] != ' ')
+    {
       return false;
+    }
     if (search_pos + target_size < str.size() && str[search_pos + target_size] != ' ')
+    {
       return false;
+    }
     return true;
   }
   
@@ -565,26 +575,31 @@ namespace lead
     for (size_t i = 0; i < vocabulary.size(); ++i)
     {
       if (w == vocabulary[i].word)
+      {
         ret.emplace_back(i);
+      }
       else if (auto search_pos = vocabulary[i].meaning.find(w); search_pos != std::string::npos
                                                                 &&
                                                                 contains(search_pos, vocabulary[i].meaning, w.size()))
+      {
         ret.emplace_back(i);
+      }
       else if (auto d = utils::get_edit_distance(vocabulary[i].word, w); d < w.size() / 2)
       {
         diff[vocabulary[i].word] = d;
         ret.emplace_back(i);
       }
     }
-    for(auto& r : ret)
+    for (auto &r: ret)
     {
       auto word = at(r).word->word;
-      if(diff.find(word) == diff.end())
+      if (diff.find(word) == diff.end())
+      {
         diff[word] = utils::get_edit_distance(word, w);
+      }
     }
     std::sort(ret.begin(), ret.end(),
-              [&diff, this](auto&&s1, auto&& s2)
-              {return diff[at(s1).word->word] < diff[at(s2).word->word];});
+              [&diff, this](auto &&s1, auto &&s2) { return diff[at(s1).word->word] < diff[at(s2).word->word]; });
     return ret;
   }
   

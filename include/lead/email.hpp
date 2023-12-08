@@ -27,9 +27,10 @@
 
 namespace lead
 {
-  struct email_upload_status {
+  struct email_upload_status
+  {
     size_t bytes_read;
-    const std::string * const payload_text;
+    const std::string *const payload_text;
   };
   struct Email
   {
@@ -40,6 +41,7 @@ namespace lead
     std::string subject;
     std::string body;
   };
+  
   class EmailSender
   {
   private:
@@ -48,7 +50,9 @@ namespace lead
     std::string server;
   public:
     EmailSender() = default;
+    
     void init(const std::string &server_, const std::string &username_, const std::string &password);
+    
     int send(const Email &email) const;
   };
 }
