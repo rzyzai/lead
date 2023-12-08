@@ -1,7 +1,7 @@
 {
   "admin_password": "admin",
   "listen_address": "0.0.0.0",
-  "listen_port": 8968,
+  "listen_port": 8080,
   "resource_path": "../res",
   "smtp_email": "",
   "smtp_password": "",
