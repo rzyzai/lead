@@ -6,7 +6,8 @@ Lead
 <strong>一个简约的背单词应用</strong>
 </p>
 
-首页: https://rzyzai.tech/lead/
+首页: https://rzyzai.tech/lead/  
+DEMO: http://lead.rzyzai.tech/
 
 ### 示例
 | ![memorize](https://pic.imgdb.cn/item/6573363ac458853aef3b36b5.png) | ![quiz](https://pic.imgdb.cn/item/65733639c458853aef3b319e.png) |
